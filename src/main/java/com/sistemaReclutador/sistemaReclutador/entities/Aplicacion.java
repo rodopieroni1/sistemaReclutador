@@ -13,6 +13,9 @@ public class Aplicacion {
     
     @Column(name = "Fecha")
     private LocalDateTime fecha;
+    
+    @Column(name = "estadoaplicaciones")
+    private boolean estadoaplicaciones;
 
     @ManyToOne
     @JoinColumn(name = "idPerfil", nullable = true)
@@ -22,6 +25,7 @@ public class Aplicacion {
     @JoinColumn(name = "idOferta", nullable = true)
     private Oferta oferta;
 
+    
 	
 
 	public int getIdaplicacion() {
@@ -55,5 +59,15 @@ public class Aplicacion {
 	public void setOferta(Oferta oferta) {
 		this.oferta = oferta;
 	}
+
+	public boolean isEstadoaplicaciones() {
+		return estadoaplicaciones;
+	}
+
+	public void setEstadoaplicaciones(boolean estadoaplicaciones) {
+		this.estadoaplicaciones = estadoaplicaciones;
+	}
+	
+	
     
 	}

@@ -16,7 +16,7 @@ public class Perfil {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id_perfil;
 
-	@Column(name = "dni", nullable = false, length = 20)
+	@Column(name = "dni", length = 20)
 	private String dni;
 
 	@Column(name = "nombre", nullable = false, length = 100)
@@ -25,10 +25,13 @@ public class Perfil {
 	@Column(name = "direccion", length = 255)
 	private String direccion;
 	
+	@Column(name = "clave", nullable = false, length = 100)
+	private String clave;
+	
 	@Column(name = "contraseña", nullable = false, length = 100)
 	private String contraseña;
 
-	@Column(name = "email", length = 255)
+	@Column(name = "email", nullable = true, length = 100)
 	private String email;
 	
 
@@ -87,5 +90,29 @@ public class Perfil {
 	public void setUploadcv(byte[] uploadcv) {
 		this.uploadcv = uploadcv;
 	}
-	
+
+	public String getClave() {
+		return clave;
+	}
+
+	public void setClave(String clave) {
+		this.clave = clave;
+	}
+
+	public String getContraseña() {
+		return contraseña;
+	}
+
+	public void setContraseña(String contraseña) {
+		this.contraseña = contraseña;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 }

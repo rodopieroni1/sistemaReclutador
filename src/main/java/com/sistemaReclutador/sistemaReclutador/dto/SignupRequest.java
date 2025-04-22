@@ -3,9 +3,11 @@ package com.sistemaReclutador.sistemaReclutador.dto;
 public class SignupRequest {
 
 	private String email;
+	private String password;
 	private String nombre;
-	private String contraseña;
 	private String clave;
+	private String tipoUsuario;
+	
 	public String getEmail() {
 		return email;
 	}
@@ -18,11 +20,12 @@ public class SignupRequest {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	public String getContraseña() {
-		return contraseña;
+	
+	public String getPassword() {
+		return password;
 	}
-	public void setContraseña(String contraseña) {
-		this.contraseña = contraseña;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	public String getClave() {
 		return clave;
@@ -30,4 +33,11 @@ public class SignupRequest {
 	public void setClave(String clave) {
 		this.clave = clave;
 	}
+	public String getTipoUsuario() {
+		return tipoUsuario;
+	}
+	public void setTipoUsuario(String tipoUsuario) {
+		this.tipoUsuario = tipoUsuario;
+	}
+
 }

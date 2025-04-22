@@ -2,7 +2,7 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.sistemaReclutador.sistemaReclutador.dto.SignupRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.PerfilSignupRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AuthService;
@@ -20,7 +20,6 @@ public class PerfilController {
 
 		private final AuthService authService;
 		
-		@Autowired
 		public PerfilController(AuthService authService) {
 				this.authService=authService;
 		}
@@ -28,12 +27,22 @@ public class PerfilController {
 	    @Autowired
 	    private PerfilRepository perfilRepository;
 
-	    @PostMapping
+	    /*@PostMapping
 	    public ResponseEntity<Perfil> crearPerfil(@RequestBody Perfil perfil) {
 	        Perfil nuevoPerfil = perfilRepository.save(perfil);
 	        return new ResponseEntity<>(nuevoPerfil, HttpStatus.CREATED);
-	    }
+	    }*/
 
+	    @PostMapping
+		public ResponseEntity<String> crearPerfil(@RequestBody PerfilSignupRequest perfilSignupRequest){
+			boolean isUserCreate = authService.createUserPerfil(perfilSignupRequest);
+			if(isUserCreate) {
+				return ResponseEntity.status(HttpStatus.CREATED).body("Usuario Creado satisfactoriamente");
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo Crear el usuario");			
+			}		
+		}	
+	    
 	    @GetMapping("/{id}")
 	    public Perfil obtenerPerfilPorId(@PathVariable int id) {
 	        return perfilRepository.findById(id).orElse(null);
@@ -63,16 +72,4 @@ public class PerfilController {
 	    	perfilRepository.deleteById(id);
 	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	    }
-	    
-	   
-		
-		@PostMapping
-		public ResponseEntity<String> signupPerfil(@RequestBody SignupRequest signupRequest){
-			boolean isUserCreate = authService.createUser(signupRequest);
-			if(isUserCreate) {
-				return ResponseEntity.status(HttpStatus.CREATED).body("Usuario Creado satisfactoriamente");
-			}else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo Crear el usuario");			
-			}		
-		}	
 	}

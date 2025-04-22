@@ -61,5 +61,10 @@ public class Usuario {
 		public void setEmail(String email) {
 			this.email = email;
 		}
-		
+		public String getTipoUsuario() {
+			return tipoUsuario;
+		}
+		public void setTipoUsuario(String tipoUsuario) {
+			this.tipoUsuario = tipoUsuario;
+		}
 }

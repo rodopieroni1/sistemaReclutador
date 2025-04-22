@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
 @RestController
 @RequestMapping("/aplicaciones")
 public class AplicacionController {
@@ -18,7 +19,8 @@ public class AplicacionController {
 
     @GetMapping
     public List<Aplicacion> getAllAplicaciones() {
-        return aplicacionRepository.findAll();
+    	System.out.println("pasa: "+ aplicacionRepository.findAllDesc());
+        return aplicacionRepository.findAllDesc();
     }
 
     @GetMapping("/{id}")
