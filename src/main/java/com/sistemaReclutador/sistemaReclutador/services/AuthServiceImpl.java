@@ -49,8 +49,8 @@ public class AuthServiceImpl implements AuthService {
 		}
 		Perfil perfil = new Perfil();
 		BeanUtils.copyProperties(perfilSignupRequest, perfil);
-		String hashPassword = passwordEncoder.encode(perfilSignupRequest.getContraseña());
-		perfil.setContraseña(hashPassword);
+		String hashPassword = passwordEncoder.encode(perfilSignupRequest.getPassword());
+		perfil.setPassword(hashPassword);
 		perfilRepository.save(perfil);
 		return true;
 	}

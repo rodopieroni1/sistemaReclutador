@@ -54,8 +54,6 @@ public class OfertaController {
     // Crear una nueva oferta
    @PostMapping("/crear")
     public ResponseEntity<Map<String, String>> createOferta(@RequestBody OfertaRequest ofertaRequest) {
-    	System.out.println("ID;"+ ofertaRequest.getDescripcionOferta() + "OfertaDetails "+ ofertaRequest.getIdOferta());
-
     	Oferta oferta = convertirDtoAEntidad(ofertaRequest);
     	boolean isUserCreate = ofertaRepository.save(oferta) != null;
 		 Map<String, String> response = new HashMap<>();

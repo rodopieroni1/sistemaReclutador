@@ -5,45 +5,40 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+
 
 @Entity
 @Table(name = "perfil")
 public class Perfil {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id_perfil;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id_perfil;
 
-	@Column(name = "dni", length = 20)
-	private String dni;
+    @Column(name = "dni", length = 20)
+    private String dni;
 
-	@Column(name = "nombre", nullable = false, length = 100)
-	private String nombre;
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
 
-	@Column(name = "direccion", length = 255)
-	private String direccion;
-	
-	@Column(name = "clave", nullable = false, length = 100)
-	private String clave;
-	
-	@Column(name = "contraseña", nullable = false, length = 100)
-	private String contraseña;
+    @Column(name = "direccion", length = 255)
+    private String direccion;
 
-	@Column(name = "email", nullable = true, length = 100)
-	private String email;
-	
+    @Column(name = "clave", nullable = false, length = 100)
+    private String clave;
 
-	@Lob
-	@Column(name = "foto")
-	private byte[] foto;
+    @Column(name = "password", nullable = false, length = 100)
+    private String password;
 
-	@Lob
-	@Column(name = "uploadcv")
-	private byte[] uploadcv;
-	
-	public int getId_perfil() {
+    @Column(name = "email", nullable = true, length = 100)
+    private String email;
+    
+    // Rutas de los archivos en el sistema de archivos
+    @Column(name = "foto_url", length = 255)
+    private String fotoUrl;
+
+    public int getId_perfil() {
 		return id_perfil;
 	}
 
@@ -75,22 +70,6 @@ public class Perfil {
 		this.direccion = direccion;
 	}
 
-	public byte[] getFoto() {
-		return foto;
-	}
-
-	public void setFoto(byte[] foto) {
-		this.foto = foto;
-	}
-
-	public byte[] getUploadcv() {
-		return uploadcv;
-	}
-
-	public void setUploadcv(byte[] uploadcv) {
-		this.uploadcv = uploadcv;
-	}
-
 	public String getClave() {
 		return clave;
 	}
@@ -99,12 +78,12 @@ public class Perfil {
 		this.clave = clave;
 	}
 
-	public String getContraseña() {
-		return contraseña;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setContraseña(String contraseña) {
-		this.contraseña = contraseña;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getEmail() {
@@ -115,4 +94,25 @@ public class Perfil {
 		this.email = email;
 	}
 
+	@Column(name = "documento_url", length = 255)
+    private String documentoUrl;
+
+    // Getters y setters
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
+    public String getDocumentoUrl() {
+        return documentoUrl;
+    }
+
+    public void setDocumentoUrl(String documentoUrl) {
+        this.documentoUrl = documentoUrl;
+    }
+
+    // Otros getters y setters
 }

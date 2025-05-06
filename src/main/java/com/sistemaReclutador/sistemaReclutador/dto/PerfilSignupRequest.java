@@ -1,14 +1,37 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Lob;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PerfilSignupRequest {
 
+	@JsonProperty("email")
 	private String email;
+	
+	@JsonProperty("nombre")
 	private String nombre;
-	private String contraseña;
+	
+	@JsonProperty("password")
+	private String password;
+	
+	@JsonProperty("clave")
 	private String clave;
+	
+	@JsonProperty("dni")
 	private String dni;
+	
+	@JsonProperty("direccion")
 	private String direccion;
+	
+	@Lob
+	@JsonProperty("foto")
 	private byte[] foto;
+	
+	@Lob
+	@JsonProperty("uploadcv")
 	private byte[] uploadcv;
 	
 	
@@ -24,11 +47,11 @@ public class PerfilSignupRequest {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	public String getContraseña() {
-		return contraseña;
+	public String getPassword() {
+		return password;
 	}
-	public void setContraseña(String contraseña) {
-		this.contraseña = contraseña;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	public String getClave() {
 		return clave;
