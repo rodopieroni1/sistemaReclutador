@@ -1,12 +1,20 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
+import java.util.HashMap;
+import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
+import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
+import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.repositories.UsuarioRepository;
+import com.sistemaReclutador.sistemaReclutador.services.AuthService;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +25,24 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+	private AuthService authService;
+	private JwtUtil jwtUtil;
+	
+	@Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+	@PostMapping("/auth/login")
+	public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
+	    Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
+	    if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
+	        String token = jwtUtil.generateToken(user.get().getNombre());
+	        System.out.println("SALE5TOKEN: "+ credential.getImagen());
+	        return ResponseEntity.ok().body(Map.of("token", token));
+	    }
+	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));
+	}
 
     // Obtener todos los usuarios
     @ResponseStatus(HttpStatus.OK)

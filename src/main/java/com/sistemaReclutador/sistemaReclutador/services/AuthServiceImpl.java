@@ -4,6 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilSignupRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.SignupRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
@@ -54,5 +55,7 @@ public class AuthServiceImpl implements AuthService {
 		perfilRepository.save(perfil);
 		return true;
 	}
+	
+	
 
 }

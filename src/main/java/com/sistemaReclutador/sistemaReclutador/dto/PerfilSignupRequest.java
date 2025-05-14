@@ -7,6 +7,9 @@ import jakarta.persistence.Lob;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PerfilSignupRequest {
+	
+	@JsonProperty("id")
+	private int id;
 
 	@JsonProperty("email")
 	private String email;
@@ -28,13 +31,18 @@ public class PerfilSignupRequest {
 	
 	@Lob
 	@JsonProperty("foto")
-	private byte[] foto;
+	private String foto;
 	
 	@Lob
 	@JsonProperty("uploadcv")
-	private byte[] uploadcv;
+	private String uploadcv;
 	
-	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
 	public String getEmail() {
 		return email;
 	}
@@ -71,16 +79,16 @@ public class PerfilSignupRequest {
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
-	public byte[] getFoto() {
+	public String getFoto() {
 		return foto;
 	}
-	public void setFoto(byte[] foto) {
+	public void setFoto(String foto) {
 		this.foto = foto;
 	}
-	public byte[] getUploadcv() {
+	public String getUploadcv() {
 		return uploadcv;
 	}
-	public void setUploadcv(byte[] uploadcv) {
+	public void setUploadcv(String uploadcv) {
 		this.uploadcv = uploadcv;
 	}
 }

@@ -25,11 +25,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebSecurityConfig implements WebMvcConfigurer {
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()) // Desactiva CSRF
 				.authorizeHttpRequests(authorize -> authorize.requestMatchers("/uploads/**").permitAll()
@@ -42,9 +37,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 						.permitAll().requestMatchers("/ofertas/crear").permitAll()
 						.requestMatchers("/ofertas/actualizar/{id}").permitAll()
 						.requestMatchers("/ofertas/eliminar/{id}").permitAll().requestMatchers("/api/uploads")
-						.permitAll().requestMatchers("/usuarios").permitAll().requestMatchers("/perfiles").permitAll()
-						.requestMatchers("/ws").permitAll()
-						.requestMatchers("http://localhost:8080/src/assets/uploads/documentos/**").permitAll()
+						.permitAll().requestMatchers("/usuarios")
+						.permitAll().requestMatchers("/perfiles")
+					    .permitAll().requestMatchers("/usuarios/auth/login") // Permitir acceso al login
+					    .permitAll().requestMatchers("/perfiles/auth/login") // Permitir acceso al login
+					    .permitAll().requestMatchers("/perfiles/{id}")
+					    .permitAll().requestMatchers("/perfiles/name/{name}")
+						.permitAll().requestMatchers("/ws")
+						.permitAll().requestMatchers("http://localhost:8080/src/assets/uploads/documentos/**").permitAll()
 						.anyRequest().authenticated() // Exige autenticación para todas las demás solicitudes
 				).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Política
 																												// de
