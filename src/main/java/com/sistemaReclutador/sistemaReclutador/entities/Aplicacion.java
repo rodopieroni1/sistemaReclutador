@@ -18,11 +18,11 @@ public class Aplicacion {
     private boolean estadoaplicaciones;
 
     @ManyToOne
-    @JoinColumn(name = "idPerfil", nullable = true)
+    @JoinColumn(name = "id_perfil", referencedColumnName = "id_perfil", nullable = true)
     private Perfil perfil;
 
     @ManyToOne
-    @JoinColumn(name = "idOferta", nullable = true)
+    @JoinColumn(name = "id_oferta", nullable = true)
     private Oferta oferta;
 
     

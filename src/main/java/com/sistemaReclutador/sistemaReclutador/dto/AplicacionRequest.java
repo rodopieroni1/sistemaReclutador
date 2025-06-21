@@ -1,16 +1,17 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AplicacionRequest {
-	
-	@JsonProperty("id_aplicacion")
-	private int idAplicacion;
-	
+		
 	@JsonProperty("fechaAplicacion")
-	private int fechaAplicacion;
+	private LocalDateTime fechaAplicacion;
 	
 	@JsonProperty("estadoaplicaciones")
 	private boolean estadoaplicaciones;
@@ -21,19 +22,12 @@ public class AplicacionRequest {
 	@JsonProperty("id_oferta")
 	private Oferta idOferta;
 
-	public int getIdAplicacion() {
-		return idAplicacion;
-	}
-
-	public void setIdAplicacion(int idAplicacion) {
-		this.idAplicacion = idAplicacion;
-	}
-
-	public int getFechaAplicacion() {
+	
+	public LocalDateTime getFechaAplicacion() {
 		return fechaAplicacion;
 	}
 
-	public void setFechaAplicacion(int fechaAplicacion) {
+	public void setFechaAplicacion(LocalDateTime fechaAplicacion) {
 		this.fechaAplicacion = fechaAplicacion;
 	}
 
@@ -60,5 +54,5 @@ public class AplicacionRequest {
 	public void setIdOferta(Oferta idOferta) {
 		this.idOferta = idOferta;
 	}
-
+	
 }

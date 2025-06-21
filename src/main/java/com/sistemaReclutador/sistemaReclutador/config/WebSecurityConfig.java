@@ -8,14 +8,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,29 +25,34 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()) // Desactiva CSRF
 				.authorizeHttpRequests(authorize -> authorize.requestMatchers("/uploads/**").permitAll()
-						.requestMatchers("/login").permitAll().requestMatchers("/aplicaciones").permitAll()
-						.requestMatchers("/empresas").permitAll().requestMatchers("/empresas/existe/{cuit}").permitAll()
-						.requestMatchers("/empresas/existeId/{id}").permitAll().requestMatchers("/empresas/crear")
-						.permitAll().requestMatchers("/empresas/actualizar/{id}").permitAll()
-						.requestMatchers("/empresas/eliminar/{id}").permitAll().requestMatchers("/ofertas").permitAll()
-						.requestMatchers("/ofertas/todas").permitAll().requestMatchers("/ofertas/existeId/{id}")
-						.permitAll().requestMatchers("/ofertas/crear").permitAll()
+						.requestMatchers("/login").permitAll()
+						.requestMatchers("/aplicaciones").permitAll()
+						.requestMatchers("/empresas").permitAll()
+						.requestMatchers("/empresas/existe/{cuit}").permitAll()
+						.requestMatchers("/empresas/existeId/{id}").permitAll()
+						.requestMatchers("/empresas/crear").permitAll()
+						.requestMatchers("/empresas/actualizar/{id}").permitAll()
+						.requestMatchers("/empresas/eliminar/{id}").permitAll()
+						.requestMatchers("/ofertas").permitAll()
+						.requestMatchers("/ofertas/todas").permitAll()
+						.requestMatchers("/ofertas/existeId/{id}").permitAll()
+						.requestMatchers("/ofertas/crear").permitAll()
 						.requestMatchers("/ofertas/actualizar/{id}").permitAll()
-						.requestMatchers("/ofertas/eliminar/{id}").permitAll().requestMatchers("/api/uploads")
-						.permitAll().requestMatchers("/usuarios")
-						.permitAll().requestMatchers("/perfiles")
-					    .permitAll().requestMatchers("/usuarios/auth/login") // Permitir acceso al login
-					    .permitAll().requestMatchers("/perfiles/auth/login") // Permitir acceso al login
-					    .permitAll().requestMatchers("/perfiles/{id}")
-					    .permitAll().requestMatchers("/perfiles/name/{name}")
-						.permitAll().requestMatchers("/ws")
-						.permitAll().requestMatchers("http://localhost:8080/src/assets/uploads/documentos/**").permitAll()
+						.requestMatchers("/ofertas/eliminar/{id}").permitAll()
+						.requestMatchers("/ofertas/buscar", "/ofertas/buscar/**").permitAll()
+						.requestMatchers("/api/uploads/**").permitAll()
+						.requestMatchers("/usuarios").permitAll()
+						.requestMatchers("/perfiles").permitAll()
+						.requestMatchers("/usuarios/auth/login").permitAll()
+						.requestMatchers("/perfiles/auth/login").permitAll()
+						.requestMatchers("/perfiles/{id}").permitAll()
+						.requestMatchers("/perfiles/name/{name}").permitAll()
+						.requestMatchers("/perfiles/id/{name}").permitAll()
+						.requestMatchers("/ws").permitAll()
+						.requestMatchers("http://localhost:8080/src/assets/uploads/fotos").permitAll()
+						.requestMatchers("http://localhost:8080/src/assets/uploads/documentos").permitAll()
 						.anyRequest().authenticated() // Exige autenticación para todas las demás solicitudes
-				).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Política
-																												// de
-																												// sesión
-																												// sin
-																												// estado
+				).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Política de sesión si estado
 				);
 		return http.build();
 	}

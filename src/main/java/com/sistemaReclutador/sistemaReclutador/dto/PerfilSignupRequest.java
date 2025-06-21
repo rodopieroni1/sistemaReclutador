@@ -8,8 +8,8 @@ import jakarta.persistence.Lob;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PerfilSignupRequest {
 	
-	@JsonProperty("id")
-	private int id;
+	@JsonProperty("id_perfil")
+	private Integer id;
 
 	@JsonProperty("email")
 	private String email;
@@ -37,10 +37,10 @@ public class PerfilSignupRequest {
 	@JsonProperty("uploadcv")
 	private String uploadcv;
 	
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getEmail() {

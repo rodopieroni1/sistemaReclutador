@@ -1,4 +1,5 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -6,6 +7,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class MyWebSocketHandler extends TextWebSocketHandler {
     private final List<WebSocketSession> sessions = new ArrayList<>();
 
@@ -33,8 +35,10 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
                 try {
-                    System.out.println("Imagen subida: " + imageUrl);
+                    System.out.println("Imagen subidaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: " + imageUrl);
                     session.sendMessage(new TextMessage(imageUrl));
+                    System.out.println("Imagen subidaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa222: " + session);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

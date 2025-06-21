@@ -38,6 +38,7 @@ public class EmpresaController {
     
     @GetMapping("/existeId/{id}")
     public Empresa obtenerEmpresa(@PathVariable Long id) {
+    		System.out.println("empresaRepository.findEmpresa(id): "+ empresaRepository.findEmpresa(id).getId_empresa());
  	       return empresaRepository.findEmpresa(id);
     }
 

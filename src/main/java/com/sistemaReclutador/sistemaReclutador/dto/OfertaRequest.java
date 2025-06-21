@@ -6,9 +6,15 @@ import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OfertaRequest {
-	@JsonProperty("idOferta")
+	@JsonProperty("id_oferta")
     private Long idOferta;
     
+	@JsonProperty("nombreOferta")
+    private String nombreOferta;
+	
+	@JsonProperty("estadoOferta")
+	private boolean estadoOferta;
+	
 	@JsonProperty("descripcionOferta")
     private String descripcionOferta;
     
@@ -42,6 +48,13 @@ public class OfertaRequest {
 		this.idEmpresa = idEmpresa;
 	}
 
+	public String getNombreOferta() {
+		return nombreOferta;
+	}
+
+	public void setNombreOferta(String nombreOferta) {
+		this.nombreOferta = nombreOferta;
+	}
 	public String getDescripcionOferta() {
 		return descripcionOferta;
 	}
@@ -105,4 +118,13 @@ public class OfertaRequest {
 	public void setHistoriaEmpresa(String historiaEmpresa) {
 		this.historiaEmpresa = historiaEmpresa;
 	}
+
+	public boolean isEstadoOferta() {
+		return estadoOferta;
+	}
+
+	public void setEstadoOferta(boolean estadoOferta) {
+		this.estadoOferta = estadoOferta;
+	}
+
 }

@@ -14,7 +14,8 @@ public class Perfil {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_perfil;
+    @Column(name = "id_perfil")
+    private Integer id_perfil;
 
     @Column(name = "dni", length = 20)
     private String dni;
@@ -38,11 +39,11 @@ public class Perfil {
     @Column(name = "foto_url", length = 255)
     private String fotoUrl;
 
-    public int getId_perfil() {
+    public Integer getId_perfil() {
 		return id_perfil;
 	}
 
-	public void setId_perfil(int id_perfil) {
+	public void setId_perfil(Integer id_perfil) {
 		this.id_perfil = id_perfil;
 	}
 

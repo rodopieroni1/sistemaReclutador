@@ -23,7 +23,7 @@ public class Empresa {
 	@Column(name = "direccion", length = 255)
 	private String direccion;
 	
-	@Column(name = "historiaEmpresa", columnDefinition = "TEXT")
+	@Column(name = "historia_empresa", columnDefinition = "TEXT")
 	private String historiaEmpresa;
 
 	@Column(name = "observaciones", columnDefinition = "TEXT")

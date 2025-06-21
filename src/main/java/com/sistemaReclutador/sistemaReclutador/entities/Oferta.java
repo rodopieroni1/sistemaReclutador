@@ -16,17 +16,25 @@ public class Oferta {
 
 	    @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+		@Column(name = "id_oferta")
 	    private Long idOferta;
 	    
-	    @Column(name = "descripcionOferta", columnDefinition = "TEXT")
+		@Column(name = "nombreOferta")
+	    private String nombreOferta;
+	    
+	    @Column(name = "descripcion_oferta", columnDefinition = "TEXT")
 	    private String descripcionOferta;
 	    
 	    @Lob
-	    @Column(name = "fotoOferta")
-	    private String fotoOferta; 
+	    @Column(name = "foto_oferta")
+	    private String fotoOferta;
+	    
+	    @Column(name = "estadoOferta") // Asegura que Hibernate use el nombre correcto
+	    private boolean estadoOferta;
+	    
 
 	    @ManyToOne
-	    @JoinColumn(name = "idEmpresa", nullable = true)
+	    @JoinColumn(name = "id_empresa", referencedColumnName = "id_empresa")
 	    private Empresa empresa;
 
 		public Long getIdOferta() {
@@ -35,6 +43,14 @@ public class Oferta {
 
 		public void setIdOferta(Long idOferta) {
 			this.idOferta = idOferta;
+		}
+
+		public String getNombreOferta() {
+			return nombreOferta;
+		}
+
+		public void setNombreOferta(String nombreOferta) {
+			this.nombreOferta = nombreOferta;
 		}
 
 		public String getDescripcionOferta() {
@@ -59,6 +75,14 @@ public class Oferta {
 
 		public void setEmpresa(Empresa empresa) {
 			this.empresa = empresa;
+		}
+
+		public boolean isEstadoOferta() {
+			return estadoOferta;
+		}
+
+		public void setEstadoOferta(boolean estadoOferta) {
+			this.estadoOferta = estadoOferta;
 		}
 	    
 }

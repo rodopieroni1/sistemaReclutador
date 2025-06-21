@@ -6,9 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
-import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
-import com.sistemaReclutador.sistemaReclutador.services.AuthService;
 
 import java.io.File;
 import java.util.List;
@@ -33,8 +31,8 @@ public class PerfilController {
 	@Autowired
 	private PerfilRepository perfilRepository;
 
-	@Bean
-    public PasswordEncoder passwordEncoder() {
+	@Bean(name = "customPasswordEncoder")
+	public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 	@PostMapping("/auth/login")
@@ -50,38 +48,39 @@ public class PerfilController {
 	@GetMapping("/name/{name}")
 	public ResponseEntity<String> obtenerPerfilPorName(@PathVariable String name) {
 	    String nameReturn = perfilRepository.findByName(name);
-	    
-	    System.out.println("Respuesta enviada al frontend: " + nameReturn);
-
 	    if (nameReturn == null || nameReturn.isEmpty()) {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("URL no encontrado");
 	    }
 
 	    return ResponseEntity.ok(nameReturn);
 	}
+	
+	@GetMapping("/id/{name}")
+	public ResponseEntity<Perfil> obtenerPerfilPorId(@PathVariable String name) {
+	    Perfil perfil = perfilRepository.findById(name);
+	    if (perfil == null || perfil.equals(null) ) {
+	        return null;
+	    }
+	    return ResponseEntity.ok(perfil);
+	}
 
-	 
 	@PostMapping
 	public ResponseEntity<String> crearPerfil(@RequestParam("nombre") String nombre, @RequestParam("dni") String dni,
 	        @RequestParam("direccion") String direccion, @RequestParam("email") String email,
 	        @RequestParam("clave") String clave, @RequestParam("password") String password,
 	        @RequestParam("foto") MultipartFile foto, @RequestParam("uploadcv") MultipartFile uploadcv) {
-
 	    try {
 	    	// Hashear la contraseña antes de guardarla
 	        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 	        String hashedPassword = encoder.encode(password);
-	        
 	        // Define directorios de almacenamiento
 	        String fotoDir = UPLOAD_DIR + "fotos/";
 	        String cvDir = UPLOAD_DIR + "documentos/";
-
 	        // Crear directorios si no existen
 	        File directorioFoto = new File(fotoDir);
 	        if (!directorioFoto.exists()) {
 	            directorioFoto.mkdirs();
 	        }
-
 	        File directorioCV = new File(cvDir);
 	        if (!directorioCV.exists()) {
 	            directorioCV.mkdirs();
@@ -114,7 +113,6 @@ public class PerfilController {
 
 	        // Guardar perfil en la base de datos
 	        perfilRepository.save(perfil);
-
 	        return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -123,10 +121,8 @@ public class PerfilController {
 	    }
 	}
 
-
 	@GetMapping("/{id}")
 	public Perfil obtenerPerfilPorId(@PathVariable int id) {
-		System.out.println("PARAMETROOOO:"+ id);
 		return perfilRepository.findById(id).orElse(null);
 	}
 

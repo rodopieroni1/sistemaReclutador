@@ -15,6 +15,9 @@ public interface PerfilRepository extends JpaRepository<Perfil, Integer> {
 
 	@Query("SELECT p.fotoUrl FROM Perfil p WHERE p.clave = :name")
 	String findByName(@Param("name") String name);
+	
+	@Query("SELECT p FROM Perfil p WHERE p.clave = :name")
+	Perfil findById(@Param("name") String name);
 
     Optional<Perfil> findByClave(String clave);
 	boolean existsByEmail(String email);

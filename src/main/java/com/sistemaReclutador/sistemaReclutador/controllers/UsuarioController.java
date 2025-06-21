@@ -38,7 +38,6 @@ public class UsuarioController {
 	    Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
 	    if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
 	        String token = jwtUtil.generateToken(user.get().getNombre());
-	        System.out.println("SALE5TOKEN: "+ credential.getImagen());
 	        return ResponseEntity.ok().body(Map.of("token", token));
 	    }
 	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));

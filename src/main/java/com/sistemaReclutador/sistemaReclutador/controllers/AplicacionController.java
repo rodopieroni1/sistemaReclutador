@@ -1,7 +1,9 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
+import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +15,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/aplicaciones")
 public class AplicacionController {
+	boolean active = true;
 
+    @Autowired
+    private AplicacionService aplicacionService;
     @Autowired
     private AplicacionRepository aplicacionRepository;
 
     @GetMapping
     public List<Aplicacion> getAllAplicaciones() {
-    	System.out.println("pasa: "+ aplicacionRepository.findAllDesc());
         return aplicacionRepository.findAllDesc();
     }
 
@@ -29,8 +33,8 @@ public class AplicacionController {
     }
 
     @PostMapping
-    public Aplicacion createAplicacion(@RequestBody Aplicacion aplicacion) {
-        return aplicacionRepository.save(aplicacion);
+    public Aplicacion createAplicacion(@RequestBody AplicacionRequest aplicacion) {
+       return aplicacionService.crearAplicacion(aplicacion);
     }
 
     @PutMapping("/{id}")
@@ -50,5 +54,6 @@ public class AplicacionController {
     public void deleteAplicacion(@PathVariable int id) {
         aplicacionRepository.deleteById(id);
     }
+    
 }
 
