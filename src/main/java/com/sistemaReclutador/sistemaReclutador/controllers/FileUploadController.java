@@ -35,7 +35,9 @@ public class FileUploadController {
             webSocketHandler.notifyClients(saveFile1);
             
             Map<String, String> respuesta = new HashMap<>();
-            respuesta.put("mensaje", "Archivo con foto cargado exitosamente");
+            String urlAcceso = "/assets/uploads/fotos/" + file.getOriginalFilename();
+            respuesta.put("url", urlAcceso);
+
             return ResponseEntity.ok().body(respuesta);
         
             } catch (IOException e) {

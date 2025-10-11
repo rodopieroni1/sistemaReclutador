@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
+import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
+import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 
 @Repository
 public interface AplicacionRepository extends JpaRepository<Aplicacion, Integer> {

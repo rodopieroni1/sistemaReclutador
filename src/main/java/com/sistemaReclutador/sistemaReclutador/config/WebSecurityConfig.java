@@ -3,6 +3,7 @@ package com.sistemaReclutador.sistemaReclutador.config;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +25,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()) // Desactiva CSRF
-				.authorizeHttpRequests(authorize -> authorize.requestMatchers("/uploads/**").permitAll()
+				.authorizeHttpRequests(authorize -> authorize
+			            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 👈 Agregá esta línea
+						.requestMatchers("/uploads/**").permitAll()
 						.requestMatchers("/login").permitAll()
 						.requestMatchers("/aplicaciones").permitAll()
 						.requestMatchers("/empresas").permitAll()
@@ -40,14 +43,21 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 						.requestMatchers("/ofertas/actualizar/{id}").permitAll()
 						.requestMatchers("/ofertas/eliminar/{id}").permitAll()
 						.requestMatchers("/ofertas/buscar", "/ofertas/buscar/**").permitAll()
+						.requestMatchers("/rubro").permitAll()
+						.requestMatchers("/rubro/{id}").permitAll()
+						.requestMatchers("/rubro/crear").permitAll()
+						.requestMatchers("/rubro/eliminar/{id}").permitAll()
+						.requestMatchers("/rubro/actualizar/{id}").permitAll()						
 						.requestMatchers("/api/uploads/**").permitAll()
 						.requestMatchers("/usuarios").permitAll()
-						.requestMatchers("/perfiles").permitAll()
 						.requestMatchers("/usuarios/auth/login").permitAll()
 						.requestMatchers("/perfiles/auth/login").permitAll()
 						.requestMatchers("/perfiles/{id}").permitAll()
+						.requestMatchers("/perfiles").permitAll()
 						.requestMatchers("/perfiles/name/{name}").permitAll()
 						.requestMatchers("/perfiles/id/{name}").permitAll()
+						.requestMatchers("/perfiles/olvide-password").permitAll()
+						.requestMatchers("/perfiles/reset-password").permitAll()
 						.requestMatchers("/ws").permitAll()
 						.requestMatchers("http://localhost:8080/src/assets/uploads/fotos").permitAll()
 						.requestMatchers("http://localhost:8080/src/assets/uploads/documentos").permitAll()
