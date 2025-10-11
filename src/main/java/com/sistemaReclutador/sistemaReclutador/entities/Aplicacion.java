@@ -9,7 +9,7 @@ public class Aplicacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idaplicacion;
+    private  Integer idaplicacion;
     
     @Column(name = "Fecha")
     private LocalDateTime fecha;
@@ -24,15 +24,13 @@ public class Aplicacion {
     @ManyToOne
     @JoinColumn(name = "id_oferta", nullable = true)
     private Oferta oferta;
-
     
 	
-
-	public int getIdaplicacion() {
+	public Integer getIdaplicacion() {
 		return idaplicacion;
 	}
 
-	public void setIdaplicacion(int idaplicacion) {
+	public void setIdaplicacion(Integer idaplicacion) {
 		this.idaplicacion = idaplicacion;
 	}
 

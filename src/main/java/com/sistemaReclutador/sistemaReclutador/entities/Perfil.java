@@ -17,7 +17,7 @@ public class Perfil {
     @Column(name = "id_perfil")
     private Integer id_perfil;
 
-    @Column(name = "dni", length = 20)
+    @Column(name = "dni", length = 20, unique = true)
     private String dni;
 
     @Column(name = "nombre", nullable = false, length = 100)
@@ -26,13 +26,13 @@ public class Perfil {
     @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @Column(name = "clave", nullable = false, length = 100)
+    @Column(name = "clave", nullable = false, length = 100, unique = true)
     private String clave;
 
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
-    @Column(name = "email", nullable = true, length = 100)
+    @Column(name = "email", nullable = true, length = 100, unique = true)
     private String email;
     
     // Rutas de los archivos en el sistema de archivos

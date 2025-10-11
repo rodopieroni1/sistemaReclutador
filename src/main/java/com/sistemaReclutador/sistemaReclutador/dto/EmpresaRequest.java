@@ -26,6 +26,9 @@ public class EmpresaRequest {
 	
 	@JsonProperty("cuitEmpresa")
 	private Long  cuit;
+	
+	@JsonProperty("idRubro")
+	private Long  idRubro;	
 		
 	public int getIdempresa() {
 		return idempresa;
@@ -68,5 +71,11 @@ public class EmpresaRequest {
 	}
 	public void setCuit(Long cuit) {
 		this.cuit = cuit;
-	}	
+	}
+	public Long getIdRubro() {
+		return idRubro;
+	}
+	public void setIdRubro(Long idRubro) {
+		this.idRubro = idRubro;
+	}
 }

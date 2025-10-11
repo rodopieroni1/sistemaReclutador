@@ -1,7 +1,6 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
 import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;

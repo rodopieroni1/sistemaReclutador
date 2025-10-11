@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,6 +37,10 @@ public class Empresa {
 
 	@Column(name = "email", unique = true, length = 100)
 	private String email;
+	
+	@ManyToOne
+    @JoinColumn(name = "id_rubro", nullable = false)
+    private Rubro rubro;
 
 	public Long getId_empresa() {
 		return id_empresa;
@@ -91,5 +97,12 @@ public class Empresa {
 	public void setCuit(Long cuit) {
 		this.cuit = cuit;
 	}
-
+	
+    public Rubro getRubro() { 
+    	return rubro; 
+    	}
+    
+    public void setRubro(Rubro rubro) { 
+    	this.rubro = rubro; 
+    	}
 }
