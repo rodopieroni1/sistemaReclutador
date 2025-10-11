@@ -11,6 +11,7 @@
 	</parent>
 	<groupId>com.sistemaReclutador</groupId>
 	<artifactId>sistemaReclutador</artifactId>
+	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>sistemaReclutador</name>
 	<description>Sistema Reclutador</description>
