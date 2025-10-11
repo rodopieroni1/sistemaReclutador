@@ -28,8 +28,10 @@ public class AplicacionController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Aplicacion> getAplicacionById(@PathVariable int id) {
-        return aplicacionRepository.findById(id);
+    public boolean getAplicacionById(@PathVariable Integer id) {
+    	boolean existeAplicacion = aplicacionService.existsById(id);
+    	System.out.println("BBBBBBB: "+ existeAplicacion);
+    	return existeAplicacion;
     }
 
     @PostMapping
