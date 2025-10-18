@@ -26,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 
-@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
+@CrossOrigin(origins = "http://localhost:4200")
 @Configuration
 @RestController
 @RequestMapping("/perfiles")
