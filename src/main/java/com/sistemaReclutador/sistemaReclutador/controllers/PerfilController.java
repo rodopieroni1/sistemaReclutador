@@ -105,6 +105,8 @@ public class PerfilController {
 	        String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
 	        File saveFileFoto = new File(fotoDir + fileFoto);
 	        File saveFileCV = new File(cvDir + fileCV);
+	        System.out.println(System.getProperty("java.io.tmpdir"));
+
 	        foto.transferTo(saveFileFoto);
 	        uploadcv.transferTo(saveFileCV);
 	        Perfil perfil = new Perfil();

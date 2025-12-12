@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS sistemareclutador;
+USE sistemareclutador;
+
+
 -- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sistemareclutador
