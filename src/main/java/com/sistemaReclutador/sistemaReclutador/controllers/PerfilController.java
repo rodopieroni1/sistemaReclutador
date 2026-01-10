@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,9 @@ public class PerfilController {
 
 	private final String UPLOAD_DIR = "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/"; // Cambia
 	private JwtUtil jwtUtil;
-	
+	@Value("${app.base.url}")
+	private String appBaseUrl;
+
 	@Autowired
 	private EmailService emailService;
 	
@@ -139,8 +142,8 @@ public class PerfilController {
 	        perfil.setDireccion(direccion);
 	        perfil.setPassword(hashedPassword);
 	        // Guardar URLs en la base de datos
-	        perfil.setFotoUrl("http://localhost:8080/uploads/fotos/" + fileFoto);
-	        perfil.setDocumentoUrl("http://localhost:8080/uploads/documentos/" + fileCV);
+	        perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
+	        perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
 	        // Guardar perfil en la base de datos
 	        perfilRepository.save(perfil);
 	        return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
@@ -194,7 +197,7 @@ public class PerfilController {
 	            fotoDir.mkdirs();
 	            File fotoFile = new File(fotoDir, fileFoto);
 	            foto.transferTo(fotoFile);
-	            perfil.setFotoUrl("http://localhost:8080/uploads/fotos/" + fileFoto);
+	            perfil.setFotoUrl(appBaseUrl+"/uploads/fotos/" + fileFoto);
 	        }
 	        if (uploadcv != null && !uploadcv.isEmpty()) {
 	            String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
@@ -202,7 +205,7 @@ public class PerfilController {
 	            cvDir.mkdirs();
 	            File cvFile = new File(cvDir, fileCV);
 	            uploadcv.transferTo(cvFile);
-	            perfil.setDocumentoUrl("http://localhost:8080/uploads/documentos/" + fileCV);
+	            perfil.setDocumentoUrl(appBaseUrl+"/uploads/documentos/" + fileCV);
 	        }
 	        perfilRepository.save(perfil);
 	        return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
@@ -233,7 +236,7 @@ public class PerfilController {
 	        tokenRepository.save(resetToken);
 	        String resetLink = "http://localhost:4200/reset-password?token=" + token;
 	        emailService.send(perfil.getEmail(), "Recuperación de contraseña", 
-	            "Hacé clic en el siguiente enlace para restablecer tu contraseña: " + resetLink);
+	            "ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: " + resetLink);
 	        return ResponseEntity.ok(Map.of("message", "Si el usuario existe, se envió el enlace"));
 	    }
 
