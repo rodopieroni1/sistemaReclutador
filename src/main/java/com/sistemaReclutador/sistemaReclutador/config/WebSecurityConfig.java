@@ -30,6 +30,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 						.requestMatchers("/uploads/**").permitAll()
 						.requestMatchers("/login").permitAll()
 						.requestMatchers("/aplicaciones").permitAll()
+						.requestMatchers("/aplicaciones/perfil/{idPerfil}").permitAll()
 						.requestMatchers("/empresas").permitAll()
 						.requestMatchers("/empresas/existe/{cuit}").permitAll()
 						.requestMatchers("/empresas/existeId/{id}").permitAll()

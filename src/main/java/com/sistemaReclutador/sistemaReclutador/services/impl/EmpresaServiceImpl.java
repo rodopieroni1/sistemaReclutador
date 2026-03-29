@@ -46,6 +46,7 @@ public class EmpresaServiceImpl implements EmpresaService {
       	Empresa empresaUpdate = (empresaRepository.findById(id)).get();
          if(existe) {
          	empresaUpdate.setCuit(empresaDetails.getCuit());
+         	empresaUpdate.setTelefono(empresaDetails.getTelefono());
          	empresaUpdate.setDireccion(empresaDetails.getDireccion());
          	empresaUpdate.setEmail(empresaDetails.getEmail());
          	empresaUpdate.setHistoriaEmpresa(empresaDetails.getHistoria());
@@ -68,6 +69,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 	        empresa.setDireccion(dto.getDireccion());
 	        empresa.setHistoriaEmpresa(dto.getHistoria());
 	        empresa.setObservaciones(dto.getObservaciones());
+	        empresa.setTelefono(dto.getTelefono());
 	        empresa.setCuit(dto.getCuit());
 	        empresa.setEmail(dto.getEmail());
 	        

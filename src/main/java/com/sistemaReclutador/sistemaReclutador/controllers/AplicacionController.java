@@ -1,6 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
@@ -8,6 +9,7 @@ import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,5 +58,18 @@ public class AplicacionController {
         aplicacionRepository.deleteById(id);
     }
     
+    @GetMapping("/perfil/{idPerfil}")
+    public List<AplicacionesMiasResponse> obtenerAsignaciones(@PathVariable int idPerfil) {
+    	List<Object[]>resultado = aplicacionService.obtenerAplicacionesPerfil(idPerfil);
+    	
+    	return resultado.stream()
+    			.map(obj-> new AplicacionesMiasResponse(
+    					(String) obj[0],
+    					(String) obj[1],
+    					(LocalDateTime) obj[2],
+    					(Boolean) obj[3]
+    					))
+    			.toList();
+    }
 }
 

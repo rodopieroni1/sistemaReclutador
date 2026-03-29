@@ -24,6 +24,9 @@ public class EmpresaRequest {
 	@JsonProperty("emailEmpresa")
 	private String email;
 	
+	@JsonProperty("telefonoEmpresa")
+	private String telefono;
+	
 	@JsonProperty("cuitEmpresa")
 	private Long  cuit;
 	
@@ -59,6 +62,12 @@ public class EmpresaRequest {
 	}
 	public void setObservaciones(String observaciones) {
 		this.observaciones = observaciones;
+	}	
+	public String getTelefono() {
+		return telefono;
+	}
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
 	}
 	public String getEmail() {
 		return email;
