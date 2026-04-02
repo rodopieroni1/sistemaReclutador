@@ -20,7 +20,7 @@ public interface AplicacionRepository extends JpaRepository<Aplicacion, Integer>
     boolean existsByPerfilAndOferta(@Param("idPerfil") Integer idPerfil, @Param("idOferta") Long idOferta);
     
     
-    @Query("SELECT o.nombreOferta, e.nombre, a.fecha, a.estadoaplicaciones " +
+    @Query("SELECT a.idaplicacion, o.nombreOferta, e.nombre, a.fecha, a.estadoaplicaciones " +
     	       "FROM Aplicacion a " +
     	       "JOIN a.oferta o " +
     	       "JOIN o.empresa e " +

@@ -9,6 +9,7 @@ public class Aplicacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idaplicacion")
     private  Integer idaplicacion;
     
     @Column(name = "Fecha")

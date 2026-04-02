@@ -7,10 +7,12 @@ import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
@@ -46,13 +48,22 @@ public class AplicacionController {
 	        if (aplicacionActualizado.isPresent()) {
 	        	Aplicacion aplicacion = aplicacionActualizado.get();
 	        	aplicacion.setOferta(aplicacionDetails.getOferta());
-	        	//aplicacion.setPerfil(aplicacionDetails.getPerfil());
+	        	aplicacion.setPerfil(aplicacionDetails.getPerfil());
+	            aplicacion.setEstadoaplicaciones(aplicacionDetails.isEstadoaplicaciones());
 	        	aplicacion.setFecha(aplicacionDetails.getFecha());
 	        	return aplicacionRepository.save(aplicacion);
 	        }
 	        return null; // Devuelve null si el usuario no existe
     }
-
+    
+    @PatchMapping("/estado/{idPost}")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Integer id, @RequestBody Map<String, Boolean> body) {
+        boolean estado = body.get("estado");
+        aplicacionService.cambiarEstado(id, estado);
+        return ResponseEntity.ok().build();
+    }
+    
+    
     @DeleteMapping("/{id}")
     public void deleteAplicacion(@PathVariable int id) {
         aplicacionRepository.deleteById(id);
@@ -64,10 +75,11 @@ public class AplicacionController {
     	
     	return resultado.stream()
     			.map(obj-> new AplicacionesMiasResponse(
-    					(String) obj[0],
+    					(Integer) obj[0],
     					(String) obj[1],
-    					(LocalDateTime) obj[2],
-    					(Boolean) obj[3]
+    					(String) obj[2],
+    					(LocalDateTime) obj[3],
+    					(Boolean) obj[4]
     					))
     			.toList();
     }

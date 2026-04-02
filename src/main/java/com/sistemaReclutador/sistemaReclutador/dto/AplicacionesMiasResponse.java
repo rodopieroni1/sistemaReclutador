@@ -3,18 +3,27 @@ package com.sistemaReclutador.sistemaReclutador.dto;
 import java.time.LocalDateTime;
 
 public class AplicacionesMiasResponse {
-
+	private Integer idaplicacion;
 	private String puesto;
 	private String empresa;
 	private LocalDateTime fecha;
 	private boolean estado;
 	
-	public AplicacionesMiasResponse(String puesto, String empresa, LocalDateTime fecha, boolean estado) {
+	public AplicacionesMiasResponse(Integer idaplicacion, String puesto, String empresa, LocalDateTime fecha, boolean estado) {
 		super();
+		this.idaplicacion = idaplicacion;
 		this.puesto = puesto;
 		this.empresa = empresa;
 		this.fecha = fecha;
 		this.estado = estado;
+	}
+	
+	public Integer getIdaplicacion() {
+		return idaplicacion;
+	}
+
+	public void setIdaplicacion(Integer idaplicacion) {
+		this.idaplicacion = idaplicacion;
 	}
 
 	public String getPuesto() {

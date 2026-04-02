@@ -2,6 +2,7 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ public class AplicacionServiceImpl implements AplicacionService {
 	OfertaRepository ofertaRepository;
 
 	private static final Logger log = LoggerFactory.getLogger(AplicacionServiceImpl.class);
-
 
 	@Override
 	public Aplicacion crearAplicacion(AplicacionRequest aplicacionRequest) {
@@ -72,12 +72,21 @@ public class AplicacionServiceImpl implements AplicacionService {
 	@Override
 	public List<Object[]> obtenerAplicacionesPerfil(int idPerfil) {
 		List<Object[]> listadoAplicaciones = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
-		if (listadoAplicaciones!= null ) {
-			log.info("Aqui"+ listadoAplicaciones);
+		if (listadoAplicaciones != null) {
+			log.info("Aqui" + listadoAplicaciones);
 			return listadoAplicaciones;
-		}else {
+		} else {
 			return null;
 		}
 	}
 
+	@Override
+	public void cambiarEstado(Integer id, boolean estado) {
+		Optional<Aplicacion> aplicacionActualizado = aplicacionRepository.findById(id);
+		if (aplicacionActualizado.isPresent()) {
+			Aplicacion aplicacion = aplicacionActualizado.get();
+			aplicacion.setEstadoaplicaciones(estado);
+			aplicacionRepository.save(aplicacion);
+		}
+	}
 }

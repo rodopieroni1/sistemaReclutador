@@ -11,4 +11,6 @@ public interface AplicacionService {
     boolean existsById(Integer id);
     Aplicacion crearAplicacion(AplicacionRequest aplicacionRequest);
     List<Object[]> obtenerAplicacionesPerfil(int idPerfil);
+	void cambiarEstado(Integer id, boolean estado);
+	
 }
