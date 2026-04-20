@@ -26,12 +26,12 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()) // Desactiva CSRF
 				.authorizeHttpRequests(authorize -> authorize
-			            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 👈 Agregá esta línea
+			            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/uploads/**").permitAll()
 						.requestMatchers("/login").permitAll()
 						.requestMatchers("/aplicaciones").permitAll()
 						.requestMatchers("/aplicaciones/{idPerfil}").permitAll()
-						.requestMatchers("/aplicaciones/estado/{idPost}").permitAll()
+						.requestMatchers("/aplicaciones/estado/**").permitAll()
 						.requestMatchers("/aplicaciones/perfil/{idPerfil}").permitAll()
 						.requestMatchers("/empresas").permitAll()
 						.requestMatchers("/empresas/existe/{cuit}").permitAll()

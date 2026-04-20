@@ -57,9 +57,9 @@ public class AplicacionController {
     }
     
     @PatchMapping("/estado/{idPost}")
-    public ResponseEntity<?> cambiarEstado(@PathVariable Integer id, @RequestBody Map<String, Boolean> body) {
+    public ResponseEntity<?> cambiarEstado(@PathVariable Integer idPost, @RequestBody Map<String, Boolean> body) {
         boolean estado = body.get("estado");
-        aplicacionService.cambiarEstado(id, estado);
+        aplicacionService.cambiarEstado(idPost, estado);
         return ResponseEntity.ok().build();
     }
     

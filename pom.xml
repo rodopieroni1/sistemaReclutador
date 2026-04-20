@@ -13,7 +13,8 @@
 	<groupId>com.sistemaReclutador</groupId>
 	<artifactId>sistemaReclutador</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
+	<!-- <packaging>war</packaging>-->
 
 	<name>sistemaReclutador</name>
 	<description>Sistema Reclutador</description>
@@ -40,11 +41,11 @@
 		</dependency>
 
 		<!-- Tomcat externo -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 
 		<!-- Base de datos -->
 		<dependency>
