@@ -33,7 +33,9 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/perfiles")
 public class PerfilController {
 
-	private final String UPLOAD_DIR = "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/"; // Cambia
+	//private final String UPLOAD_DIR = "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/"; // Cambia
+	private final String UPLOAD_DIR = "/app/uploads/";
+
 	private JwtUtil jwtUtil;
 	@Value("${app.base.url}")
 	private String appBaseUrl;

@@ -15,6 +15,9 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.cuit = :cuit")
     boolean existsByCuit(@Param("cuit") Long cuit);
 	
+	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.email = :email")
+    boolean existsByEmail(@Param("email") String email);
+	
 	@Query("SELECT a FROM Empresa a ORDER BY a.id_empresa DESC")
 	List<Empresa> findAllDesc();
 	
