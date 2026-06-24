@@ -24,18 +24,61 @@ public class EmpresaServiceImpl implements EmpresaService {
 	 
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> saveEmpresa(EmpresaRequest empresaRequest) {
-		Empresa empresa = convertirDtoAEntidad(empresaRequest);		
-	    Empresa empresaCreate = empresaRepository.save(empresa);
-		ResponseRest<Empresa> response;
+	    ResponseRest<Empresa> response;
 
-			if(empresaCreate != null ) {
-			    response = new ResponseRest<Empresa> (true, "Empresa creada satisfactoriamente", 
-			    		empresaCreate, LocalDateTime.now(), "200");
-			    return ResponseEntity.status(HttpStatus.CREATED).body(response);
-			}else {
-		        response = new ResponseRest<>(false, "No se pudo crear la empresa", null, LocalDateTime.now(), "400");
-			    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);		
-			}	
+	    try {
+	        Empresa empresa = convertirDtoAEntidad(empresaRequest);
+	        
+	        boolean existeCuit = empresaRepository.existsByCuit(empresaRequest.getCuit());
+
+	        if (existeCuit) {
+	            return ResponseEntity.badRequest().body(
+	                new ResponseRest<>(false, "El existeCuit ya está registrado", null, LocalDateTime.now(), "400")
+	            );
+	        }
+	        
+	        boolean existeEmail = empresaRepository.existsByEmail(empresaRequest.getEmail());
+
+	        if (existeEmail) {
+	            return ResponseEntity.badRequest().body(
+	                new ResponseRest<>(false, "El email ya está registrado", null, LocalDateTime.now(), "400")
+	            );
+	        }
+	        
+	        
+	        Empresa empresaCreate = empresaRepository.save(empresa);
+
+	        response = new ResponseRest<>(
+	            true,
+	            "Empresa creada satisfactoriamente",
+	            empresaCreate,
+	            LocalDateTime.now(),
+	            "200"
+	        );
+
+	        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+	    } catch (Exception e) {
+	        if (e.getMessage().contains("Duplicate")) {
+	            response = new ResponseRest<>(
+	                false,
+	                "El email o CUIT ya está registrado",
+	                null,
+	                LocalDateTime.now(),
+	                "400"
+	            );
+	        } else {
+	            response = new ResponseRest<>(
+	                false,
+	                "Error interno: " + e.getMessage(),
+	                null,
+	                LocalDateTime.now(),
+	                "500"
+	            );
+	        }
+
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	    }
 	}
 	
 	
@@ -46,6 +89,7 @@ public class EmpresaServiceImpl implements EmpresaService {
       	Empresa empresaUpdate = (empresaRepository.findById(id)).get();
          if(existe) {
          	empresaUpdate.setCuit(empresaDetails.getCuit());
+         	empresaUpdate.setTelefono(empresaDetails.getTelefono());
          	empresaUpdate.setDireccion(empresaDetails.getDireccion());
          	empresaUpdate.setEmail(empresaDetails.getEmail());
          	empresaUpdate.setHistoriaEmpresa(empresaDetails.getHistoria());
@@ -68,6 +112,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 	        empresa.setDireccion(dto.getDireccion());
 	        empresa.setHistoriaEmpresa(dto.getHistoria());
 	        empresa.setObservaciones(dto.getObservaciones());
+	        empresa.setTelefono(dto.getTelefono());
 	        empresa.setCuit(dto.getCuit());
 	        empresa.setEmail(dto.getEmail());
 	        

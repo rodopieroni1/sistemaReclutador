@@ -38,6 +38,9 @@ public class Empresa {
 	@Column(name = "email", unique = true, length = 100)
 	private String email;
 	
+	@Column(name = "telefono", unique = true, length = 100)
+	private String telefono;
+	
 	@ManyToOne
     @JoinColumn(name = "id_rubro", nullable = false)
     private Rubro rubro;
@@ -98,7 +101,15 @@ public class Empresa {
 		this.cuit = cuit;
 	}
 	
-    public Rubro getRubro() { 
+    public String getTelefono() {
+		return telefono;
+	}
+
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
+	}
+
+	public Rubro getRubro() { 
     	return rubro; 
     	}
     

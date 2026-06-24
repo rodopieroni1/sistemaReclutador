@@ -1,5 +1,6 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,11 +9,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/uploads/")
 public class FileUploadController {
-    private final String UPLOAD_DIR = "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/fotos/"; // Cambia esto según tu estructura
+  //private final String UPLOAD_DIR = "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/fotos/"; // Cambia esto según tu estructura
+    private final String UPLOAD_DIR = "C:/uploads/fotos/";
+    @Value("${app.base-url}")
+    private String baseUrl;
     
     @Autowired
     private MyWebSocketHandler webSocketHandler;
@@ -26,7 +31,8 @@ public class FileUploadController {
         }
         try {
             // Guardar archivo en UPLOAD_DIR
-            File saveFile = new File(UPLOAD_DIR + file.getOriginalFilename());
+        	String nombreArchivo = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            File saveFile = new File(UPLOAD_DIR + nombreArchivo);
             file.transferTo(saveFile);
             String saveFile1 = saveFile.toString();
             System.out.println("Imagen subida: " + saveFile1);

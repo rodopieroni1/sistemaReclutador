@@ -1,19 +1,16 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
-import com.sistemaReclutador.sistemaReclutador.repositories.RubroRepository;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.EmpresaService;
 
 
-@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/empresas")
 public class EmpresaController {
@@ -22,8 +19,6 @@ public class EmpresaController {
     private EmpresaRepository empresaRepository;
     @Autowired
     private EmpresaService empresaService;
-    @Autowired
-    private RubroRepository rubroRepository;
 
     @GetMapping
     public Iterable<Empresa> listarEmpresas() {

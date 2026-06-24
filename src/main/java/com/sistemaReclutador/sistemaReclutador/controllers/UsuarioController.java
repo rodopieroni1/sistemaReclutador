@@ -2,30 +2,28 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-import java.util.HashMap;
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
-import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.repositories.UsuarioRepository;
-import com.sistemaReclutador.sistemaReclutador.services.AuthService;
 
 import java.util.List;
 import java.util.Optional;
 
+@Configuration
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-	private AuthService authService;
 	private JwtUtil jwtUtil;
 	
 	@Bean
