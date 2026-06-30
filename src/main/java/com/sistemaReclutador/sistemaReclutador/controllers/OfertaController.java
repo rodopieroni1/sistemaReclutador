@@ -40,6 +40,7 @@ public class OfertaController {
     public Oferta obtenerOferta(@PathVariable Long id) {
     	Oferta isOferta;
     	isOferta=ofertaRepository.findOferta(id);
+    	System.out.println("OFERTAAAAAA: "+ isOferta.getDescripcionOferta());
     	return isOferta;
     }
 
