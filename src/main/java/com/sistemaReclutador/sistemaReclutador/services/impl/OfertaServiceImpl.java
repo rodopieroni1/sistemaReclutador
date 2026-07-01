@@ -1,6 +1,8 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
 public class OfertaServiceImpl implements OfertaService {
 	@Autowired
 	private OfertaRepository ofertaRepository;
+	
 	public Oferta convertirDtoAEntidad(OfertaRequest dto) {
 		Oferta oferta = new Oferta();
 		oferta.setNombreOferta(dto.getNombreOferta());
@@ -61,6 +64,18 @@ public class OfertaServiceImpl implements OfertaService {
 		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);		
 		}	
 
+	}
+
+	@Override
+	public List<Oferta> findAllOfertas() {
+		List<Oferta> listadoTodasOfertas = ofertaRepository.findAll();
+		return listadoTodasOfertas;
+	}
+	
+	@Override
+	public List<Oferta> findAllOfertasActivas() {
+		List<Oferta> listadoTodasOfertas = ofertaRepository.findAllDesc();
+		return listadoTodasOfertas;
 	}
 
 }

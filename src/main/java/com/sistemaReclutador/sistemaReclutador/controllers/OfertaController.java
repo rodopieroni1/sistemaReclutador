@@ -23,11 +23,14 @@ public class OfertaController {
     private OfertaService ofertaService;
     
     
+    @GetMapping("/disponibles")
+    public List<Oferta> getAllOfertas() {
+        return ofertaService.findAllOfertas();
+    }
+    
     @GetMapping("/todas")
     public List<Oferta> getAllOfertasDesc() {
-    	List<Oferta> isOferta= ofertaRepository.findAllDesc();
-        logger.info("Ofertas obtenidas: {}", isOferta);
-        return isOferta;
+        return ofertaService.findAllOfertasActivas();
     }
     
     @GetMapping

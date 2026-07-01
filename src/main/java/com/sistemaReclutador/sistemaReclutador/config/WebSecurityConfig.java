@@ -33,7 +33,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 				.permitAll().requestMatchers("/empresas/existe/{cuit}").permitAll()
 				.requestMatchers("/empresas/existeId/{id}").permitAll().requestMatchers("/empresas/crear").permitAll()
 				.requestMatchers("/empresas/actualizar/{id}").permitAll().requestMatchers("/empresas/eliminar/{id}")
-				.permitAll().requestMatchers("/ofertas").permitAll().requestMatchers("/ofertas/todas").permitAll()
+				.permitAll().requestMatchers("/ofertas").permitAll().requestMatchers("/ofertas/disponibles").permitAll().requestMatchers("/ofertas/todas").permitAll()
 				.requestMatchers("/ofertas/existeId/{id}").permitAll().requestMatchers("/ofertas/crear").permitAll()
 				.requestMatchers("/ofertas/actualizar/{id}").permitAll().requestMatchers("/ofertas/eliminar/{id}")
 				.permitAll().requestMatchers("/ofertas/buscar", "/ofertas/buscar/**").permitAll()

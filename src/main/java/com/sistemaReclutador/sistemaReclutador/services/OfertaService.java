@@ -1,5 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.services;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -13,5 +15,7 @@ public interface OfertaService {
 	
 	ResponseEntity<ResponseRest<Oferta>> updateOferta(Long id, OfertaRequest ofertaDetail);
 	ResponseEntity<ResponseRest<Oferta>> saveOferta( OfertaRequest ofertaDetail);
+	List<Oferta> findAllOfertas();
+	List<Oferta> findAllOfertasActivas();
 
 }

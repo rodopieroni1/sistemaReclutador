@@ -34,28 +34,18 @@ public class AplicacionController {
 
     @GetMapping("/{id}")
     public boolean getAplicacionById(@PathVariable Integer id) {
-    	boolean existeAplicacion = aplicacionService.existsById(id);
-    	return existeAplicacion;
+    	return  aplicacionService.existsById(id);
     }
 
     @PostMapping
     public AplicacionResponseDTO createAplicacion(@RequestBody AplicacionRequest aplicacion) {
-    	System.out.println("Aplicacion"+ aplicacion.getIdOferta());
        return aplicacionService.crearAplicacion(aplicacion);
     }
 
     @PutMapping("/{id}")
-    public Aplicacion updateAplicacion(@PathVariable int id, @RequestBody Aplicacion aplicacionDetails) {
-   	 Optional<Aplicacion> aplicacionActualizado = aplicacionRepository.findById(id);
-	        if (aplicacionActualizado.isPresent()) {
-	        	Aplicacion aplicacion = aplicacionActualizado.get();
-	        	aplicacion.setOferta(aplicacionDetails.getOferta());
-	        	aplicacion.setPerfil(aplicacionDetails.getPerfil());
-	            aplicacion.setEstadoaplicaciones(aplicacionDetails.isEstadoaplicaciones());
-	        	aplicacion.setFecha(aplicacionDetails.getFecha());
-	        	return aplicacionRepository.save(aplicacion);
-	        }
-	        return null; // Devuelve null si el usuario no existe
+    public ResponseEntity<?> updateAplicacion(@PathVariable int id, @RequestBody AplicacionRequest aplicacionDetails) {
+	        aplicacionService.modificarOferta(id, aplicacionDetails);
+	        return ResponseEntity.ok().build();
     }
     
     @PatchMapping("/estado/{idPost}")
@@ -74,7 +64,6 @@ public class AplicacionController {
     @GetMapping("/perfil/{idPerfil}")
     public List<AplicacionesMiasResponse> obtenerAsignaciones(@PathVariable int idPerfil) {
         List<Object[]> resultado = aplicacionService.obtenerAplicacionesPerfil(idPerfil);
-        
         return resultado.stream()
                 .map(obj -> new AplicacionesMiasResponse(
                         (Integer) obj[0],       // idaplicacion
