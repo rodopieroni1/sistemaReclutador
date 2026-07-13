@@ -17,6 +17,9 @@ public interface AplicacionRepository extends JpaRepository<Aplicacion, Integer>
 	
 	@Query("SELECT a FROM Aplicacion a ORDER BY a.idaplicacion DESC")
 	List<Aplicacion> findAllDesc();
+	
+	@Query("SELECT a FROM Aplicacion a where a.estadoaplicaciones ORDER BY a.idaplicacion DESC")
+	List<Aplicacion> findAllDescActivas();
 
 	Aplicacion save(AplicacionRequest aplicacion);
     

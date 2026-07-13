@@ -14,7 +14,6 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
 @RestController
 @RequestMapping("/rubro")
-//@CrossOrigin(origins = "*")
 public class RubroController {
 
     @Autowired

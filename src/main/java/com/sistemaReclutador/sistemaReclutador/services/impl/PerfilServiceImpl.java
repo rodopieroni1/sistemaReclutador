@@ -36,13 +36,13 @@ public class PerfilServiceImpl implements PerfilService {
 	private EmailService emailService;
 	@Autowired
 	private PerfilRepository perfilRepository;
-	// private final String UPLOAD_DIR =
-	// "C:/Users/Rodrigo/Documents/SistemaReclutadorFront/proyectoReclutador/src/assets/uploads/";
-	// Cambia
-	private final String UPLOAD_DIR = "/app/uploads/";
-
+	//cambiar uando se haga el desliegue
+	
 	@Value("${app.base.url}")
 	private String appBaseUrl;
+	
+	@Value("${app.upload.dir}")
+	private String uploadDir;
 
 	@Bean(name = "customPasswordEncoder")
 	public PasswordEncoder passwordEncoder() {
@@ -53,59 +53,76 @@ public class PerfilServiceImpl implements PerfilService {
 	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String clave,
 			String password, MultipartFile foto, MultipartFile uploadcv) {
 		try {
-			// Hashear la contraseña antes de guardarla
+			if (dni != null && dni.length() > 20) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("{\"error\":\"El DNI no debe ser mayor de 20 caracteres.\"}");
+			}
+			if (!dni.matches("\\d+")) {
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+		                .body("{\"error\":\"El DNI debe contener solo números, no se permiten letras ni caracteres especiales.\"}");
+		    }
+			if (email != null && email.length() > 100) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("{\"error\":\"El Email no debe ser mayor de 100 caracteres.\"}");
+			}
+
+			if (perfilRepository.existsByClave(clave)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("{\"error\":\"Nombre de usuario ya registrado\"}");
+			}
+
+			if (perfilRepository.existsByEmail(email)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("{\"error\":\"Email ya registrado\"}");
+			}
+
+			if (perfilRepository.existsByDni(dni)) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body("{\"error\":\"El DNI ya se encuentra registrado. ¡Verifique!\"}");
+			}
+
 			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 			String hashedPassword = encoder.encode(password);
-			// Define directorios de almacenamiento
-			String fotoDir = UPLOAD_DIR + "fotos/";
-			String cvDir = UPLOAD_DIR + "documentos/";
-			// Crear directorios si no existen
-			File directorioFoto = new File(fotoDir);
-			if (!directorioFoto.exists()) {
-				directorioFoto.mkdirs();
-			}
-			File directorioCV = new File(cvDir);
-			if (!directorioCV.exists()) {
-				directorioCV.mkdirs();
-			}
-			String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			File saveFileFoto = new File(fotoDir + fileFoto);
-			File saveFileCV = new File(cvDir + fileCV);
-			System.out.println(System.getProperty("java.io.tmpdir"));
 
-			foto.transferTo(saveFileFoto);
-			uploadcv.transferTo(saveFileCV);
+	        String baseDir = uploadDir.endsWith(File.separator) ? uploadDir : uploadDir + File.separator;
+	        
+	        String fotoDir = baseDir + "fotos" + File.separator;
+	        String cvDir = baseDir + "documentos" + File.separator;
+
+	        File directorioFoto = new File(fotoDir);
+	        if (!directorioFoto.exists()) {
+	            directorioFoto.mkdirs();
+	        }
+	        File directorioCV = new File(cvDir);
+	        if (!directorioCV.exists()) {
+	            directorioCV.mkdirs();
+	        }
+	        String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+	        String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+	        
+	        File saveFileFoto = new File(fotoDir + fileFoto);
+	        File saveFileCV = new File(cvDir + fileCV);
+			
+System.out.println("saveFileFoto: "+ saveFileFoto + " saveFileCV: "+  saveFileCV);
+
+
+			foto.transferTo(saveFileFoto.getAbsoluteFile());
+			uploadcv.transferTo(saveFileCV.getAbsoluteFile());
+			
 			Perfil perfil = new Perfil();
-
-			List<Perfil> existentes = perfilRepository.verificarDniClaveEmail(clave, email, dni);
-
-			for (Perfil p : existentes) {
-				if (p.getClave().equals(clave)) {
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-							.body("{\"error\":\"Nombre de usuario ya registrado\"}");
-				}
-				if (p.getEmail().equals(email)) {
-					System.out.println("VER CORREOS: " + p.getEmail() + "-" + email);
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"Email ya registrado\"}");
-				}
-				if (p.getDni().equals(dni)) {
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"DNI ya registrado\"}");
-				}
-			}
-
 			perfil.setClave(clave);
 			perfil.setEmail(email);
 			perfil.setDni(dni);
 			perfil.setNombre(nombre);
 			perfil.setDireccion(direccion);
 			perfil.setPassword(hashedPassword);
-			// Guardar URLs en la base de datos
+			
 			perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
 			perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
-			// Guardar perfil en la base de datos
+			
 			perfilRepository.save(perfil);
 			return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -131,7 +148,7 @@ public class PerfilServiceImpl implements PerfilService {
 			// Guardar archivos si llegan nuevos
 			if (foto != null && !foto.isEmpty()) {
 				String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File fotoDir = new File(UPLOAD_DIR + "fotos/");
+				File fotoDir = new File(uploadDir + "fotos/");
 				fotoDir.mkdirs();
 				File fotoFile = new File(fotoDir, fileFoto);
 				foto.transferTo(fotoFile);
@@ -139,7 +156,7 @@ public class PerfilServiceImpl implements PerfilService {
 			}
 			if (uploadcv != null && !uploadcv.isEmpty()) {
 				String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File cvDir = new File(UPLOAD_DIR + "documentos/");
+				File cvDir = new File(uploadDir + "documentos/");
 				cvDir.mkdirs();
 				File cvFile = new File(cvDir, fileCV);
 				uploadcv.transferTo(cvFile);

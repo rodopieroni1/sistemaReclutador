@@ -53,8 +53,8 @@ public class EmpresaController {
 
     
     @DeleteMapping("/eliminar/{id}")
-    public void eliminarEmpresa(@PathVariable Long id) {
-    	empresaRepository.deleteById(id);
+    public ResponseEntity<ResponseRest<Empresa>> eliminarEmpresa(@PathVariable Long id) {
+    	return empresaService.deleteEmpresa(id);
     	
     }
 }

@@ -21,33 +21,87 @@ public class RubroServiceImpl implements RubroService {
 
     @Override
     public Rubro obtenerRubroPorId(int id) {
-        return rubroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rubro no encontrado con ID: " + id));
+        try {
+            return rubroRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Rubro no encontrado con ID: " + id));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al obtener el rubro: " + e.getMessage());
+        }
     }
 
     @Override
     public List<Rubro> listarRubros() {
-        return rubroRepository.findAll();
+        try {
+            return rubroRepository.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al listar los rubros: " + e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<Rubro> actualizarRubro(int id, RubroRequest request) {
-        Rubro rubro = obtenerRubroPorId(id);
-        rubro.setDescripcionRubro(request.getDescripcionRubro());
-        rubroRepository.save(rubro);
-        return null;
+        try {
+            Rubro rubro = obtenerRubroPorId(id);
+            rubro.setDescripcionRubro(request.getDescripcionRubro());
+            rubroRepository.save(rubro);
+
+            return ResponseEntity.ok(rubro);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @Override
     public ResponseEntity<Rubro> eliminarRubro(int id) {
-        rubroRepository.deleteById(id);
-		return null;
+        try {
+            rubroRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
-	@Override
-	public Rubro crearRubro(RubroRequest request) {
-		Rubro rubro = new Rubro();
-        rubro.setDescripcionRubro(request.getDescripcionRubro());
-        return rubroRepository.save(rubro);
-	}
+    @Override
+    public Rubro crearRubro(RubroRequest request) {
+        try {
+            Rubro rubro = new Rubro();
+            rubro.setDescripcionRubro(request.getDescripcionRubro());
+
+            return rubroRepository.save(rubro);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al crear el rubro: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Rubro findRubroEmpresa(Long idRubro) {
+        try {
+            return rubroRepository.findById(idRubro)
+                    .orElseThrow(() -> new RuntimeException("Rubro no encontrado"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al buscar el rubro: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Rubro findRubro(int intValue) {
+        try {
+            return rubroRepository.findById(intValue)
+                    .orElseThrow(() -> new RuntimeException("Rubro no encontrado"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al buscar el rubro: " + e.getMessage());
+        }
+    }
 }

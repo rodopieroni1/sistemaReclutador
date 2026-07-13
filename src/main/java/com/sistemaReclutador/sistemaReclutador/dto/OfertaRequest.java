@@ -1,5 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
@@ -20,32 +22,19 @@ public class OfertaRequest {
     
 	@JsonProperty("fotoOferta")
     private String fotoOferta; 
+	
+	@JsonProperty("fotoArchivo")
+	private MultipartFile fotoArchivo;
 
     @JsonProperty("empresa")
     private Empresa idEmpresa;
-    
-    
-    private String nombreEmpresa;
-    private String cuitEmpresa;
-    private String emailEmpresa;
-    private String observacionesEmpresa;
-    private String direccionEmpresa;
-    private String historiaEmpresa;
-	
+
 	public Long getIdOferta() {
 		return idOferta;
 	}
 
 	public void setIdOferta(Long idOferta) {
 		this.idOferta = idOferta;
-	}
-
-	public Empresa getIdEmpresa() {
-		return idEmpresa;
-	}
-
-	public void setIdEmpresa(Empresa idEmpresa) {
-		this.idEmpresa = idEmpresa;
 	}
 
 	public String getNombreOferta() {
@@ -55,6 +44,15 @@ public class OfertaRequest {
 	public void setNombreOferta(String nombreOferta) {
 		this.nombreOferta = nombreOferta;
 	}
+
+	public boolean isEstadoOferta() {
+		return estadoOferta;
+	}
+
+	public void setEstadoOferta(boolean estadoOferta) {
+		this.estadoOferta = estadoOferta;
+	}
+
 	public String getDescripcionOferta() {
 		return descripcionOferta;
 	}
@@ -71,60 +69,19 @@ public class OfertaRequest {
 		this.fotoOferta = fotoOferta;
 	}
 
-	public String getNombreEmpresa() {
-		return nombreEmpresa;
+	public Empresa getIdEmpresa() {
+		return idEmpresa;
 	}
 
-	public void setNombreEmpresa(String nombreEmpresa) {
-		this.nombreEmpresa = nombreEmpresa;
+	public void setIdEmpresa(Empresa idEmpresa) {
+		this.idEmpresa = idEmpresa;
 	}
 
-	public String getCuitEmpresa() {
-		return cuitEmpresa;
+	public MultipartFile getFotoArchivo() {
+		return fotoArchivo;
 	}
 
-	public void setCuitEmpresa(String cuitEmpresa) {
-		this.cuitEmpresa = cuitEmpresa;
-	}
-
-	public String getEmailEmpresa() {
-		return emailEmpresa;
-	}
-
-	public void setEmailEmpresa(String emailEmpresa) {
-		this.emailEmpresa = emailEmpresa;
-	}
-
-	public String getObservacionesEmpresa() {
-		return observacionesEmpresa;
-	}
-
-	public void setObservacionesEmpresa(String observacionesEmpresa) {
-		this.observacionesEmpresa = observacionesEmpresa;
-	}
-
-	public String getDireccionEmpresa() {
-		return direccionEmpresa;
-	}
-
-	public void setDireccionEmpresa(String direccionEmpresa) {
-		this.direccionEmpresa = direccionEmpresa;
-	}
-
-	public String getHistoriaEmpresa() {
-		return historiaEmpresa;
-	}
-
-	public void setHistoriaEmpresa(String historiaEmpresa) {
-		this.historiaEmpresa = historiaEmpresa;
-	}
-
-	public boolean isEstadoOferta() {
-		return estadoOferta;
-	}
-
-	public void setEstadoOferta(boolean estadoOferta) {
-		this.estadoOferta = estadoOferta;
-	}
-
+	public void setFotoArchivo(MultipartFile fotoArchivo) {
+		this.fotoArchivo = fotoArchivo;
+	}  
 }

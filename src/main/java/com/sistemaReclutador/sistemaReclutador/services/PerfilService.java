@@ -3,6 +3,7 @@ package com.sistemaReclutador.sistemaReclutador.services;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,6 @@ public interface PerfilService {
 	ResponseEntity<Perfil> obtenerPerfilPorName(String name);
 	Perfil findById(int id);
 	ResponseEntity<List<Perfil>> listarPerfiles();
-	
+
 
 }
