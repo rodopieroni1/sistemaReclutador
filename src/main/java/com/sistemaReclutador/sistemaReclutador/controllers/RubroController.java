@@ -41,7 +41,7 @@ public class RubroController {
     }
 
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Rubro> deleteRubro(@PathVariable int id) {
+    public ResponseEntity<String> deleteRubro(@PathVariable int id) {
         return rubroService.eliminarRubro(id);
     }
 }

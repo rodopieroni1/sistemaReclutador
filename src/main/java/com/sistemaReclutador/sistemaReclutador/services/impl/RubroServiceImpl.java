@@ -3,6 +3,7 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -56,14 +57,15 @@ public class RubroServiceImpl implements RubroService {
     }
 
     @Override
-    public ResponseEntity<Rubro> eliminarRubro(int id) {
+    public ResponseEntity<String> eliminarRubro(int id) {
         try {
             rubroRepository.deleteById(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok("Rubro eliminado correctamente");
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No se puede eliminar el rubro porque tiene empresas asociadas.");
         }
     }
 

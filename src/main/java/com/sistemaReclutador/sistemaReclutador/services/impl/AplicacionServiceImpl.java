@@ -125,4 +125,53 @@ public class AplicacionServiceImpl implements AplicacionService {
 			aplicacionRepository.save(aplicacion);
 		}
 	}
+
+	@Override
+	public List<Aplicacion> findAllDesc() {
+	    try {
+	        List<Aplicacion> aplicaciones = aplicacionRepository.findAllDesc();
+
+	        if (aplicaciones == null || aplicaciones.isEmpty()) {
+	            return null;
+	        }
+
+	        return aplicaciones;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+	@Override
+	public List<Aplicacion> findAllDescActivas() {
+	    try {
+	        List<Aplicacion> aplicaciones = aplicacionRepository.findAllDescActivas();
+
+	        if (aplicaciones == null || aplicaciones.isEmpty()) {
+	            return null;
+	        }
+
+	        return aplicaciones;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+	@Override
+	public void deleteById(int id) {
+	    try {
+
+	        if (!aplicacionRepository.existsById(id)) {
+	            return;
+	        }
+
+	        aplicacionRepository.deleteById(id);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
 }

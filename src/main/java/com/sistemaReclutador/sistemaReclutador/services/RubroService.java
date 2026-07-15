@@ -12,7 +12,7 @@ public interface RubroService {
     Rubro obtenerRubroPorId(int id);
     List<Rubro> listarRubros();
     ResponseEntity<Rubro> actualizarRubro(int id, RubroRequest request);
-    ResponseEntity<Rubro> eliminarRubro(int id);
+    ResponseEntity<String> eliminarRubro(int id);
 	Rubro findRubroEmpresa(Long idRubro);
 	Rubro findRubro(int intValue);
 }

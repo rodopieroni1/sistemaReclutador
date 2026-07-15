@@ -23,17 +23,16 @@ public class AplicacionController {
 
 	@Autowired
 	private AplicacionService aplicacionService;
-	@Autowired
-	private AplicacionRepository aplicacionRepository;
+	
 
 	@GetMapping
 	public List<Aplicacion> getAllAplicaciones() {
-		return aplicacionRepository.findAllDesc();
+		return aplicacionService.findAllDesc();
 	}
 	
 	@GetMapping("/activas")
 	public List<Aplicacion> getAllAplicacionesActivas() {
-		return aplicacionRepository.findAllDescActivas();
+		return aplicacionService.findAllDescActivas();
 	}
 
 	@GetMapping("/{id}")
@@ -61,7 +60,7 @@ public class AplicacionController {
 
 	@DeleteMapping("/{id}")
 	public void deleteAplicacion(@PathVariable int id) {
-		aplicacionRepository.deleteById(id);
+		aplicacionService.deleteById(id);
 	}
 
 	@GetMapping("/perfil/{idPerfil}")

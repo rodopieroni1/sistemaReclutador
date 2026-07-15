@@ -17,5 +17,8 @@ public interface AplicacionService {
     ResponseEntity<ResponseRest<Aplicacion>> modificarOferta(int id, AplicacionRequest aplicacionDetails);
     List<Object[]> obtenerAplicacionesPerfil(int idPerfil);
 	void cambiarEstado(Integer id, boolean estado);
+	List<Aplicacion> findAllDesc();
+	List<Aplicacion> findAllDescActivas();
+	void deleteById(int id);
 	
 }

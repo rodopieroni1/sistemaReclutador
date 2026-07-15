@@ -1,87 +1,61 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
-import com.sistemaReclutador.sistemaReclutador.repositories.UsuarioRepository;
+import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
+import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
 
-import java.util.List;
-import java.util.Optional;
 
-@Configuration
+
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-	private JwtUtil jwtUtil;
+    private UsuarioService usuarioService;
 	
-	@Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
 	@PostMapping("/auth/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
-	    Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
-	    if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
-	        String token = jwtUtil.generateToken(user.get().getNombre());
-	        return ResponseEntity.ok().body(Map.of("token", token));
-	    }
-	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));
+	    return usuarioService.login(credential);
 	}
 
-    // Obtener todos los usuarios
-    @ResponseStatus(HttpStatus.OK)
+
 	@GetMapping
     public List<Usuario> getAllUsuarios() {
-        return usuarioRepository.findAll();
+        return usuarioService.findAll();
     }
 
-    // Obtener un usuario por ID
     @GetMapping("/{id}")
     public Usuario getUsuarioById(@PathVariable int id) {
-        return usuarioRepository.findById(id).orElse(null);
+        return usuarioService.findById(id);
     }
 
-    // Crear un nuevo usuario
     @PostMapping
     public Usuario createUsuario(@RequestBody Usuario usuario) {
-        return usuarioRepository.save(usuario);
+        return usuarioService.saveUsuario(usuario);
     }
 
-    // Actualizar un usuario existente
     @PutMapping("/{id}")
-    public Usuario updateUsuario(@PathVariable int id, @RequestBody Usuario usuarioDetails) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-        if (usuarioOptional.isPresent()) {
-            Usuario usuario = usuarioOptional.get();
-            usuario.setClave(usuarioDetails.getClave());
-            usuario.setContraseña(usuarioDetails.getContraseña());
-            usuario.setNombre(usuarioDetails.getNombre());
-            return usuarioRepository.save(usuario);
-        }
-        return null; // Devuelve null si el usuario no existe
+    public ResponseEntity<ResponseRest<Usuario>> updateUsuario(@PathVariable int id, @RequestBody Usuario usuarioDetails) {
+		return usuarioService.actualizarUsuario(usuarioDetails);
     }
 
-    // Eliminar un usuario
     @DeleteMapping("/{id}")
-    public String deleteUsuario(@PathVariable int id) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-        if (usuarioOptional.isPresent()) {
-            usuarioRepository.deleteById(id);
-            return "Usuario eliminado con éxito";
-        }
-        return "Usuario no encontrado";
+    public ResponseEntity<?> deleteUsuario(@PathVariable int id) {
+    	return usuarioService.eliminarUsuario(id);
     }
 }
