@@ -7,12 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
-import com.sistemaReclutador.sistemaReclutador.repositories.RubroRepository;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.EmpresaService;
 import com.sistemaReclutador.sistemaReclutador.services.RubroService;
@@ -28,7 +26,6 @@ public class EmpresaServiceImpl implements EmpresaService {
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> saveEmpresa(EmpresaRequest empresaRequest) {
 		ResponseRest<Empresa> response;
-
 		try {
 			Empresa empresa = convertirDtoAEntidad(empresaRequest);
 			boolean existeCuit = empresaRepository.existsByCuit(empresaRequest.getCuit());
@@ -108,7 +105,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 		} catch (Exception e) {
 			return null;
 		}
-		
+
 	}
 
 	@Override
@@ -134,4 +131,23 @@ public class EmpresaServiceImpl implements EmpresaService {
 		}
 	}
 
+	@Override
+	public Iterable<Empresa> buscarPorEmpresa() {
+		return empresaRepository.findAllDesc();
+	}
+
+	@Override
+	public boolean existsByCuit(Long cuit) {
+		boolean isEmpresa = empresaRepository.existsByCuit(cuit);
+		if (isEmpresa) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public Empresa findEmpresa(Long id) {
+		return empresaRepository.findEmpresa(id);
+	}
 }

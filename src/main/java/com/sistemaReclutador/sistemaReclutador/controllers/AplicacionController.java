@@ -4,13 +4,10 @@ import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
-import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
