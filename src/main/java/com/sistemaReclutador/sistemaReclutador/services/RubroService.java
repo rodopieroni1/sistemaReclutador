@@ -1,10 +1,8 @@
 package com.sistemaReclutador.sistemaReclutador.services;
 
 import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.sistemaReclutador.sistemaReclutador.dto.RubroRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
 
@@ -14,6 +12,8 @@ public interface RubroService {
     Rubro obtenerRubroPorId(int id);
     List<Rubro> listarRubros();
     ResponseEntity<Rubro> actualizarRubro(int id, RubroRequest request);
-    ResponseEntity<Rubro> eliminarRubro(int id);
+    ResponseEntity<String> eliminarRubro(int id);
+	Rubro findRubroEmpresa(Long idRubro);
+	Rubro findRubro(Long intValue);
 }
 

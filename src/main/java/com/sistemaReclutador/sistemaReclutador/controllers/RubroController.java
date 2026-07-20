@@ -14,7 +14,6 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
 @RestController
 @RequestMapping("/rubro")
-//@CrossOrigin(origins = "*")
 public class RubroController {
 
     @Autowired
@@ -42,7 +41,7 @@ public class RubroController {
     }
 
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Rubro> deleteRubro(@PathVariable int id) {
+    public ResponseEntity<String> deleteRubro(@PathVariable int id) {
         return rubroService.eliminarRubro(id);
     }
 }

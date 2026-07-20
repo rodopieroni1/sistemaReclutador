@@ -29,5 +29,6 @@ public interface PerfilRepository extends JpaRepository<Perfil, Integer> {
     
 	boolean existsByEmail(String email);
 	boolean existsByDni(String dni);
+	boolean existsByClave(String clave);
 
 }

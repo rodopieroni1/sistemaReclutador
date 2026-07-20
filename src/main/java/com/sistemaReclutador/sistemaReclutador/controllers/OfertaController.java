@@ -2,95 +2,68 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
-import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/ofertas")
 public class OfertaController {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(OfertaController.class);
-    
-    @Autowired
-    private OfertaRepository ofertaRepository;
-    @Autowired
-    private OfertaService ofertaService;
-    
-    
-    @GetMapping("/todas")
-    public List<Oferta> getAllOfertasDesc() {
-    	List<Oferta> isOferta= ofertaRepository.findAllDesc();
-        logger.info("Ofertas obtenidas: {}", isOferta);
-        return isOferta;
-    }
-    
-    @GetMapping
-    public List<Oferta> getAllOfertasEmpresa() {
-        return ofertaRepository.findEmpresaByOferta();
-    }
+	
+	@Autowired
+	private OfertaService ofertaService;
 
-    // Obtener una oferta por ID
-    @GetMapping("/existeId/{id}")
-    public Oferta obtenerOferta(@PathVariable Long id) {
-    	Oferta isOferta;
-    	isOferta=ofertaRepository.findOferta(id);
-    	return isOferta;
-    }
+	@GetMapping("/disponibles")
+	public List<Oferta> getAllOfertas() {
+		return ofertaService.findAllOfertas();
+	}
 
-    // Crear una nueva oferta
-   @PostMapping("/crear")
-    public ResponseEntity<ResponseRest<Oferta>> createOferta(@RequestBody OfertaRequest ofertaRequest) {
-	   return ofertaService.saveOferta(ofertaRequest);
-    }   
-    
-   
-    @PutMapping("/actualizar/{id}")
-    public ResponseEntity<ResponseRest<Oferta>> updateOferta(@PathVariable Long id, @RequestBody OfertaRequest ofertaDetails) {
-    	return ofertaService.updateOferta(id, ofertaDetails);
-    }
-    
-    @DeleteMapping("/eliminar/{id}")
-    public void eliminarOferta(@PathVariable Long id) {
-     	Oferta oferta = (ofertaRepository.findById(id)).get();
-     	oferta.setEstadoOferta(true);
-     	ofertaRepository.save(oferta);
-    }
-    
-    @GetMapping("/buscar")
-    public List<Oferta> buscarOferta(
-            @RequestParam(required = false) String nombreOferta,
-            @RequestParam(required = false) String descripcionEmpresa,
-            @RequestParam(required = false) String descripcionRubro) {
+	@GetMapping("/todas")
+	public List<Oferta> getAllOfertasDesc() {
+		return ofertaService.findAllOfertasActivas();
+	}
 
-        if (nombreOferta != null && descripcionEmpresa != null && descripcionRubro != null) {
-            return ofertaRepository.buscarPorCampos(nombreOferta, descripcionEmpresa, descripcionRubro);
-        }
+	@GetMapping
+	public List<Oferta> getAllOfertasEmpresa() {
+		return ofertaService.findEmpresaByOferta();
+	}
 
-        if (nombreOferta != null && descripcionRubro != null) {
-            return ofertaRepository.buscarPorNombreYRubro(nombreOferta, descripcionRubro);
-        }
+	@GetMapping("/existeId/{id}")
+	public Oferta obtenerOferta(@PathVariable Long id) {
+		return ofertaService.obtenerOferta(id);
+	}
 
-        if (descripcionEmpresa != null && descripcionRubro != null) {
-            return ofertaRepository.buscarPorDescripcionYRubro(descripcionEmpresa, descripcionRubro);
-        }
-        if (descripcionRubro != null) {
-            return ofertaRepository.buscarPorRubro(descripcionRubro);
-        }
+	@PostMapping("/crear")
+	public ResponseEntity<ResponseRest<Oferta>> createOferta(@RequestBody OfertaRequest ofertaRequest) {
+		return ofertaService.saveOferta(ofertaRequest);
+	}
 
-        if (nombreOferta != null) {
-            return ofertaRepository.buscarPorNombreOferta(nombreOferta);
-        }
+	@PutMapping(value = "/actualizar/{id}", consumes = { "multipart/form-data" })
+	public ResponseEntity<ResponseRest<Oferta>> updateOferta(@PathVariable Long id,
+			@RequestParam("nombreOferta") String nombreOferta,
+			@RequestParam("descripcionOferta") String descripcionOferta,
+			@RequestParam("estadoOferta") boolean estadoOferta, @RequestParam("idEmpresa") Long idEmpresa,
+			@RequestParam("fotoOferta") String fotoOferta,
+			@RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+		return ofertaService.updateOferta(id, nombreOferta, descripcionOferta, estadoOferta, idEmpresa, fotoOferta,
+				fotoArchivo);
+	}
 
-        if (descripcionEmpresa != null) {
-            return ofertaRepository.buscarPorDescripcionEmpresa(descripcionEmpresa);
-        }
-        return ofertaRepository.findAll();
-    }
+	@DeleteMapping("/eliminar/{id}")
+	public ResponseEntity<ResponseRest<Oferta>> eliminarOferta(@PathVariable Long id) {
+		return ofertaService.eliminarOferta(id);
+	}
+
+	@GetMapping("/buscar")
+	public List<Oferta> buscarOferta(@RequestParam(required = false) String nombreOferta,
+			@RequestParam(required = false) String descripcionEmpresa,
+			@RequestParam(required = false) String descripcionRubro) {
+		return ofertaService.buscarPorCampo(nombreOferta, descripcionEmpresa, descripcionRubro);
+	}
 
 }

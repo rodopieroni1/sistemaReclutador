@@ -14,7 +14,7 @@ public interface OfertaRepository extends JpaRepository<Oferta, Long> {
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e order by o.idOferta desc")
 	List<Oferta> findEmpresaByOferta();
 
-	@Query("SELECT o FROM Oferta o ORDER BY o.idOferta DESC")
+	@Query("SELECT o FROM Oferta o WHERE o.estadoOferta = 1 ORDER BY o.idOferta DESC")
 	List<Oferta> findAllDesc();
 
 	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END FROM Oferta o WHERE o.idOferta = :id")

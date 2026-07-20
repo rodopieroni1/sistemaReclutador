@@ -24,6 +24,7 @@ public class Rubro {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "idRubro")
 	private int idRubro;
 	
     @Column(name = "descripcionRubro")

@@ -11,5 +11,10 @@ import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 public interface EmpresaService {
 	ResponseEntity<ResponseRest<Empresa>> saveEmpresa(EmpresaRequest empresaRequest);
 	ResponseEntity<ResponseRest<Empresa>> updateEmpresa(Long id, EmpresaRequest empresaRequest);
+	ResponseEntity<ResponseRest<Empresa>> deleteEmpresa(Long id);
+	Iterable<Empresa> buscarPorEmpresa();
+	boolean existsByCuit(Long cuit);
+	Empresa findEmpresa(Long id);
+	
 
 }

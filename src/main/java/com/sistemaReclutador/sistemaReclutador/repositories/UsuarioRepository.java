@@ -10,7 +10,7 @@ import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 	
-    Optional<Usuario> findByClave(String clave);
+	 Optional<Usuario> findByClave(String clave);
 	boolean existsByEmail(String email);
 
 }
