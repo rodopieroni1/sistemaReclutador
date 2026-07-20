@@ -18,8 +18,6 @@ public class RubroServiceImpl implements RubroService {
     @Autowired
     private RubroRepository rubroRepository;
 
- 
-
     @Override
     public Rubro obtenerRubroPorId(int id) {
         try {
@@ -96,7 +94,7 @@ public class RubroServiceImpl implements RubroService {
     }
 
     @Override
-    public Rubro findRubro(int intValue) {
+    public Rubro findRubro(Long intValue) {
         try {
             return rubroRepository.findById(intValue)
                     .orElseThrow(() -> new RuntimeException("Rubro no encontrado"));

@@ -83,12 +83,9 @@ public class PerfilServiceImpl implements PerfilService {
 
 			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 			String hashedPassword = encoder.encode(password);
-
 	        String baseDir = uploadDir.endsWith(File.separator) ? uploadDir : uploadDir + File.separator;
-	        
 	        String fotoDir = baseDir + "fotos" + File.separator;
 	        String cvDir = baseDir + "documentos" + File.separator;
-
 	        File directorioFoto = new File(fotoDir);
 	        if (!directorioFoto.exists()) {
 	            directorioFoto.mkdirs();
@@ -98,14 +95,9 @@ public class PerfilServiceImpl implements PerfilService {
 	            directorioCV.mkdirs();
 	        }
 	        String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-	        String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-	        
+	        String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");	        
 	        File saveFileFoto = new File(fotoDir + fileFoto);
 	        File saveFileCV = new File(cvDir + fileCV);
-			
-System.out.println("saveFileFoto: "+ saveFileFoto + " saveFileCV: "+  saveFileCV);
-
-
 			foto.transferTo(saveFileFoto.getAbsoluteFile());
 			uploadcv.transferTo(saveFileCV.getAbsoluteFile());
 			

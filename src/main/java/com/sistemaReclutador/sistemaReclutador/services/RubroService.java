@@ -14,6 +14,6 @@ public interface RubroService {
     ResponseEntity<Rubro> actualizarRubro(int id, RubroRequest request);
     ResponseEntity<String> eliminarRubro(int id);
 	Rubro findRubroEmpresa(Long idRubro);
-	Rubro findRubro(int intValue);
+	Rubro findRubro(Long intValue);
 }
 

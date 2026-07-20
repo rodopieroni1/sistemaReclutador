@@ -1,12 +1,16 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
@@ -22,6 +26,11 @@ public class EmpresaServiceImpl implements EmpresaService {
 	EmpresaRepository empresaRepository;
 	@Autowired
 	private RubroService rubroService;
+	@Value("${app.base.url}")
+	private String appBaseUrl;
+	
+	@Value("${app.upload.dir}")
+	private String uploadDir;
 
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> saveEmpresa(EmpresaRequest empresaRequest) {
@@ -30,7 +39,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 			Empresa empresa = convertirDtoAEntidad(empresaRequest);
 			boolean existeCuit = empresaRepository.existsByCuit(empresaRequest.getCuit());
 			if (existeCuit) {
-				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El existeCuit ya está registrado",
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El Cuit ya está registrado",
 						null, LocalDateTime.now(), "400"));
 			}
 			boolean existeEmail = empresaRepository.existsByEmail(empresaRequest.getEmail());
@@ -38,9 +47,25 @@ public class EmpresaServiceImpl implements EmpresaService {
 				return ResponseEntity.badRequest().body(
 						new ResponseRest<>(false, "El email ya está registrado", null, LocalDateTime.now(), "400"));
 			}
+			
+			String baseDir = uploadDir.endsWith(File.separator)
+			        ? uploadDir
+			        : uploadDir + File.separator;
+
+			String logoDir = baseDir + "logos" + File.separator;
+			File directorioLogo = new File(logoDir);
+			if (!directorioLogo.exists()) {
+			    directorioLogo.mkdirs();
+			}
+			MultipartFile logo = empresaRequest.getLogo();
+			if (logo != null && !logo.isEmpty()) {
+			    String nombreArchivo = logo.getOriginalFilename()
+			            .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    File archivoLogo = new File(logoDir + nombreArchivo);
+			    logo.transferTo(archivoLogo);
+			}
 			Empresa empresaCreate = empresaRepository.save(empresa);
-			response = new ResponseRest<>(true, "Empresa creada satisfactoriamente", empresaCreate, LocalDateTime.now(),
-					"200");
+			response = new ResponseRest<>(true, "Empresa creada satisfactoriamente", empresaCreate, LocalDateTime.now(),"200");
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
 		} catch (Exception e) {
 			if (e.getMessage().contains("Duplicate")) {
@@ -69,16 +94,32 @@ public class EmpresaServiceImpl implements EmpresaService {
 			empresaUpdate.setTelefono(empresaDetails.getTelefono());
 			empresaUpdate.setDireccion(empresaDetails.getDireccion());
 			empresaUpdate.setEmail(empresaDetails.getEmail());
-			empresaUpdate.setHistoriaEmpresa(empresaDetails.getHistoria());
+			empresaUpdate.setHistoriaEmpresa(empresaDetails.getHistoriaEmpresa());
 			empresaUpdate.setNombre(empresaDetails.getNombre());
 			empresaUpdate.setObservaciones(empresaDetails.getObservaciones());
 			empresaUpdate.setRubro(rubro);
+			
+			MultipartFile logo = empresaDetails.getLogo();
+			if (logo != null && !logo.isEmpty()) {
+			    String baseDir = uploadDir.endsWith(File.separator)
+			            ? uploadDir
+			            : uploadDir + File.separator;
+			    String logoDir = baseDir + "logos" + File.separator;
+			    File directorioLogo = new File(logoDir);
+			    if (!directorioLogo.exists()) {
+			        directorioLogo.mkdirs();
+			    }
+			    String nombreArchivo = logo.getOriginalFilename()
+			            .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    File archivoLogo = new File(logoDir + nombreArchivo);
+			    logo.transferTo(archivoLogo);
+			    empresaUpdate.setLogo(nombreArchivo);
+			}
+			
 			empresaRepository.save(empresaUpdate);
 			ResponseRest<Empresa> response = new ResponseRest<>(true, "Empresa actualizada satisfactoriamente",
 					empresaUpdate, LocalDateTime.now(), "200");
-
 			return ResponseEntity.ok(response);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			ResponseRest<Empresa> response = new ResponseRest<>(false,
@@ -92,20 +133,18 @@ public class EmpresaServiceImpl implements EmpresaService {
 			Empresa empresa = new Empresa();
 			empresa.setNombre(dto.getNombre());
 			empresa.setDireccion(dto.getDireccion());
-			empresa.setHistoriaEmpresa(dto.getHistoria());
+			empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
 			empresa.setObservaciones(dto.getObservaciones());
 			empresa.setTelefono(dto.getTelefono());
 			empresa.setCuit(dto.getCuit());
 			empresa.setEmail(dto.getEmail());
-
-			Rubro rubro = rubroService.findRubro(dto.getIdRubro().intValue());
-
-			empresa.setRubro(rubro);
+			empresa.setLogo(dto.getNombre());
+			Rubro rubro = rubroService.findRubro(dto.getIdRubro());
+			empresa.setRubro(rubro);	
 			return empresa;
 		} catch (Exception e) {
 			return null;
 		}
-
 	}
 
 	@Override
@@ -121,7 +160,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 			empresaRepository.delete(empresa);
 			ResponseRest<Empresa> response = new ResponseRest<>(true, "Empresa eliminada satisfactoriamente", empresa,
 					LocalDateTime.now(), "200");
-			return ResponseEntity.ok(response);
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
 		} catch (Exception e) {
 			e.printStackTrace();

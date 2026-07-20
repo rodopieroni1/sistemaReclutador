@@ -1,5 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,7 +18,7 @@ public class EmpresaRequest {
 	private String direccion;
 	
 	@JsonProperty("historiaEmpresa")
-	private String historia;
+	private String historiaEmpresa;
 	
 	@JsonProperty("observacionesEmpresa")
 	private String observaciones;
@@ -26,6 +28,9 @@ public class EmpresaRequest {
 	
 	@JsonProperty("telefonoEmpresa")
 	private String telefono;
+	
+	@JsonProperty("logo")
+	private MultipartFile logo;
 	
 	@JsonProperty("cuitEmpresa")
 	private Long  cuit;
@@ -51,11 +56,12 @@ public class EmpresaRequest {
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
-	public String getHistoria() {
-		return historia;
+	
+	public String getHistoriaEmpresa() {
+		return historiaEmpresa;
 	}
-	public void setHistoria(String historia) {
-		this.historia = historia;
+	public void setHistoriaEmpresa(String historiaEmpresa) {
+		this.historiaEmpresa = historiaEmpresa;
 	}
 	public String getObservaciones() {
 		return observaciones;
@@ -80,6 +86,12 @@ public class EmpresaRequest {
 	}
 	public void setCuit(Long cuit) {
 		this.cuit = cuit;
+	}	
+	public MultipartFile getLogo() {
+		return logo;
+	}
+	public void setLogo(MultipartFile logo) {
+		this.logo = logo;
 	}
 	public Long getIdRubro() {
 		return idRubro;

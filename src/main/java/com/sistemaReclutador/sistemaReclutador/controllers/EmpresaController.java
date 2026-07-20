@@ -1,6 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
@@ -31,17 +32,17 @@ public class EmpresaController {
 		return empresaService.findEmpresa(id);
 	}
 
-	@PostMapping("/crear")
-	public ResponseEntity<ResponseRest<Empresa>> crearEmpresa(@RequestBody EmpresaRequest empresaRequest) {
-		return empresaService.saveEmpresa(empresaRequest);
+	@PostMapping(value = "/crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ResponseRest<Empresa>> crearEmpresa(
+	        @ModelAttribute EmpresaRequest empresaRequest) {
+	    return empresaService.saveEmpresa(empresaRequest);
 	}
 
-	@PutMapping("/actualizar/{id}")
-	public ResponseEntity<ResponseRest<Empresa>> updateOferta(@PathVariable Long id,
-			@RequestBody EmpresaRequest empresaDetails) {
-		return empresaService.updateEmpresa(id, empresaDetails);
-	}
-
+	@PutMapping(value="/actualizar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+		public ResponseEntity<ResponseRest<Empresa>> actualizarEmpresa( @PathVariable Long id, @ModelAttribute EmpresaRequest request) {
+		    return empresaService.updateEmpresa(id, request);
+		}
+	
 	@DeleteMapping("/eliminar/{id}")
 	public ResponseEntity<ResponseRest<Empresa>> eliminarEmpresa(@PathVariable Long id) {
 		return empresaService.deleteEmpresa(id);

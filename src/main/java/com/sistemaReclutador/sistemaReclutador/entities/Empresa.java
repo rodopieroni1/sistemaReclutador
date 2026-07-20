@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 @Table(name = "empresas")
 public class Empresa {
 	
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id_empresa;
@@ -37,6 +36,9 @@ public class Empresa {
 
 	@Column(name = "email", unique = true, length = 100)
 	private String email;
+	
+	@Column(name = "logo", length = 245)
+	private String logo;
 	
 	@Column(name = "telefono", unique = true, length = 100)
 	private String telefono;
@@ -107,6 +109,14 @@ public class Empresa {
 
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
 	}
 
 	public Rubro getRubro() { 
