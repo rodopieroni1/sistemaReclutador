@@ -14,7 +14,6 @@ import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 public interface AplicacionService {
     boolean existsById(Integer id);
     AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest);
-    ResponseEntity<ResponseRest<Aplicacion>> modificarOferta(int id, AplicacionRequest aplicacionDetails);
     List<Object[]> obtenerAplicacionesPerfil(int idPerfil);
 	void cambiarEstado(Integer id, boolean estado);
 	List<Aplicacion> findAllDesc();

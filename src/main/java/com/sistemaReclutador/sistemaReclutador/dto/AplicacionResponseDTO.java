@@ -5,11 +5,11 @@ import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 
 public class AplicacionResponseDTO {
 	private ResultadosAplicacion status;
-	private Aplicacion aplicacion;
+	private String mensaje;
 
-	public AplicacionResponseDTO(ResultadosAplicacion status, Aplicacion aplicacion) {
+	public AplicacionResponseDTO(ResultadosAplicacion status, String mensaje) {
 		this.status = status;
-		this.aplicacion = aplicacion;
+		this.mensaje = mensaje;
 	}
 
 	public ResultadosAplicacion getStatus() {
@@ -20,11 +20,11 @@ public class AplicacionResponseDTO {
 		this.status = status;
 	}
 
-	public Aplicacion getAplicacion() {
-		return aplicacion;
+	public String getMensaje() {
+		return mensaje;
 	}
 
-	public void setAplicacion(Aplicacion aplicacion) {
-		this.aplicacion = aplicacion;
+	public void setMensaje(String mensaje) {
+		this.mensaje = mensaje;
 	}
 }

@@ -42,12 +42,6 @@ public class AplicacionController {
 		return aplicacionService.crearAplicacion(aplicacion);
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateAplicacion(@PathVariable int id, @RequestBody AplicacionRequest aplicacionDetails) {
-		aplicacionService.modificarOferta(id, aplicacionDetails);
-		return ResponseEntity.ok().build();
-	}
-
 	@PatchMapping("/estado/{idPost}")
 	public ResponseEntity<?> cambiarEstado(@PathVariable Integer idPost, @RequestBody Map<String, Boolean> body) {
 		boolean estado = body.get("estado");
