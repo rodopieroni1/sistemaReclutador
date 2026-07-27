@@ -32,10 +32,49 @@ public class EmpresaServiceImpl implements EmpresaService {
 	@Value("${app.upload.dir}")
 	private String uploadDir;
 
+	
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> saveEmpresa(EmpresaRequest empresaRequest) {
 		ResponseRest<Empresa> response;
 		try {
+			if (empresaRequest.getEmail() == null || empresaRequest.getEmail().trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El correo electrónico es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+			if (!empresaRequest.getEmail().matches(emailRegex)) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El formato del correo electrónico no es válido", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaRequest.getCuit() == null) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El CUIT es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			String cuitString = String.valueOf(empresaRequest.getCuit());
+			if (cuitString.length() != 11) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El CUIT debe tener exactamente 11 dígitos", null, LocalDateTime.now(), "400"));
+			}
+
+			if (empresaRequest.getNombre() == null || empresaRequest.getNombre().trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre de la empresa es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaRequest.getNombre().length() > 100) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre de la empresa no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaRequest.getEmail().length() > 100) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El correo electrónico no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaRequest.getDireccion() != null && empresaRequest.getDireccion().length() > 255) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "La dirección no puede superar los 255 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaRequest.getTelefono() != null && empresaRequest.getTelefono().length() > 100) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El teléfono no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			MultipartFile logo = empresaRequest.getLogo();
+			String nombreArchivo = null;
+			if (logo != null && !logo.isEmpty() && logo.getOriginalFilename() != null) {
+				nombreArchivo = logo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+				if (nombreArchivo.length() > 245) { // logo varchar(245)
+					return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre del archivo del logo es demasiado largo (máximo 245 caracteres)", null, LocalDateTime.now(), "400"));
+				}
+			}
 			Empresa empresa = convertirDtoAEntidad(empresaRequest);
 			boolean existeCuit = empresaRepository.existsByCuit(empresaRequest.getCuit());
 			if (existeCuit) {
@@ -48,32 +87,25 @@ public class EmpresaServiceImpl implements EmpresaService {
 						new ResponseRest<>(false, "El email ya está registrado", null, LocalDateTime.now(), "400"));
 			}
 			
-			String baseDir = uploadDir.endsWith(File.separator)
-			        ? uploadDir
-			        : uploadDir + File.separator;
-
-			String logoDir = baseDir + "logos" + File.separator;
-			File directorioLogo = new File(logoDir);
-			if (!directorioLogo.exists()) {
-			    directorioLogo.mkdirs();
-			}
-			MultipartFile logo = empresaRequest.getLogo();
 			if (logo != null && !logo.isEmpty()) {
-			    String nombreArchivo = logo.getOriginalFilename()
-			            .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			    File archivoLogo = new File(logoDir + nombreArchivo);
-			    logo.transferTo(archivoLogo);
+				String baseDir = uploadDir.endsWith(File.separator) ? uploadDir : uploadDir + File.separator;
+				String logoDir = baseDir + "logos" + File.separator;
+				File directorioLogo = new File(logoDir);
+				if (!directorioLogo.exists()) {
+					directorioLogo.mkdirs();
+				}
+				File archivoLogo = new File(logoDir + nombreArchivo);
+				logo.transferTo(archivoLogo);
+				empresa.setLogo(nombreArchivo);
 			}
 			Empresa empresaCreate = empresaRepository.save(empresa);
 			response = new ResponseRest<>(true, "Empresa creada satisfactoriamente", empresaCreate, LocalDateTime.now(),"200");
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
 		} catch (Exception e) {
-			if (e.getMessage().contains("Duplicate")) {
-				response = new ResponseRest<>(false, "El email o CUIT ya está registrado", null, LocalDateTime.now(),
-						"400");
+			if (e.getMessage() != null && e.getMessage().contains("Duplicate")) {
+				response = new ResponseRest<>(false, "El email o CUIT ya está registrado", null, LocalDateTime.now(), "400");
 			} else {
-				response = new ResponseRest<>(false, "Error interno: " + e.getMessage(), null, LocalDateTime.now(),
-						"500");
+				response = new ResponseRest<>(false, "Error interno: " + e.getMessage(), null, LocalDateTime.now(), "500");
 			}
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
@@ -82,12 +114,56 @@ public class EmpresaServiceImpl implements EmpresaService {
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> updateEmpresa(Long id, EmpresaRequest empresaDetails) {
 		try {
+			// 1. VALIDACIÓN DE FORMATO DE CORREO
+			if (empresaDetails.getEmail() == null || empresaDetails.getEmail().trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El correo electrónico es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+			if (!empresaDetails.getEmail().matches(emailRegex)) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El formato del correo electrónico no es válido", null, LocalDateTime.now(), "400"));
+			}
+
+			// 2. VALIDACIÓN DE LONGITUD DE CUIT (11 dígitos numéricos exigidos por el tipo bigint)
+			if (empresaDetails.getCuit() == null) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El CUIT es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			String cuitString = String.valueOf(empresaDetails.getCuit());
+			if (cuitString.length() != 11) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El CUIT debe tener exactamente 11 dígitos", null, LocalDateTime.now(), "400"));
+			}
+
+			if (empresaDetails.getNombre() == null || empresaDetails.getNombre().trim().isEmpty()) {
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre de la empresa es obligatorio", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaDetails.getNombre().length() > 100) { // nombre varchar(100)
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre de la empresa no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaDetails.getEmail().length() > 100) { // email varchar(100)
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El correo electrónico no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaDetails.getDireccion() != null && empresaDetails.getDireccion().length() > 255) { // direccion varchar(255)
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "La dirección no puede superar los 255 caracteres", null, LocalDateTime.now(), "400"));
+			}
+			if (empresaDetails.getTelefono() != null && empresaDetails.getTelefono().length() > 100) { // telefono varchar(100)
+				return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El teléfono no puede superar los 100 caracteres", null, LocalDateTime.now(), "400"));
+			}
+
+			MultipartFile logo = empresaDetails.getLogo();
+			if (logo != null && !logo.isEmpty() && logo.getOriginalFilename() != null) {
+				String nombreArchivoVerificar = logo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+				if (nombreArchivoVerificar.length() > 245) { // logo varchar(245)
+					return ResponseEntity.badRequest().body(new ResponseRest<>(false, "El nombre del archivo del logo es demasiado largo (máximo 245 caracteres)", null, LocalDateTime.now(), "400"));
+				}
+			}
+
+			// Lógica original de actualización
 			boolean existe = empresaRepository.findByIdEmpresa(id);
 			if (!existe) {
 				ResponseRest<Empresa> response = new ResponseRest<>(false, "No se pudo actualizar la empresa", null,
 						LocalDateTime.now(), "400");
 				return ResponseEntity.badRequest().body(response);
 			}
+			
 			Empresa empresaUpdate = empresaRepository.findById(id).get();
 			Rubro rubro = rubroService.findRubroEmpresa(empresaDetails.getIdRubro());
 			empresaUpdate.setCuit(empresaDetails.getCuit());
@@ -98,8 +174,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 			empresaUpdate.setNombre(empresaDetails.getNombre());
 			empresaUpdate.setObservaciones(empresaDetails.getObservaciones());
 			empresaUpdate.setRubro(rubro);
-			
-			MultipartFile logo = empresaDetails.getLogo();
+			// Procesamiento físico del archivo si se seleccionó uno nuevo
 			if (logo != null && !logo.isEmpty()) {
 			    String baseDir = uploadDir.endsWith(File.separator)
 			            ? uploadDir
@@ -113,6 +188,8 @@ public class EmpresaServiceImpl implements EmpresaService {
 			            .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
 			    File archivoLogo = new File(logoDir + nombreArchivo);
 			    logo.transferTo(archivoLogo);
+			    
+			    // Actualiza el campo en la base de datos con el nuevo nombre sanitizado
 			    empresaUpdate.setLogo(nombreArchivo);
 			}
 			
@@ -128,24 +205,29 @@ public class EmpresaServiceImpl implements EmpresaService {
 		}
 	}
 
+
 	public Empresa convertirDtoAEntidad(EmpresaRequest dto) {
-		try {
-			Empresa empresa = new Empresa();
-			empresa.setNombre(dto.getNombre());
-			empresa.setDireccion(dto.getDireccion());
-			empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
-			empresa.setObservaciones(dto.getObservaciones());
-			empresa.setTelefono(dto.getTelefono());
-			empresa.setCuit(dto.getCuit());
-			empresa.setEmail(dto.getEmail());
-			empresa.setLogo(dto.getNombre());
-			Rubro rubro = rubroService.findRubro(dto.getIdRubro());
-			empresa.setRubro(rubro);	
-			return empresa;
-		} catch (Exception e) {
-			return null;
+		Empresa empresa = new Empresa();
+		empresa.setNombre(dto.getNombre());
+		empresa.setDireccion(dto.getDireccion());
+		empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
+		empresa.setObservaciones(dto.getObservaciones());
+		empresa.setTelefono(dto.getTelefono());
+		empresa.setCuit(dto.getCuit());
+		empresa.setEmail(dto.getEmail());
+		if (dto.getLogo() != null && !dto.getLogo().isEmpty() && dto.getLogo().getOriginalFilename() != null) {
+		    String nombreArchivoSanitizado = dto.getLogo().getOriginalFilename()
+		            .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+		    empresa.setLogo(nombreArchivoSanitizado);
 		}
-	}
+		Rubro rubro = rubroService.findRubro(dto.getIdRubro());
+		if (rubro == null) {
+		    throw new IllegalArgumentException("El rubro no existe");
+		}
+		empresa.setRubro(rubro);	
+		return empresa;
+}
+
 
 	@Override
 	public ResponseEntity<ResponseRest<Empresa>> deleteEmpresa(Long id) {

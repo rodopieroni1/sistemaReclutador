@@ -3,13 +3,9 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.sistemaReclutador.sistemaReclutador.Enum.ResultadosAplicacion;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
@@ -30,8 +26,6 @@ public class AplicacionServiceImpl implements AplicacionService {
 	@Autowired
 	OfertaRepository ofertaRepository;
 
-	private static final Logger log = LoggerFactory.getLogger(AplicacionServiceImpl.class);
-
 	@Transactional
 	@Override
 	public AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest) {
@@ -39,16 +33,12 @@ public class AplicacionServiceImpl implements AplicacionService {
 		if (aplicacionRequest.getIdPerfil() == null || aplicacionRequest.getIdPerfil().getId_perfil() == null) {
 			return new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_INVALIDO, "Debe indicar un perfil válido.");
 		}
-		
 		Optional<Perfil> perfilOpt = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil());
-		
 		if (perfilOpt.isEmpty()) {
 			return new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_NO_ENCONTRADO,
 					"El perfil indicado no existe.");
 		}
-		
 		if (aplicacionRequest.getIdOferta() == null || aplicacionRequest.getIdOferta().getIdOferta() == null) {
-
 			return new AplicacionResponseDTO(ResultadosAplicacion.OFERTA_INVALIDA, "Debe indicar una oferta válida.");
 		}
 		
@@ -61,7 +51,7 @@ public class AplicacionServiceImpl implements AplicacionService {
 		Perfil perfil = perfilOpt.get();
 		Oferta oferta = ofertaOpt.get();
 
-		Optional<Aplicacion> aplicacionOpt = aplicacionRepository.findByPerfilAndOferta(perfil, oferta);
+		Optional<Aplicacion> aplicacionOpt = aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta());
 
 		if (aplicacionOpt.isPresent()) {
 			Aplicacion aplicacionExistenteRecuperada = aplicacionOpt.get();
@@ -103,7 +93,6 @@ public class AplicacionServiceImpl implements AplicacionService {
 	public List<Object[]> obtenerAplicacionesPerfil(int idPerfil) {
 		List<Object[]> listadoAplicaciones = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
 		if (listadoAplicaciones != null) {
-			log.info("Aqui" + listadoAplicaciones);
 			return listadoAplicaciones;
 		} else {
 			return null;
@@ -124,13 +113,10 @@ public class AplicacionServiceImpl implements AplicacionService {
 	public List<Aplicacion> findAllDesc() {
 		try {
 			List<Aplicacion> aplicaciones = aplicacionRepository.findAllDesc();
-
 			if (aplicaciones == null || aplicaciones.isEmpty()) {
 				return null;
 			}
-
 			return aplicaciones;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -141,13 +127,10 @@ public class AplicacionServiceImpl implements AplicacionService {
 	public List<Aplicacion> findAllDescActivas() {
 		try {
 			List<Aplicacion> aplicaciones = aplicacionRepository.findAllDescActivas();
-
 			if (aplicaciones == null || aplicaciones.isEmpty()) {
 				return null;
 			}
-
 			return aplicaciones;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -157,13 +140,10 @@ public class AplicacionServiceImpl implements AplicacionService {
 	@Override
 	public void deleteById(int id) {
 		try {
-
 			if (!aplicacionRepository.existsById(id)) {
 				return;
 			}
-
 			aplicacionRepository.deleteById(id);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

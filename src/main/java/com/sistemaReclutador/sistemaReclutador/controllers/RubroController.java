@@ -2,6 +2,7 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import com.sistemaReclutador.sistemaReclutador.dto.RubroRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
+import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.RubroService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,12 @@ public class RubroController {
     }
 
     @PostMapping("/crear")
-    public  ResponseEntity<Rubro> createRubro(@RequestBody RubroRequest rubro) {
-         rubroService.crearRubro(rubro);
-         return null;
+    public  ResponseEntity<ResponseRest<Rubro>> createRubro(@RequestBody RubroRequest rubro) {
+         return rubroService.crearRubro(rubro);
     }
 
     @PutMapping("/actualizar/{id}")
-    public ResponseEntity<Rubro> updateRubro(@PathVariable int id, @RequestBody RubroRequest rubro) {
+    public ResponseEntity<ResponseRest<Rubro>> updateRubro(@PathVariable int id, @RequestBody RubroRequest rubro) {
         return rubroService.actualizarRubro(id, rubro);
     }
 

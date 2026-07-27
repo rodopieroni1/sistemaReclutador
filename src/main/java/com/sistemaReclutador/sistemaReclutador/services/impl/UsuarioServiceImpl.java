@@ -34,7 +34,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	public ResponseEntity<?> login(LoginRequest credential) {
-		ResponseRest<Oferta> response;
 		try {
 			Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
 			if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
