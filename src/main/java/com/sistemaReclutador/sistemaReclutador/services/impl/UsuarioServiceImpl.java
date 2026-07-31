@@ -37,7 +37,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 		try {
 			Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
 			if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
-				String token = jwtUtil.generateToken(user.get().getNombre());
+				String token = jwtUtil.generateTokenUsuario(user.get().getNombre());
 				return ResponseEntity.ok().body(Map.of("token", token));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));

@@ -21,7 +21,6 @@ public class AplicacionController {
 	@Autowired
 	private AplicacionService aplicacionService;
 	
-
 	@GetMapping
 	public List<Aplicacion> getAllAplicaciones() {
 		return aplicacionService.findAllDesc();

@@ -22,6 +22,7 @@ public interface PerfilService {
 	ResponseEntity<Perfil> obtenerPerfilPorName(String name);
 	Perfil findById(int id);
 	ResponseEntity<List<Perfil>> listarPerfiles();
+	void cerrarSesion(String clave);
 
 
 }
