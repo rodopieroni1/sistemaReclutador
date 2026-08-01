@@ -44,6 +44,9 @@ public class PerfilServiceImpl implements PerfilService {
 
 	@Value("${app.upload.dir}")
 	private String uploadDir;
+	
+	@Value("${app.api.front}")
+	private String apiFront;
 
 	@Bean(name = "customPasswordEncoder")
 	public PasswordEncoder passwordEncoder() {
@@ -274,35 +277,54 @@ public class PerfilServiceImpl implements PerfilService {
 
 	@Override
 	public ResponseEntity<?> olvideContraseña(Map<String, String> body) {
-		String clave = body.get("email");
-		Optional<Perfil> perfilOpt = perfilRepository.findByEmail(clave);
-		if (perfilOpt.isPresent()) {
-			Perfil perfil = perfilOpt.get();
-			String token = UUID.randomUUID().toString();
-			PasswordResetToken resetToken = new PasswordResetToken();
-			resetToken.setToken(token);
-			resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
-			resetToken.setPerfil(perfil);
-			tokenRepository.save(resetToken);
-			String resetLink = "http://localhost:4200/reset-password?token=" + token;
-			emailService.send(perfil.getEmail(), "Recuperación de contraseña",
-					"ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: "
-							+ resetLink);
-			return ResponseEntity.ok(Map.of("message", "Si el usuario existe, se envió el enlace"));
+		String clave = body.get("clave");
+		String email = body.get("email");
+		Optional<Perfil> perfilOpt = perfilRepository.findByEmail(clave, email);
+		try {
+			if (perfilOpt.isPresent()) {
+				Perfil perfil = perfilOpt.get();
+				PasswordResetToken tokenExistente =  tokenRepository.findByPerfil(perfil).orElse(null);
+				if (tokenExistente != null) {
+				    tokenExistente.setToken(UUID.randomUUID().toString());
+				    tokenExistente.setExpiryDate(LocalDateTime.now().plusHours(1));
+				    tokenRepository.save(tokenExistente);
+				    String resetLink = apiFront + "/reset-password?token=" + tokenExistente.getToken();
+				    emailService.send(perfil.getEmail(), "Recuperación de contraseña",
+							"ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: "
+									+ resetLink);
+					return ResponseEntity.ok(Map.of("message", "Se envió el enlace al mail ingresado"));
+				} else {
+				    PasswordResetToken token = new PasswordResetToken();
+				    token.setPerfil(perfil);
+				    token.setToken(UUID.randomUUID().toString());
+				    token.setExpiryDate(LocalDateTime.now().plusHours(1));
+				    tokenRepository.save(token);
+				    String resetLink = apiFront + "/reset-password?token=" + token.getToken();
+				    emailService.send(perfil.getEmail(), "Recuperación de contraseña",
+							"ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: "
+									+ resetLink);
+					return ResponseEntity.ok(Map.of("message", "Se envió el enlace al mail ingresado"));
+				}
+				
+				
+				
+			} else {
+				return ResponseEntity.ok(Map.of("message", "Esta clave no se corresponde al mail ingersado"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.ok(Map.of("message", "Ocurrio un error inespeado"));
 		}
-		return ResponseEntity.ok(Map.of("message", "Si el usuario existe, se envió el enlace"));
 	}
 
 	@Override
 	public ResponseEntity<?> resetearContraseña(Map<String, String> body) {
 		String token = body.get("token");
 		String newPassword = body.get("newPassword");
-
 		Optional<PasswordResetToken> tokenOpt = tokenRepository.findByToken(token);
 		if (tokenOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Token inválido"));
 		}
-
 		PasswordResetToken resetToken = tokenOpt.get();
 		if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Token expirado"));

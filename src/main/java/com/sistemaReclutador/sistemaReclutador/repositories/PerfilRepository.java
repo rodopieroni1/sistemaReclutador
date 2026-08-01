@@ -22,11 +22,11 @@ public interface PerfilRepository extends JpaRepository<Perfil, Integer> {
 
     Optional<Perfil> findByClave(String clave);
 
-    @Query("SELECT p FROM Perfil p WHERE p.email = :email")
-    Optional<Perfil> findByEmail(String email);
+    @Query("SELECT p FROM Perfil p WHERE p.clave= :clave AND p.email = :email")
+    Optional<Perfil> findByEmail(String clave, String email);
     
     @Query("SELECT p FROM Perfil p WHERE p.email = :email")
-    Optional<Perfil> findBy (String email);
+    Optional<Perfil> findByEmail (String email);
     
     
     @Query("SELECT p FROM Perfil p WHERE p.clave = :clave OR p.email = :email OR p.dni = :dni")
