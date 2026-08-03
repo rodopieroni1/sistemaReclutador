@@ -254,10 +254,10 @@ public class PerfilServiceImpl implements PerfilService {
 					Duration tiempoSinActividad = Duration.between(ultimaActividad, LocalDateTime.now());
 					// Si hace menos de 5 minutos que hubo actividad,
 					// no permitimos un nuevo login
-					if (tiempoSinActividad.toMinutes() < 5) {
-						long minutosRestantes = 5 - tiempoSinActividad.toMinutes();
+					if (tiempoSinActividad.toMinutes() < 1) {
+						long minutosRestantes = 1 - tiempoSinActividad.toMinutes();
 						return ResponseEntity.status(HttpStatus.CONFLICT)
-								.body(Map.of("error", "Ya existe una sesión activa para este usuario, o Espere 5 minutos, si no CERRO CORRECTAMENTE la sesion anterior",
+								.body(Map.of("error", "Ya existe una sesión activa para este usuario, o Espere 1 minuto, si no CERRO CORRECTAMENTE la sesion anterior",
 										"minutosRestantes", minutosRestantes));
 					}
 				}
