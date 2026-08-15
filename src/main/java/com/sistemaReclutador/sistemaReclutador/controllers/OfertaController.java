@@ -23,7 +23,7 @@ public class OfertaController {
 		return ofertaService.findAllOfertas();
 	}
 
-	@GetMapping("/todas")
+	@GetMapping("/todas/activas")
 	public List<Oferta> getAllOfertasDesc() {
 		return ofertaService.findAllOfertasActivas();
 	}

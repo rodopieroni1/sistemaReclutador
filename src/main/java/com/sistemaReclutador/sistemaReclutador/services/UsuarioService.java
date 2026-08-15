@@ -8,7 +8,6 @@ import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 
-@Service
 public interface UsuarioService {
 	ResponseEntity<?> login(LoginRequest credential);
 	List<Usuario> findAll();

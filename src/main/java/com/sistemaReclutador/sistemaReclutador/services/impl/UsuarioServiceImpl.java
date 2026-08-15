@@ -25,8 +25,14 @@ import java.util.Optional;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
+	
 	private UsuarioRepository usuarioRepository;
 	private JwtUtil jwtUtil;
+	
+	 public UsuarioServiceImpl(UsuarioRepository usuarioRepository, JwtUtil jwtUtil) {
+	        this.usuarioRepository = usuarioRepository;
+	        this.jwtUtil = jwtUtil;
+	    }
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
