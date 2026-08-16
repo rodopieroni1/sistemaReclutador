@@ -137,33 +137,96 @@ public class OfertaServiceImpl implements OfertaService {
 
 	@Override
 	public ResponseEntity<ResponseRest<Oferta>> saveOferta(OfertaRequest ofertaDetail) {
-		ResponseRest<Oferta> response;
-		try {
-			if (ofertaDetail == null) {
-				response = new ResponseRest<>(false, "Los datos de la oferta son nulos", null, LocalDateTime.now(),
-						"400");
-				return ResponseEntity.badRequest().body(response);
-			}
-			Oferta oferta = convertirDtoAEntidad(ofertaDetail);
-			if (oferta == null) {
-				response = new ResponseRest<>(false, "No fue posible convertir el DTO", null, LocalDateTime.now(),
-						"400");
-				return ResponseEntity.badRequest().body(response);
-			}
-			Oferta ofertaCreate = ofertaRepository.save(oferta);
-			if (ofertaCreate == null) {
-				response = new ResponseRest<>(false, "No se pudo crear la oferta", null, LocalDateTime.now(), "400");
-				return ResponseEntity.badRequest().body(response);
-			}
-			response = new ResponseRest<>(true, "Oferta creada satisfactoriamente", ofertaCreate, LocalDateTime.now(),
-					"200");
-			return ResponseEntity.status(HttpStatus.CREATED).body(response);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response = new ResponseRest<>(false, "Ocurrió un error al crear la oferta: " + e.getMessage(), null,
-					LocalDateTime.now(), "500");
-			return ResponseEntity.internalServerError().body(response);
-		}
+	    ResponseRest<Oferta> response;
+
+	    try {
+	        if (ofertaDetail == null) {
+	            response = new ResponseRest<>(
+	                    false,
+	                    "Los datos de la oferta son nulos",
+	                    null,
+	                    LocalDateTime.now(),
+	                    "400"
+	            );
+	            return ResponseEntity.badRequest().body(response);
+	        }
+
+	        Oferta oferta = convertirDtoAEntidad(ofertaDetail);
+
+	        if (oferta == null) {
+	            response = new ResponseRest<>(
+	                    false,
+	                    "No fue posible convertir el DTO",
+	                    null,
+	                    LocalDateTime.now(),
+	                    "400"
+	            );
+	            return ResponseEntity.badRequest().body(response);
+	        }
+
+	        // Procesar imagen
+	        MultipartFile foto = ofertaDetail.getFotoArchivo();
+
+	        if (foto != null && !foto.isEmpty()) {
+
+	            // Limpiar el nombre del archivo
+	            String fileFoto = foto.getOriginalFilename()
+	                    .replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+
+	            // Crear carpeta uploads\ofertas si no existe
+	            File ofertaDir = new File(uploadDir + "ofertas/");
+
+	            if (!ofertaDir.exists()) {
+	                ofertaDir.mkdirs();
+	            }
+
+	            // Archivo destino
+	            File fotoFile = new File(ofertaDir, fileFoto);
+
+	            // Copiar físicamente la imagen
+	            foto.transferTo(fotoFile);
+
+	            // Guardar solamente el nombre en la BD
+	            oferta.setFotoOferta(fileFoto);
+	        }
+
+	        // Guardar oferta en BD
+	        Oferta ofertaCreate = ofertaRepository.save(oferta);
+
+	        if (ofertaCreate == null) {
+	            response = new ResponseRest<>(
+	                    false,
+	                    "No se pudo crear la oferta",
+	                    null,
+	                    LocalDateTime.now(),
+	                    "400"
+	            );
+	            return ResponseEntity.badRequest().body(response);
+	        }
+
+	        response = new ResponseRest<>(
+	                true,
+	                "Oferta creada satisfactoriamente",
+	                ofertaCreate,
+	                LocalDateTime.now(),
+	                "200"
+	        );
+
+	        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+
+	        response = new ResponseRest<>(
+	                false,
+	                "Ocurrió un error al crear la oferta: " + e.getMessage(),
+	                null,
+	                LocalDateTime.now(),
+	                "500"
+	        );
+
+	        return ResponseEntity.internalServerError().body(response);
+	    }
 	}
 
 	@Override
