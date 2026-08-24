@@ -87,17 +87,23 @@ public class EmpresaServiceImpl implements EmpresaService {
 						new ResponseRest<>(false, "El email ya está registrado", null, LocalDateTime.now(), "400"));
 			}
 			
+			// REEMPLAZA TU BLOQUE DE LOGO ACTUAL POR ESTE:
 			if (logo != null && !logo.isEmpty()) {
-				String baseDir = uploadDir.endsWith(File.separator) ? uploadDir : uploadDir + File.separator;
-				String logoDir = baseDir + "logos" + File.separator;
-				File directorioLogo = new File(logoDir);
-				if (!directorioLogo.exists()) {
-					directorioLogo.mkdirs();
-				}
-				File archivoLogo = new File(logoDir + nombreArchivo);
-				logo.transferTo(archivoLogo);
+				// 1. Usamos Path y Paths.get para que Java maneje las barras de forma nativa e inteligente
+				java.nio.file.Path baseRuta = java.nio.file.Paths.get(uploadDir, "logos").normalize();
+				
+				// 2. Creamos los directorios de forma segura si no existen
+				java.nio.file.Files.createDirectories(baseRuta);
+				
+				// 3. Definimos la ruta absoluta final del archivo
+				java.nio.file.Path archivoDestino = baseRuta.resolve(nombreArchivo).normalize();
+				
+				// 4. Guardamos el archivo usando Files.copy (es mucho más robusto en Docker que transferTo)
+				java.nio.file.Files.copy(logo.getInputStream(), archivoDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+				
 				empresa.setLogo(nombreArchivo);
 			}
+
 			Empresa empresaCreate = empresaRepository.save(empresa);
 			response = new ResponseRest<>(true, "Empresa creada satisfactoriamente", empresaCreate, LocalDateTime.now(),"200");
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
