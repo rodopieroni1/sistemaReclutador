@@ -1,6 +1,11 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -78,26 +83,14 @@ public class PerfilServiceImpl implements PerfilService {
 			if (!directorioCV.exists()) {
 				directorioCV.mkdirs();
 			}
-			// === REEMPLAZAR DESDE AQUÍ (Manejo seguro de archivos en Docker/AWS) ===
 			String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
 			String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-
-			// Rutas usando NIO Path para evitar conflictos de barras entre Windows y Linux
-			java.nio.file.Path rutaFotosDir = java.nio.file.Paths.get(uploadDir, "fotos").normalize();
-			java.nio.file.Path rutaDocumentosDir = java.nio.file.Paths.get(uploadDir, "documentos").normalize();
-
-			// Crear carpetas físicas si no existen
-			java.nio.file.Files.createDirectories(rutaFotosDir);
-			java.nio.file.Files.createDirectories(rutaDocumentosDir);
-
-			// Rutas absolutas de los archivos finales
-			java.nio.file.Path archivoFotoDestino = rutaFotosDir.resolve(fileFoto).normalize();
-			java.nio.file.Path archivoCVDestino = rutaDocumentosDir.resolve(fileCV).normalize();
-
-			// Guardado robusto en disco/volumen Docker
-			java.nio.file.Files.copy(foto.getInputStream(), archivoFotoDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-			java.nio.file.Files.copy(uploadcv.getInputStream(), archivoCVDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-			// === HASTA AQUÍ ===
+			Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
+			Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
+			Files.createDirectories(rutaFotosDir);
+			Files.createDirectories(rutaDocumentosDir);
+			Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
 
 
 			Perfil perfil = new Perfil();
@@ -145,22 +138,22 @@ public class PerfilServiceImpl implements PerfilService {
 			perfil.setEmail(email);
 			perfil.setClave(clave);
 
-			// Guardar archivos si llegan nuevos (Versión corregida para Docker)
 			if (foto != null && !foto.isEmpty()) {
-				String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				java.nio.file.Path rutaFotosDir = java.nio.file.Paths.get(uploadDir, "fotos").normalize();
-				java.nio.file.Files.createDirectories(rutaFotosDir);
-				java.nio.file.Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-				perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
+			    String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
+			    Files.createDirectories(rutaFotosDir);
+			    Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
+			    perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
 			}
-			
+
 			if (uploadcv != null && !uploadcv.isEmpty()) {
-				String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				java.nio.file.Path rutaDocumentosDir = java.nio.file.Paths.get(uploadDir, "documentos").normalize();
-				java.nio.file.Files.createDirectories(rutaDocumentosDir);
-				java.nio.file.Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-				perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
+			    String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
+			    Files.createDirectories(rutaDocumentosDir);
+			    Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
+			    perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
 			}
+
 
 			perfilRepository.save(perfil);
 			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
