@@ -21,7 +21,6 @@ public class AplicacionController {
 	@Autowired
 	private AplicacionService aplicacionService;
 	
-
 	@GetMapping
 	public List<Aplicacion> getAllAplicaciones() {
 		return aplicacionService.findAllDesc();
@@ -40,12 +39,6 @@ public class AplicacionController {
 	@PostMapping
 	public AplicacionResponseDTO createAplicacion(@RequestBody AplicacionRequest aplicacion) {
 		return aplicacionService.crearAplicacion(aplicacion);
-	}
-
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateAplicacion(@PathVariable int id, @RequestBody AplicacionRequest aplicacionDetails) {
-		aplicacionService.modificarOferta(id, aplicacionDetails);
-		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("/estado/{idPost}")

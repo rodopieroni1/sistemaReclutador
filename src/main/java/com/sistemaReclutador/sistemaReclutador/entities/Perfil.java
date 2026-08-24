@@ -1,5 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.entities;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +36,15 @@ public class Perfil {
 
     @Column(name = "email", nullable = true, length = 100, unique = true)
     private String email;
+    
+    @Column(name = "session_id")
+    private String sessionId;
+    
+    @Column(name = "fechaUltimaActividad")
+    private LocalDateTime fechaUltimaActividad;
+    
+    @Column(name = "ultimoDispositivo")
+    private String ultimoDispositivo;
     
     // Rutas de los archivos en el sistema de archivos
     @Column(name = "foto_url", length = 255)
@@ -111,9 +122,33 @@ public class Perfil {
         return documentoUrl;
     }
 
-    public void setDocumentoUrl(String documentoUrl) {
+    
+
+	public void setDocumentoUrl(String documentoUrl) {
         this.documentoUrl = documentoUrl;
     }
+	
+	public String getSessionId() {
+		return sessionId;
+	}
 
-    // Otros getters y setters
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public LocalDateTime getFechaUltimaActividad() {
+		return fechaUltimaActividad;
+	}
+
+	public void setFechaUltimaActividad(LocalDateTime fechaUltimaActividad) {
+		this.fechaUltimaActividad = fechaUltimaActividad;
+	}
+
+	public String getUltimoDispositivo() {
+		return ultimoDispositivo;
+	}
+
+	public void setUltimoDispositivo(String ultimoDispositivo) {
+		this.ultimoDispositivo = ultimoDispositivo;
+	}
 }

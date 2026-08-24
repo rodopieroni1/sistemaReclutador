@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +30,28 @@ public class PerfilController {
 	@Autowired
 	private PerfilService perfilService;
 	
+	@GetMapping("/auth/ping")
+	public ResponseEntity<?> ping() {
+	    return ResponseEntity.ok().build();
+	}
+	
 	@PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
         return perfilService.loginUsuario(credential);
     }
+	
+	@PostMapping("/auth/logout")
+	public ResponseEntity<?> logout(Authentication authentication) {
+		System.out.println("===== LOGOUT =====");
+	    System.out.println("Authentication: " + authentication);
+	    if (authentication != null) {
+	        System.out.println("Usuario: " + authentication.getName());
+	        perfilService.cerrarSesion(authentication.getName());
+	    } else {
+	        System.out.println("Authentication es NULL");
+	    }
+	    return ResponseEntity.ok(Map.of("mensaje", "Sesión cerrada"));
+	}
 		
 	@GetMapping("/name/{name}")
 	public ResponseEntity<Perfil> obtenerPerfilPorName(@PathVariable String name) {

@@ -25,8 +25,14 @@ import java.util.Optional;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
+	
 	private UsuarioRepository usuarioRepository;
 	private JwtUtil jwtUtil;
+	
+	 public UsuarioServiceImpl(UsuarioRepository usuarioRepository, JwtUtil jwtUtil) {
+	        this.usuarioRepository = usuarioRepository;
+	        this.jwtUtil = jwtUtil;
+	    }
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -34,11 +40,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	public ResponseEntity<?> login(LoginRequest credential) {
-		ResponseRest<Oferta> response;
 		try {
 			Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
 			if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
-				String token = jwtUtil.generateToken(user.get().getNombre());
+				String token = jwtUtil.generateTokenUsuario(user.get().getNombre());
 				return ResponseEntity.ok().body(Map.of("token", token));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));

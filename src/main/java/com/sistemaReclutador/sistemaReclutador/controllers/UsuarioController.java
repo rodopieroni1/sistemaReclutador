@@ -18,8 +18,6 @@ import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
 
-
-
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -32,7 +30,6 @@ public class UsuarioController {
 	public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
 	    return usuarioService.login(credential);
 	}
-
 
 	@GetMapping
     public List<Usuario> getAllUsuarios() {
