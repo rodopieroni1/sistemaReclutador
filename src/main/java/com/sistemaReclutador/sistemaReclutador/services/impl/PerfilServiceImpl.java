@@ -78,12 +78,27 @@ public class PerfilServiceImpl implements PerfilService {
 			if (!directorioCV.exists()) {
 				directorioCV.mkdirs();
 			}
+			// === REEMPLAZAR DESDE AQUÍ (Manejo seguro de archivos en Docker/AWS) ===
 			String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
 			String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			File saveFileFoto = new File(fotoDir + fileFoto);
-			File saveFileCV = new File(cvDir + fileCV);
-			foto.transferTo(saveFileFoto.getAbsoluteFile());
-			uploadcv.transferTo(saveFileCV.getAbsoluteFile());
+
+			// Rutas usando NIO Path para evitar conflictos de barras entre Windows y Linux
+			java.nio.file.Path rutaFotosDir = java.nio.file.Paths.get(uploadDir, "fotos").normalize();
+			java.nio.file.Path rutaDocumentosDir = java.nio.file.Paths.get(uploadDir, "documentos").normalize();
+
+			// Crear carpetas físicas si no existen
+			java.nio.file.Files.createDirectories(rutaFotosDir);
+			java.nio.file.Files.createDirectories(rutaDocumentosDir);
+
+			// Rutas absolutas de los archivos finales
+			java.nio.file.Path archivoFotoDestino = rutaFotosDir.resolve(fileFoto).normalize();
+			java.nio.file.Path archivoCVDestino = rutaDocumentosDir.resolve(fileCV).normalize();
+
+			// Guardado robusto en disco/volumen Docker
+			java.nio.file.Files.copy(foto.getInputStream(), archivoFotoDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			java.nio.file.Files.copy(uploadcv.getInputStream(), archivoCVDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			// === HASTA AQUÍ ===
+
 
 			Perfil perfil = new Perfil();
 			perfil.setClave(clave);
@@ -130,23 +145,23 @@ public class PerfilServiceImpl implements PerfilService {
 			perfil.setEmail(email);
 			perfil.setClave(clave);
 
-			// Guardar archivos si llegan nuevos
+			// Guardar archivos si llegan nuevos (Versión corregida para Docker)
 			if (foto != null && !foto.isEmpty()) {
 				String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File fotoDir = new File(uploadDir + "fotos/");
-				fotoDir.mkdirs();
-				File fotoFile = new File(fotoDir, fileFoto);
-				foto.transferTo(fotoFile);
+				java.nio.file.Path rutaFotosDir = java.nio.file.Paths.get(uploadDir, "fotos").normalize();
+				java.nio.file.Files.createDirectories(rutaFotosDir);
+				java.nio.file.Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 				perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
 			}
+			
 			if (uploadcv != null && !uploadcv.isEmpty()) {
 				String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File cvDir = new File(uploadDir + "documentos/");
-				cvDir.mkdirs();
-				File cvFile = new File(cvDir, fileCV);
-				uploadcv.transferTo(cvFile);
+				java.nio.file.Path rutaDocumentosDir = java.nio.file.Paths.get(uploadDir, "documentos").normalize();
+				java.nio.file.Files.createDirectories(rutaDocumentosDir);
+				java.nio.file.Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 				perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
 			}
+
 			perfilRepository.save(perfil);
 			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
 		} catch (Exception e) {
