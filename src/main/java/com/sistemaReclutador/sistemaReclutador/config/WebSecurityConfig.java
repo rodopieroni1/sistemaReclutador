@@ -27,7 +27,9 @@ public class WebSecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll().requestMatchers("/login")
+						.requestMatchers("/uploads/documentos/**", "/uploads/fotos/**", "/uploads/logos/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+						.requestMatchers("/login")
 						.permitAll().requestMatchers("/aplicaciones").permitAll()
 						.requestMatchers("/aplicaciones/activas").permitAll()
 						.requestMatchers("/aplicaciones/{idPerfil}").permitAll()
@@ -93,6 +95,7 @@ public class WebSecurityConfig {
 					org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer configurer) {
 				configurer.mediaType("js", org.springframework.http.MediaType.valueOf("application/javascript"));
 				configurer.mediaType("css", org.springframework.http.MediaType.valueOf("text/css"));
+			    configurer.mediaType("docx", org.springframework.http.MediaType.valueOf("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
 			}
 		};
 	}
