@@ -1,6 +1,11 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,10 +85,13 @@ public class PerfilServiceImpl implements PerfilService {
 			}
 			String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
 			String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			File saveFileFoto = new File(fotoDir + fileFoto);
-			File saveFileCV = new File(cvDir + fileCV);
-			foto.transferTo(saveFileFoto.getAbsoluteFile());
-			uploadcv.transferTo(saveFileCV.getAbsoluteFile());
+			Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
+			Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
+			Files.createDirectories(rutaFotosDir);
+			Files.createDirectories(rutaDocumentosDir);
+			Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
+
 
 			Perfil perfil = new Perfil();
 			perfil.setClave(clave);
@@ -130,23 +138,23 @@ public class PerfilServiceImpl implements PerfilService {
 			perfil.setEmail(email);
 			perfil.setClave(clave);
 
-			// Guardar archivos si llegan nuevos
 			if (foto != null && !foto.isEmpty()) {
-				String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File fotoDir = new File(uploadDir + "fotos/");
-				fotoDir.mkdirs();
-				File fotoFile = new File(fotoDir, fileFoto);
-				foto.transferTo(fotoFile);
-				perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
+			    String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
+			    Files.createDirectories(rutaFotosDir);
+			    Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
+			    perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
 			}
+
 			if (uploadcv != null && !uploadcv.isEmpty()) {
-				String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-				File cvDir = new File(uploadDir + "documentos/");
-				cvDir.mkdirs();
-				File cvFile = new File(cvDir, fileCV);
-				uploadcv.transferTo(cvFile);
-				perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
+			    String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+			    Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
+			    Files.createDirectories(rutaDocumentosDir);
+			    Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
+			    perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
 			}
+
+
 			perfilRepository.save(perfil);
 			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
 		} catch (Exception e) {
