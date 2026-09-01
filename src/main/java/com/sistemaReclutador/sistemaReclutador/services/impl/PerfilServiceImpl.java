@@ -1,55 +1,44 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.time.*;
+import java.util.*;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.PerfilDTO;
 import com.sistemaReclutador.sistemaReclutador.entities.PasswordResetToken;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
+import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
 import com.sistemaReclutador.sistemaReclutador.repositories.PasswordResetTokenRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.EmailService;
 import com.sistemaReclutador.sistemaReclutador.services.PerfilService;
+import com.sistemaReclutador.sistemaReclutador.strategies.FileStorageStrategy;
+import com.sistemaReclutador.sistemaReclutador.strategies.PerfilStrategy;
 
-@Configuration
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
 public class PerfilServiceImpl implements PerfilService {
 
-	@Autowired
-	private PasswordResetTokenRepository tokenRepository;
-	private final JwtUtil jwtUtil = new JwtUtil();
-	@Autowired
-	private EmailService emailService;
-	@Autowired
-	private PerfilRepository perfilRepository;
-	// cambiar uando se haga el desliegue
-
-	@Value("${app.base.url}")
-	private String appBaseUrl;
-
-	@Value("${app.upload.dir}")
-	private String uploadDir;
+	private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
+    private final PerfilRepository perfilRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final FileStorageStrategy fileStorageService;
+    private final List<PerfilStrategy> validationStrategies; 
 	
+	// cambiar uando se haga el desliegue
 	@Value("${app.api.front}")
 	private String apiFront;
 
@@ -59,193 +48,68 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String clave,
-			String password, MultipartFile foto, MultipartFile uploadcv) {
+	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, 
+	                                           String clave, String password, MultipartFile foto, MultipartFile uploadcv) {
+	    
+	    PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, clave);
+	    validarDatosPerfil(dto);
+	    Perfil perfil = new Perfil();
+	    perfil.setNombre(nombre);
+	    perfil.setDni(dni);
+	    perfil.setDireccion(direccion);
+	    perfil.setEmail(email);
+	    perfil.setClave(clave);
+	    perfil.setPassword(passwordEncoder.encode(password));
 
-		try {
-			// Ejecutar validaciones (id = 0 significa creación)
-			Optional<ResponseEntity<String>> errorValidacion = validarDatosPerfil(0, nombre, dni, direccion, email,
-					clave);
-			if (errorValidacion.isPresent()) {
-				return errorValidacion.get();
-			}
+	    perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
+	    perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
 
-			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-			String hashedPassword = encoder.encode(password);
-			String baseDir = uploadDir.endsWith(File.separator) ? uploadDir : uploadDir + File.separator;
-			String fotoDir = baseDir + "fotos" + File.separator;
-			String cvDir = baseDir + "documentos" + File.separator;
-			File directorioFoto = new File(fotoDir);
-			if (!directorioFoto.exists()) {
-				directorioFoto.mkdirs();
-			}
-			File directorioCV = new File(cvDir);
-			if (!directorioCV.exists()) {
-				directorioCV.mkdirs();
-			}
-			String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
-			Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
-			Files.createDirectories(rutaFotosDir);
-			Files.createDirectories(rutaDocumentosDir);
-			Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
-
-
-			Perfil perfil = new Perfil();
-			perfil.setClave(clave);
-			perfil.setEmail(email);
-			perfil.setDni(dni);
-			perfil.setNombre(nombre);
-			perfil.setDireccion(direccion);
-			perfil.setPassword(hashedPassword);
-
-			perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
-			perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
-
-			perfilRepository.save(perfil);
-			return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("{\"error\":\"Error al guardar el perfil.\"}");
-		}
+	    perfilRepository.save(perfil);
+	    
+	    return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
 	}
 
-	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String email,
-			String clave, MultipartFile foto, MultipartFile uploadcv) {
-		try {
-			Optional<Perfil> perfilOpt = perfilRepository.findById(id);
-			if (perfilOpt.isEmpty()) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Perfil no encontrado\"}");
-			}
+	@Override
+	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, 
+	                                              String email, String clave, MultipartFile foto, MultipartFile uploadcv) {
+	
+	        Optional<Perfil> perfilOpt = perfilRepository.findById(id);
+	        if (perfilOpt.isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                    .body("{\"error\":\"Perfil no encontrado\"}");
+	        }
+	        PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, clave);
+	         validarDatosPerfil(dto);
 
-			try {
-				Optional<ResponseEntity<String>> errorValidacion = validarDatosPerfil(id, nombre, dni, direccion, email,
-						clave);
-				if (errorValidacion.isPresent()) {
-					return errorValidacion.get();
-				}
-			} catch (IllegalArgumentException e) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"" + e.getMessage() + "\"}");
-			}
-			Perfil perfil = perfilOpt.get();
-			perfil.setNombre(nombre);
-			perfil.setDni(dni);
-			perfil.setDireccion(direccion);
-			perfil.setEmail(email);
-			perfil.setClave(clave);
+	        Perfil perfil = perfilOpt.get();
+	        perfil.setNombre(nombre);
+	        perfil.setDni(dni);
+	        perfil.setDireccion(direccion);
+	        perfil.setEmail(email);
+	        perfil.setClave(clave);
 
-			if (foto != null && !foto.isEmpty()) {
-			    String fileFoto = foto.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			    Path rutaFotosDir = Paths.get(uploadDir, "fotos").normalize();
-			    Files.createDirectories(rutaFotosDir);
-			    Files.copy(foto.getInputStream(), rutaFotosDir.resolve(fileFoto), StandardCopyOption.REPLACE_EXISTING);
-			    perfil.setFotoUrl(appBaseUrl + "/uploads/fotos/" + fileFoto);
-			}
+	        if (foto != null && !foto.isEmpty()) {
+	            perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
+	        }
 
-			if (uploadcv != null && !uploadcv.isEmpty()) {
-			    String fileCV = uploadcv.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-			    Path rutaDocumentosDir = Paths.get(uploadDir, "documentos").normalize();
-			    Files.createDirectories(rutaDocumentosDir);
-			    Files.copy(uploadcv.getInputStream(), rutaDocumentosDir.resolve(fileCV), StandardCopyOption.REPLACE_EXISTING);
-			    perfil.setDocumentoUrl(appBaseUrl + "/uploads/documentos/" + fileCV);
-			}
+	        if (uploadcv != null && !uploadcv.isEmpty()) {
+	            perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
+	        }
 
-
-			perfilRepository.save(perfil);
-			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("{\"error\":\"Error al actualizar el perfil.\"}");
-		}
+	        perfilRepository.save(perfil);
+	        return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
 	}
 
-	private Optional<ResponseEntity<String>> validarDatosPerfil(Integer id, String nombre, String dni, String direccion,
-			String email, String clave) {
-		String regexEmail = "^[A-Za-z0-9+_.-]+@(.+)$";
-
-		// 1. Validaciones de DNI
-		if (dni != null && dni.length() > 20) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("{\"error\":\"El DNI no debe ser mayor de 20 caracteres.\"}"));
-		}
-		if (dni == null || !dni.matches("\\d+")) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					"{\"error\":\"El DNI debe contener solo números, no se permiten letras ni caracteres especiales.\"}"));
-		}
-
-		// Control de DNI Duplicado (Ignorando al propio usuario si es un update)
-		if (id == 0) { // CREATE
-			if (perfilRepository.existsByDni(dni)) {
-				return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("{\"error\":\"El DNI ya se encuentra registrado. ¡Verifique!\"}"));
-			}
-		} else { // UPDATE
-			Optional<Perfil> perfilExistente = perfilRepository.findByDni(dni);
-			if (perfilExistente.isPresent() && perfilExistente.get().getId_perfil() != id) {
-				return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("{\"error\":\"El DNI ya se encuentra registrado por otro usuario.\"}"));
-			}
-		}
-
-		// 2. Validaciones de Nombre
-		if (nombre != null && nombre.length() > 100) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("{\"error\":\"El Nombre no debe ser mayor de 100 caracteres.\"}"));
-		}
-
-		// 2. Validaciones de Direcciones
-		if (direccion != null && direccion.length() > 255) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("{\"error\":\"La direccion no debe ser mayor de 255 caracteres.\"}"));
-		}
-
-		// 3. Validaciones de Email
-		if (email != null && (!email.matches(regexEmail) || email.length() > 100)) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-					"{\"error\":\"El formato del correo electrónico no es válido o supera los 100 caracteres.\"}"));
-		}
-
-		// Control de Email Duplicado (Ignorando al propio usuario si es un update)
-		if (id == 0) { // CREATE
-			if (perfilRepository.existsByEmail(email)) {
-				return Optional
-						.of(ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"Email ya registrado\"}"));
-			}
-		} else { // UPDATE
-			Optional<Perfil> perfilExistenteEmail = perfilRepository.findByEmail(email);
-			if (perfilExistenteEmail.isPresent() && perfilExistenteEmail.get().getId_perfil() != id) {
-				return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("{\"error\":\"El Email ya se encuentra registrado por otro usuario.\"}"));
-			}
-		}
-
-		// 4. Validaciones de Clave / Usuario
-		if (id == 0) { // CREATE
-			if (perfilRepository.existsByClave(clave)) {
-				return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("{\"error\":\"Nombre de usuario ya registrado\"}"));
-			}
-		} else { // UPDATE
-			Optional<Perfil> perfilExistenteClave = perfilRepository.findByClave(clave);
-			if (perfilExistenteClave.isPresent() && perfilExistenteClave.get().getId_perfil() != id) {
-				return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("{\"error\":\"Nombre de usuario ya registrado por otro perfil.\"}"));
-			}
-
-		}
-		if (clave != null && clave.length() > 100) {
-			return Optional.of(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("{\"error\":\"La clave no debe ser mayor de 100 caracteres.\"}"));
-		}
-
-		return Optional.empty(); // Todo válido
+	private void validarDatosPerfil(PerfilDTO dto) {
+	    for (PerfilStrategy strategy : validationStrategies) {
+	        Optional<String> error = strategy.validar(dto, perfilRepository);
+	        if (error.isPresent()) {
+	            throw new IllegalArgumentException(error.get());
+	        }
+	    }
 	}
-
+	
+	
 	@Override
 	public ResponseEntity<?> eliminarPerfil(int id) {
 		perfilRepository.deleteById(id);
@@ -368,7 +232,7 @@ public class PerfilServiceImpl implements PerfilService {
 
 	@Override
 	public Perfil findById(int id) {
-		return perfilRepository.findById(id).orElse(null);
+	    return perfilRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Perfil con ID " + id + " no encontrado"));
 	}
 
 	@Override

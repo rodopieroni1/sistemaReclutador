@@ -1,48 +1,39 @@
 package com.sistemaReclutador.sistemaReclutador.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name="rubro")
+@Table(name = "rubro")
 public class Rubro {
-	public Rubro(int idRubro, String descripcionRubro) {
-		this.idRubro = idRubro;
-		this.descripcionRubro = descripcionRubro;
-	}
 
-	public Rubro(){}
-	
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "idRubro")
-	private int idRubro;
-	
+    @Column(name = "idRubro")
+    private Integer idRubro;
+
     @Column(name = "descripcionRubro")
-	private String descripcionRubro;
-		
+    private String descripcionRubro;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "rubro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Empresa> empresas = new ArrayList<>();
-    	
-	public int getIdRubro() {
-		return idRubro;
-	}
-	public void setIdRubro(int idRubro) {
-		this.idRubro = idRubro;
-	}
-	public String getDescripcionRubro() {
-		return descripcionRubro;
-	}
-	public void setDescripcionRubro(String descripcionRubro) {
-		this.descripcionRubro = descripcionRubro;
-	}
+
+    // Constructor personalizado explicito
+    public Rubro(Integer idRubro, String descripcionRubro) {
+        this.idRubro = idRubro;
+        this.descripcionRubro = descripcionRubro;
+        this.empresas = new ArrayList<>();
+    }
 }

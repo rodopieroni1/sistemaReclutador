@@ -1,15 +1,11 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/uploads/")
@@ -35,7 +31,7 @@ public class FileUploadController {
             File directorioBase = new File(uploadDir);
             String nombreOriginal = file.getOriginalFilename();
             
-            // 1. Clasificación del tipo de carpeta
+            // Clasificación del tipo de carpeta
             String subCarpeta = "documentos"; 
             if (tipo != null && tipo.equalsIgnoreCase("oferta")) {
                 subCarpeta = "ofertas"; 
@@ -45,26 +41,23 @@ public class FileUploadController {
                 subCarpeta = "fotos";
             }
             
-            // 2. Generar un nombre único para evitar repeticiones
+            // Generar un nombre único para evitar repeticiones
             // Limpiamos el nombre original de caracteres raros primero
             String nombreLimpio = nombreOriginal.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
             
             // Le agregamos un UUID único por delante: "UUID_nombre_limpio.jpg"
             String nombreUnico = java.util.UUID.randomUUID().toString() + "_" + nombreLimpio;
             
-            // 3. Apuntar al directorio destino
+            // Apuntar al directorio destino
             File directorioDestino = new File(directorioBase, subCarpeta);
             if (!directorioDestino.exists()) {
                 directorioDestino.mkdirs(); 
             }
 
-            // 4. Guardar físicamente el archivo con el nuevo NOMBRE ÚNICO
             File saveFile = new File(directorioDestino, nombreUnico);
             file.transferTo(saveFile);
             
-            System.out.println("=========================================");
-            System.out.println("¡GUARDADO REAL EN!: " + saveFile.getAbsolutePath());
-            System.out.println("=========================================");
+            System.out.println("GUARDADO EN: " + saveFile.getAbsolutePath());
 
             webSocketHandler.notifyClients(saveFile.getAbsolutePath());
             

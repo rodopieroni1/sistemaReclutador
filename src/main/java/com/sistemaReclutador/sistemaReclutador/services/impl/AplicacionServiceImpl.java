@@ -2,150 +2,130 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.sistemaReclutador.sistemaReclutador.Enum.ResultadosAplicacion;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
+import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
 import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
+import com.sistemaReclutador.sistemaReclutador.strategies.AplicacionesMiasStrategy;
+import com.sistemaReclutador.sistemaReclutador.validators.ValidacionAplicacionHandler;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class AplicacionServiceImpl implements AplicacionService {
-	@Autowired
-	AplicacionRepository aplicacionRepository;
-	@Autowired
-	PerfilRepository perfilRepository;
-	@Autowired
-	OfertaRepository ofertaRepository;
+
+	private final AplicacionRepository aplicacionRepository;
+	private final PerfilRepository perfilRepository;
+	private final OfertaRepository ofertaRepository;
+	private final Map<String, AplicacionesMiasStrategy> mappingStrategies;
+	private final List<ValidacionAplicacionHandler> validadores;
 
 	@Transactional
 	@Override
 	public AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest) {
+	    
+	    for (ValidacionAplicacionHandler validador : validadores) {
+	        Optional<AplicacionResponseDTO> error = validador.validar(aplicacionRequest);
+	        if (error.isPresent()) {
+	            return error.get();
+	        }
+	    }
+	    
+	    Perfil perfil = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil())
+	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró el perfil con ID: " + aplicacionRequest.getIdPerfil().getId_perfil()));
+	            
+	    Oferta oferta = ofertaRepository.findById(aplicacionRequest.getIdOferta().getIdOferta())
+	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + aplicacionRequest.getIdOferta().getIdOferta()));
 
-		if (aplicacionRequest.getIdPerfil() == null || aplicacionRequest.getIdPerfil().getId_perfil() == null) {
-			return new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_INVALIDO, "Debe indicar un perfil válido.");
-		}
-		Optional<Perfil> perfilOpt = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil());
-		if (perfilOpt.isEmpty()) {
-			return new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_NO_ENCONTRADO,
-					"El perfil indicado no existe.");
-		}
-		if (aplicacionRequest.getIdOferta() == null || aplicacionRequest.getIdOferta().getIdOferta() == null) {
-			return new AplicacionResponseDTO(ResultadosAplicacion.OFERTA_INVALIDA, "Debe indicar una oferta válida.");
-		}
-		
-		Optional<Oferta> ofertaOpt = ofertaRepository.findById(aplicacionRequest.getIdOferta().getIdOferta());
-		if (ofertaOpt.isEmpty()) {
-			return new AplicacionResponseDTO(ResultadosAplicacion.OFERTA_NO_ENCONTRADA,
-					"La oferta indicada no existe.");
-		}
-
-		Perfil perfil = perfilOpt.get();
-		Oferta oferta = ofertaOpt.get();
-
-		Optional<Aplicacion> aplicacionOpt = aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta());
-
-		if (aplicacionOpt.isPresent()) {
-			Aplicacion aplicacionExistenteRecuperada = aplicacionOpt.get();
-
-			// CASO 1: Ya existía y el estado en base de datos ya es true (1)
-			if (Boolean.TRUE.equals(aplicacionExistenteRecuperada.isEstadoaplicaciones())) {
-				return new AplicacionResponseDTO(ResultadosAplicacion.YA_APLICO,
-						"Ya aplicaste anteriormente a esta oferta.");
-			}
-
-			// CASO 2: Ya existía pero el estado estaba en false (0). La reactivamos.
-			aplicacionExistenteRecuperada.setEstadoaplicaciones(true);
-			aplicacionExistenteRecuperada.setFecha(LocalDateTime.now());
-
-			// Guardamos los cambios en la base de datos
-			aplicacionRepository.save(aplicacionExistenteRecuperada);
-			return new AplicacionResponseDTO(ResultadosAplicacion.ACTUALIZACION_ESTADO,
-					"Tu postulación fue reactivada correctamente.");
-		}
-
-		// CASO 3: Si no existía, la creamos desde cero como nueva postulación
-		Aplicacion aplicacionEntity = new Aplicacion();
-		aplicacionEntity.setFecha(LocalDateTime.now());
-		aplicacionEntity.setEstadoaplicaciones(true);
-		aplicacionEntity.setPerfil(perfil);
-		aplicacionEntity.setOferta(oferta);
-
-		aplicacionRepository.save(aplicacionEntity);
-		return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA,
-				"Te postulaste correctamente a la oferta.");
+	    return aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta())
+	            .map(this::procesarExistente)
+	            .orElseGet(() -> crearNueva(perfil, oferta));
 	}
 
+	private AplicacionResponseDTO procesarExistente(Aplicacion aplicacion) {
+        if (Boolean.TRUE.equals(aplicacion.isEstadoaplicaciones())) {
+            return new AplicacionResponseDTO(ResultadosAplicacion.YA_APLICO, "Ya aplicaste anteriormente a esta oferta.");
+        }
+        aplicacion.reactivar();
+        aplicacionRepository.save(aplicacion);
+        return new AplicacionResponseDTO(ResultadosAplicacion.ACTUALIZACION_ESTADO, "Tu postulación fue reactivada correctamente.");
+    }
+	
+	private AplicacionResponseDTO crearNueva(Perfil perfil, Oferta oferta) {
+        Aplicacion nueva = new Aplicacion();
+        nueva.setFecha(LocalDateTime.now());
+        nueva.setEstadoaplicaciones(true);
+        nueva.setPerfil(perfil);
+        nueva.setOferta(oferta);
+
+        aplicacionRepository.save(nueva);
+        return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA, "Te postulaste correctamente a la oferta.");
+    }
+	
+	@Transactional(readOnly = true)
 	@Override
 	public boolean existsById(Integer id) {
 		return aplicacionRepository.existsById(id);
 	}
 
+	@Transactional(readOnly = true)
 	@Override
-	public List<Object[]> obtenerAplicacionesPerfil(int idPerfil) {
-		List<Object[]> listadoAplicaciones = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
-		if (listadoAplicaciones != null) {
-			return listadoAplicaciones;
-		} else {
-			return null;
-		}
+	public List<AplicacionesMiasResponse> obtenerAplicacionesPerfil(int idPerfil, String format) {
+	    List<Object[]> resultado = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
+	    AplicacionesMiasStrategy strategy = mappingStrategies.getOrDefault(
+	            format, 
+	            mappingStrategies.get("standardMappingStrategy")
+	    );
+	    return resultado.stream()
+	            .map(strategy::map)
+	            .toList();
 	}
 
+	@Transactional
 	@Override
 	public void cambiarEstado(Integer id, boolean estado) {
-		Optional<Aplicacion> aplicacionActualizado = aplicacionRepository.findById(id);
-		if (aplicacionActualizado.isPresent()) {
-			Aplicacion aplicacion = aplicacionActualizado.get();
-			aplicacion.setEstadoaplicaciones(estado);
-			aplicacionRepository.save(aplicacion);
-		}
+	    Aplicacion aplicacion = aplicacionRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la aplicación con ID: " + id));
+	    
+	    aplicacion.setEstadoaplicaciones(estado);
+	    aplicacionRepository.save(aplicacion);
 	}
 
-	@Override
-	public List<Aplicacion> findAllDesc() {
-		try {
-			List<Aplicacion> aplicaciones = aplicacionRepository.findAllDesc();
-			if (aplicaciones == null || aplicaciones.isEmpty()) {
-				return null;
-			}
-			return aplicaciones;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+	@Transactional(readOnly = true)
+    @Override
+    public List<Aplicacion> findAllDesc() {
+        return aplicacionRepository.findAllDesc();
+    }
 
-	@Override
-	public List<Aplicacion> findAllDescActivas() {
-		try {
-			List<Aplicacion> aplicaciones = aplicacionRepository.findAllDescActivas();
-			if (aplicaciones == null || aplicaciones.isEmpty()) {
-				return null;
-			}
-			return aplicaciones;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+	@Transactional(readOnly = true)
+    @Override
+    public List<Aplicacion> findAllDescActivas() {
+        return aplicacionRepository.findAllDescActivas();
+    }
 
-	@Override
-	public void deleteById(int id) {
-		try {
-			if (!aplicacionRepository.existsById(id)) {
-				return;
-			}
-			aplicacionRepository.deleteById(id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	@Transactional
+    @Override
+    public void deleteById(int id) {
+        if (!aplicacionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("No se encontró la aplicación con ID: " + id);
+        }
+        aplicacionRepository.deleteById(id);
+    }
 }

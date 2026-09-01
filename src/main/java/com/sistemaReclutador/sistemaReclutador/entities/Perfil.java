@@ -1,15 +1,14 @@
 package com.sistemaReclutador.sistemaReclutador.entities;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "perfil")
 public class Perfil {
@@ -34,121 +33,21 @@ public class Perfil {
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
-    @Column(name = "email", nullable = true, length = 100, unique = true)
+    @Column(name = "email", length = 100, unique = true)
     private String email;
-    
+
     @Column(name = "session_id")
     private String sessionId;
-    
+
     @Column(name = "fechaUltimaActividad")
     private LocalDateTime fechaUltimaActividad;
-    
+
     @Column(name = "ultimoDispositivo")
     private String ultimoDispositivo;
-    
-    // Rutas de los archivos en el sistema de archivos
+
     @Column(name = "foto_url", length = 255)
     private String fotoUrl;
 
-    public Integer getId_perfil() {
-		return id_perfil;
-	}
-
-	public void setId_perfil(Integer id_perfil) {
-		this.id_perfil = id_perfil;
-	}
-
-	public String getDni() {
-		return dni;
-	}
-
-	public void setDni(String dni) {
-		this.dni = dni;
-	}
-
-	public String getNombre() {
-		return nombre;
-	}
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-	public String getDireccion() {
-		return direccion;
-	}
-
-	public void setDireccion(String direccion) {
-		this.direccion = direccion;
-	}
-
-	public String getClave() {
-		return clave;
-	}
-
-	public void setClave(String clave) {
-		this.clave = clave;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@Column(name = "documento_url", length = 255)
+    @Column(name = "documento_url", length = 255)
     private String documentoUrl;
-
-    // Getters y setters
-    public String getFotoUrl() {
-        return fotoUrl;
-    }
-
-    public void setFotoUrl(String fotoUrl) {
-        this.fotoUrl = fotoUrl;
-    }
-
-    public String getDocumentoUrl() {
-        return documentoUrl;
-    }
-
-    
-
-	public void setDocumentoUrl(String documentoUrl) {
-        this.documentoUrl = documentoUrl;
-    }
-	
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	public LocalDateTime getFechaUltimaActividad() {
-		return fechaUltimaActividad;
-	}
-
-	public void setFechaUltimaActividad(LocalDateTime fechaUltimaActividad) {
-		this.fechaUltimaActividad = fechaUltimaActividad;
-	}
-
-	public String getUltimoDispositivo() {
-		return ultimoDispositivo;
-	}
-
-	public void setUltimoDispositivo(String ultimoDispositivo) {
-		this.ultimoDispositivo = ultimoDispositivo;
-	}
 }

@@ -1,8 +1,14 @@
 package com.sistemaReclutador.sistemaReclutador.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "aplicacion")
 public class Aplicacion {
@@ -10,63 +16,24 @@ public class Aplicacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idaplicacion")
-    private  Integer idaplicacion;
-    
+    private Integer idaplicacion;
+
     @Column(name = "Fecha")
     private LocalDateTime fecha;
-    
+
     @Column(name = "estadoaplicaciones")
     private boolean estadoaplicaciones;
 
     @ManyToOne
-    @JoinColumn(name = "id_perfil", referencedColumnName = "id_perfil", nullable = true)
+    @JoinColumn(name = "id_perfil", referencedColumnName = "id_perfil")
     private Perfil perfil;
 
     @ManyToOne
-    @JoinColumn(name = "id_oferta", nullable = true)
+    @JoinColumn(name = "id_oferta")
     private Oferta oferta;
     
-	
-	public Integer getIdaplicacion() {
-		return idaplicacion;
-	}
-
-	public void setIdaplicacion(Integer idaplicacion) {
-		this.idaplicacion = idaplicacion;
-	}
-
-	public Perfil getPerfil() {
-		return perfil;
-	}
-
-	public void setPerfil(Perfil perfil) {
-		this.perfil = perfil;
-	}
-
-	public LocalDateTime getFecha() {
-		return fecha;
-	}
-
-	public void setFecha(LocalDateTime fecha) {
-		this.fecha = fecha;
-	}
-
-	public Oferta getOferta() {
-		return oferta;
-	}
-
-	public void setOferta(Oferta oferta) {
-		this.oferta = oferta;
-	}
-
-	public boolean isEstadoaplicaciones() {
-		return estadoaplicaciones;
-	}
-
-	public void setEstadoaplicaciones(boolean estadoaplicaciones) {
-		this.estadoaplicaciones = estadoaplicaciones;
-	}
-	
-	
-    
-	}
+    public void reactivar() {
+        this.estadoaplicaciones = true;
+        this.fecha = LocalDateTime.now();
+    }
+}

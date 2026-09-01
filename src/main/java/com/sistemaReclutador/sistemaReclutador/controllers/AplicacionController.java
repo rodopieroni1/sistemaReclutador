@@ -1,73 +1,62 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
+import com.sistemaReclutador.sistemaReclutador.dto.*;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:4200") // Permite solicitudes desde el frontend
+import java.util.List;
+
 @RestController
 @RequestMapping("/aplicaciones")
+@RequiredArgsConstructor
+@Validated
 public class AplicacionController {
-	boolean active = true;
 
-	@Autowired
-	private AplicacionService aplicacionService;
-	
-	@GetMapping
-	public List<Aplicacion> getAllAplicaciones() {
-		return aplicacionService.findAllDesc();
-	}
-	
-	@GetMapping("/activas")
-	public List<Aplicacion> getAllAplicacionesActivas() {
-		return aplicacionService.findAllDescActivas();
-	}
+    private final AplicacionService aplicacionService;
 
-	@GetMapping("/{id}")
-	public boolean getAplicacionById(@PathVariable Integer id) {
-		return aplicacionService.existsById(id);
-	}
+    @GetMapping
+    public ResponseEntity<List<Aplicacion>> getAllAplicaciones() {
+        return ResponseEntity.ok(aplicacionService.findAllDesc());
+    }
 
-	@PostMapping
-	public AplicacionResponseDTO createAplicacion(@RequestBody AplicacionRequest aplicacion) {
-		return aplicacionService.crearAplicacion(aplicacion);
-	}
+    @GetMapping("/activas")
+    public ResponseEntity<List<Aplicacion>> getAllAplicacionesActivas() {
+        return ResponseEntity.ok(aplicacionService.findAllDescActivas());
+    }
 
-	@PatchMapping("/estado/{idPost}")
-	public ResponseEntity<?> cambiarEstado(@PathVariable Integer idPost, @RequestBody Map<String, Boolean> body) {
-		boolean estado = body.get("estado");
-		aplicacionService.cambiarEstado(idPost, estado);
-		return ResponseEntity.ok().build();
-	}
+    @GetMapping("/{id}")
+    public ResponseEntity<Boolean> getAplicacionById(@PathVariable Integer id) {
+        return ResponseEntity.ok(aplicacionService.existsById(id));
+    }
 
-	@DeleteMapping("/{id}")
-	public void deleteAplicacion(@PathVariable int id) {
-		aplicacionService.deleteById(id);
-	}
+    @PostMapping
+    public ResponseEntity<AplicacionResponseDTO> createAplicacion(@RequestBody AplicacionRequest aplicacion) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(aplicacionService.crearAplicacion(aplicacion));
+    }
 
-	@GetMapping("/perfil/{idPerfil}")
-	public List<AplicacionesMiasResponse> obtenerAsignaciones(@PathVariable int idPerfil) {
-		List<Object[]> resultado = aplicacionService.obtenerAplicacionesPerfil(idPerfil);
-		return resultado.stream().map(obj -> new AplicacionesMiasResponse((Integer) obj[0], // idaplicacion
-				(String) obj[1], // puesto / nombreOferta
-				(String) obj[2], // empresa
-				(LocalDateTime) obj[3], // fecha
-				(Boolean) obj[4], // estado
-				(String) obj[5], // descripcionOferta
-				(String) obj[6], // fotoOferta
-				(String) obj[7], // email
-				(String) obj[8], // telefono
-				(String) obj[9], // direccion
-				(Long) obj[10] // idOferta
-		)).toList();
-	}
+    @PatchMapping("/estado/{idPost}")
+    public ResponseEntity<Void> cambiarEstado(
+            @PathVariable Integer idPost, 
+            @RequestBody CambiarEstadoRequestDTO request) {
+        aplicacionService.cambiarEstado(idPost, request.estado());
+        return ResponseEntity.noContent().build();
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAplicacion(@PathVariable Integer id) {
+        aplicacionService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/perfil/{idPerfil}")
+    public ResponseEntity<List<AplicacionesMiasResponse>> obtenerAsignaciones(
+            @PathVariable Integer idPerfil,
+            @RequestParam(defaultValue = "standardMappingStrategy") String format) {
+        return ResponseEntity.ok(aplicacionService.obtenerAplicacionesPerfil(idPerfil, format));
+    }
 }

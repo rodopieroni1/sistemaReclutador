@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.controllers.AplicacionController;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
+import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 
 @WebMvcTest(controllers = AplicacionController.class, excludeAutoConfiguration = { SecurityAutoConfiguration.class,
@@ -40,7 +41,10 @@ public class AplicacionesControllerTests {
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@MockBean
+	private PerfilRepository perfilRepository;
 
+	//si busco una lista y trae algo esta bien, si trae cero esta mal
 	@Test
 	void getAllAplicacionesActivas_DebeRetornarLista() throws Exception {
 		Mockito.when(aplicacionService.findAllDescActivas()).thenReturn(List.of(new Aplicacion()));
