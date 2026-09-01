@@ -1,5 +1,6 @@
 package com.sistemaReclutador.sistemaReclutador.config;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,32 +27,36 @@ public class WebSecurityConfig {
 	@Autowired
 	private JwtAuthFilter jwtAuthFilter;
 
-	// Inyecta el valor desde application.properties (con http://localhost:4200 por
-	// defecto)
 	@Value("${cors.allowed-origins:http://localhost:4200}")
 	private String allowedOrigins;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
+		return http
+				.csrf(csrf -> csrf.disable())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						// Simplificado con comodines (no hace falta listar endpoint por endpoint)
+				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/uploads/**", "/login", "/ws").permitAll()
-						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/usuarios/**",
-								"/perfiles/**")
-						.permitAll().anyRequest().authenticated())
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
+						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/usuarios/**", "/perfiles/**").permitAll()
+						.anyRequest().authenticated()
+				)
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+				.build();
 	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(List.of(allowedOrigins));
+		
+		List<String> origins = Arrays.asList(allowedOrigins.split(","));
+		config.setAllowedOriginPatterns(origins); 
+		
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-		config.setExposedHeaders(List.of("Content-Disposition"));
+		config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
@@ -71,7 +76,6 @@ public class WebSecurityConfig {
 					}
 					String resourcePath = uploadDir.startsWith("/") ? "file:" + uploadDir : "file:///" + uploadDir;
 					registry.addResourceHandler("/uploads/**").addResourceLocations(resourcePath).setCachePeriod(0);
-					System.out.println("=================================================" + resourcePath);
 				}
 			}
 
