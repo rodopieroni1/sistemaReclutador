@@ -45,43 +45,18 @@ public class AplicacionesRepositoriosTests {
 
 	@Test
 	void crearAplicacion_existeByIdPerfil() {		
-		AplicacionRequest aplicacionRequest = armarRequest();
-		Optional<Aplicacion> aplicacionOpt = aplicationRepository.findByPerfilAndOferta(aplicacionRequest.getIdPerfil().getId_perfil(),
-				aplicacionRequest.getIdOferta().getIdOferta()); // se busca en la base de datos real
-		assertEquals(aplicacionOpt.isPresent(), true);
-		assertTrue(aplicacionOpt.isPresent(), "La aplicación debería existir en la base de datos");
-		//al final de cada @Test se hace un Rollback
+	    AplicacionRequest aplicacionRequest = armarRequest();
+
+	    Optional<Aplicacion> aplicacionOpt =
+	        aplicationRepository.findByPerfilAndOferta(
+	            aplicacionRequest.getIdPerfil().getId_perfil(),
+	            aplicacionRequest.getIdOferta().getIdOferta()
+	        );
+
+	    assertEquals(aplicacionOpt.isPresent(), true);
+	    assertTrue(aplicacionOpt.isPresent(), "La aplicación debería existir en la base de datos");
 	}
-
-	@BeforeEach
-	void setup() {
-
-		Aplicacion aplicacion = new Aplicacion();
-		Perfil perfil = new Perfil();
-		Oferta oferta = new Oferta();
-
-		perfil.setId_perfil(2);
-		perfil.setNombre("Juan PérezS");
-		perfil.setClave("password123S");
-		perfil.setDni("35123456S");
-		perfil.setEmail("juan.perez@gmail.comS");
-		perfil.setDireccion("Av. Siempreviva 742S");
-		perfil.setDocumentoUrl("http://ejemplo.comS");
-		perfil.setFotoUrl("http://ejemplo.comS");
-
-		oferta.setIdOferta(22L);
-		oferta.setNombreOferta("Desarrollador Java SeniorS");
-		oferta.setDescripcionOferta(
-				"Búsqueda orientada a profesionales con más de 5 años de experiencia en Spring Boot.S");
-		oferta.setFotoOferta("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAS");
-		oferta.setEstadoOferta(true);
-
-		aplicacion.setIdaplicacion(1);
-		aplicacion.setFecha(LocalDateTime.of(2026, java.time.Month.JULY, 23, 10, 30, 0));
-		aplicacion.setEstadoaplicaciones(false);
-		aplicacion.setPerfil(perfil);
-		aplicacion.setOferta(oferta);
-	}
+	
 
 	private AplicacionRequest armarRequest() {
 		AplicacionRequest aplicacion = new AplicacionRequest();
@@ -89,7 +64,7 @@ public class AplicacionesRepositoriosTests {
 		Perfil perfil = new Perfil();
 		Oferta oferta = new Oferta();
 
-		perfil.setId_perfil(22);
+		perfil.setId_perfil(2);
 		perfil.setNombre("Juan PérezAR");
 		perfil.setClave("password123AR");
 		perfil.setDni("35123456AR");
@@ -98,7 +73,7 @@ public class AplicacionesRepositoriosTests {
 		perfil.setDocumentoUrl("http://ejemplo.comAR");
 		perfil.setFotoUrl("http://ejemplo.comAR");
 
-		oferta.setIdOferta(2L);
+		oferta.setIdOferta(10L);
 		oferta.setNombreOferta("Desarrollador Java SeniorAR");
 		oferta.setDescripcionOferta(
 				"Búsqueda orientada a profesionales con más de 5 años de experiencia en Spring Boot.AR");

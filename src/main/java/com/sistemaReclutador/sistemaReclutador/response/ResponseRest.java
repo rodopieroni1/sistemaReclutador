@@ -2,64 +2,54 @@ package com.sistemaReclutador.sistemaReclutador.response;
 
 import java.time.LocalDateTime;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ResponseRest<T> {
 
-	private boolean success;
-	private String message;
-	private T data;
-	private LocalDateTime timestamp;
-	private String errorCode;
+    private boolean success;
+    private String message;
+    private T data;
+    private LocalDateTime timestamp;
+    private String errorCode;
 
-	public ResponseRest() {
-	}
+    // Métodos Factory Estáticos
 
-	public ResponseRest(boolean success, String message, T data, LocalDateTime timestamp, String errorCode) {
-		this.success = success;
-		this.message = message;
-		this.data = data;
-		this.timestamp = timestamp;
-		this.errorCode = errorCode;
+    public static <T> ResponseRest<T> success(T data, String message) {
+        return ResponseRest.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .errorCode("200")
+                .build();
+    }
 
-	}
+    public static <T> ResponseRest<T> success(T data, String message, String statusCode) {
+        return ResponseRest.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .errorCode(statusCode)
+                .build();
+    }
 
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public void setSuccess(boolean success) {
-		this.success = success;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public T getData() {
-		return data;
-	}
-
-	public void setData(T data) {
-		this.data = data;
-	}
-
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public String getErrorCode() {
-		return errorCode;
-	}
-
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
-
+    public static <T> ResponseRest<T> error(String message, String errorCode) {
+        return ResponseRest.<T>builder()
+                .success(false)
+                .message(message)
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .errorCode(errorCode)
+                .build();
+    }
 }

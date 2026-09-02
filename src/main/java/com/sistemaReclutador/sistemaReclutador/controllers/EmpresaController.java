@@ -1,8 +1,8 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-import java.time.LocalDateTime;
-
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,41 +20,49 @@ import lombok.RequiredArgsConstructor;
 @Validated
 public class EmpresaController {
 
-	private final EmpresaService empresaService;
+    private final EmpresaService empresaService;
 
-	@GetMapping
-	public ResponseEntity<Iterable<Empresa>> listarEmpresas() {
-		return ResponseEntity.ok(empresaService.buscarPorEmpresa());
-	}
+    @GetMapping
+    public ResponseEntity<ResponseRest<Iterable<Empresa>>> listarEmpresas() {
+        return ResponseEntity.ok(
+            ResponseRest.success(empresaService.buscarPorEmpresa(), "Lista de empresas obtenida correctamente")
+        );
+    }
 
-	@GetMapping("/existe/{cuit}")
-	public ResponseEntity<Boolean> existePorCuit(@PathVariable Long cuit) {
-		return ResponseEntity.ok(empresaService.existsByCuit(cuit));
-	}
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseRest<Empresa>> obtenerEmpresaPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(
+            ResponseRest.success(empresaService.findEmpresa(id), "Empresa encontrada")
+        );
+    }
 
-	@GetMapping("/existeId/{id}")
-	public ResponseEntity<Empresa> obtenerEmpresaPorId(@PathVariable Long id) {
-		return ResponseEntity.ok(empresaService.findEmpresa(id));
-	}
+    @GetMapping("/existe/{cuit}")
+    public ResponseEntity<ResponseRest<Boolean>> existePorCuit(@PathVariable Long cuit) {
+        return ResponseEntity.ok(
+            ResponseRest.success(empresaService.existsByCuit(cuit), "Verificación de CUIT realizada")
+        );
+    }
 
-	@PostMapping(value = "/crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ResponseRest<Empresa>> crearEmpresa(@Valid @ModelAttribute EmpresaRequest empresaRequest) {
-		Empresa empresaCreada = empresaService.saveEmpresa(empresaRequest);
-		ResponseRest<Empresa> response = new ResponseRest<>(true, "Empresa creada satisfactoriamente", empresaCreada, LocalDateTime.now(), "201");
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseRest<Empresa>> crearEmpresa(@Valid @ModelAttribute EmpresaRequest empresaRequest) {
+        Empresa empresaCreada = empresaService.saveEmpresa(empresaRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ResponseRest.success(empresaCreada, "Empresa creada satisfactoriamente", "201"));
+    }
 
-	@PutMapping(value = "/actualizar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ResponseRest<Empresa>> actualizarEmpresa(@PathVariable Long id, @Valid @ModelAttribute EmpresaRequest request) {
-		Empresa empresaActualizada = empresaService.updateEmpresa(id, request);
-		ResponseRest<Empresa> response = new ResponseRest<>(true, "Empresa actualizada satisfactoriamente", empresaActualizada, LocalDateTime.now(), "200");
-		return ResponseEntity.ok(response);
-	}
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseRest<Empresa>> actualizarEmpresa(@PathVariable Long id, @Valid @ModelAttribute EmpresaRequest request) {
+        Empresa empresaActualizada = empresaService.updateEmpresa(id, request);
+        return ResponseEntity.ok(
+            ResponseRest.success(empresaActualizada, "Empresa actualizada satisfactoriamente")
+        );
+    }
 
-	@DeleteMapping("/eliminar/{id}")
-	public ResponseEntity<ResponseRest<Void>> eliminarEmpresa(@PathVariable Long id) {
-		empresaService.deleteEmpresa(id);
-		ResponseRest<Void> response = new ResponseRest<>(true, "Empresa eliminada satisfactoriamente", null, LocalDateTime.now(), "200");
-		return ResponseEntity.ok(response);
-	}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseRest<Void>> eliminarEmpresa(@PathVariable Long id) {
+        empresaService.deleteEmpresa(id);
+        return ResponseEntity.ok(
+            ResponseRest.success(null, "Empresa eliminada satisfactoriamente")
+        );
+    }
 }
