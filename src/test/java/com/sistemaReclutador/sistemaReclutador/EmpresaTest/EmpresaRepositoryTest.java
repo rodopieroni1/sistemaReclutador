@@ -1,5 +1,6 @@
 package com.sistemaReclutador.sistemaReclutador.EmpresaTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -61,22 +62,26 @@ public class EmpresaRepositoryTest {
         empresa.setRubro(rubroPersistido);
         empresa.setEmail("pedrogmail.com");
         empresaRepository.save(empresa); 
-        boolean existe = empresaRepository.existsByCuit(33307120828L);
+        boolean existe = empresaRepository.existsByCuit(33397120828L);
         assertTrue(existe);
     }
 	
-    @Test
-    void saveEmpresa_DeberiaRetornarBadRequest_CuandoEmailNoEsValido() {
-        EmpresaRequest request = moficarRequestBase("Conesa", "correoInvalido.com", 33309120828L, logoValido);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El formato del correo electrónico no es válido", respuesta.getBody().getMessage());
-    }
+	@Test
+	void saveEmpresa_DeberiaLanzarExcepcion_CuandoEmailNoEsValido() {
+	    EmpresaRequest request = moficarRequestBase("Conesa", "correoInvalido.com", 33309120828L, 4, logoValido);
+
+	    IllegalArgumentException excepcion = assertThrows(
+	        IllegalArgumentException.class, 
+	        () -> empresaService.saveEmpresa(request)
+	    );
+
+	    assertEquals("El formato del correo electrónico no es válido", excepcion.getMessage());
+	}
 
     @Test
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoEmailSupera100Caracteres() {
         String emailLargo = "A".repeat(95) + "@a.com"; // 101 caracteres
-        EmpresaRequest request = moficarRequestBase("Conesa", emailLargo, 33307120828L, logoValido);
+        EmpresaRequest request = moficarRequestBase("Conesa", emailLargo, 33307120828L, 4, logoValido);
         ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
         assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
         assertEquals("El correo electrónico no puede superar los 100 caracteres", respuesta.getBody().getMessage());
@@ -131,7 +136,7 @@ public class EmpresaRepositoryTest {
     }
 
  
-    private EmpresaRequest moficarRequestBase(String nombre, String email, Long cuit, MockMultipartFile logo) {
+    private EmpresaRequest moficarRequestBase(String nombre, String email, Long cuit, Integer idRubro, MockMultipartFile logo) {
         EmpresaRequest request = new EmpresaRequest();
         request.setNombre(nombre);
         request.setDireccion("Formosa 2020");
@@ -141,7 +146,7 @@ public class EmpresaRepositoryTest {
         request.setLogo(logo);
         request.setEmail(email);
         request.setTelefono("3854177555");
-        request.setIdRubro((long) rubroPersistido.getIdRubro());
+        request.setIdRubro(idRubro);
         return request;
     }
 }

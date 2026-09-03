@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mock.web.MockPart;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
@@ -71,12 +71,14 @@ class EmpresaControllerTest {
 	    empresa.setNombre("Nueva Empresa");
 
 	    when(empresaService.saveEmpresa(any(EmpresaRequest.class))).thenReturn(empresa);
+	    MockMultipartFile logo = new MockMultipartFile("logo", "logo.png", "image/png", "bytes".getBytes());
 
 	    mockMvc.perform(multipart("/empresas")
-	            .part(new MockPart("nombre", "Nueva Empresa".getBytes()))
-	            .part(new MockPart("cuit", "20300000000".getBytes()))
-	            .part(new MockPart("email", "contacto@empresa.com".getBytes()))
-	            .part(new MockPart("rubro", "Tecnología".getBytes()))) // <--- Se envía como MockPart
+	    		.file(logo)
+	            .param("nombre", "Nueva Empresa")
+	            .param("cuit", "20300000000")
+	            .param("email", "contacto@empresa.com")
+	            .param("idRubro", "1"))
 	            .andExpect(status().isCreated())
 	            .andExpect(jsonPath("$.success").value(true))
 	            .andExpect(jsonPath("$.errorCode").value("201"))
