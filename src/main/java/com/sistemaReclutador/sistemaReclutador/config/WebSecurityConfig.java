@@ -69,14 +69,16 @@ public class WebSecurityConfig {
 			@Override
 			public void addResourceHandlers(
 					org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
-				String uploadDir = env.getProperty("app.upload.dir");
-				if (uploadDir != null) {
-					if (!uploadDir.endsWith("/")) {
-						uploadDir += "/";
-					}
-					String resourcePath = uploadDir.startsWith("/") ? "file:" + uploadDir : "file:///" + uploadDir;
-					registry.addResourceHandler("/uploads/**").addResourceLocations(resourcePath).setCachePeriod(0);
+				String uploadDir = env.getProperty("app.upload.dir", "C:/uploads/");
+				if (!uploadDir.endsWith("/")) {
+					uploadDir += "/";
 				}
+				
+				String resourcePath = "file:///" + uploadDir.replace("\\", "/");
+				
+				registry.addResourceHandler("/uploads/**")
+						.addResourceLocations(resourcePath)
+						.setCachePeriod(0);
 			}
 
 			@Override
