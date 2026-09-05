@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +17,6 @@ import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.RubroRepository;
-import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.EmpresaService;
 
 @SpringBootTest
@@ -80,11 +77,13 @@ public class EmpresaRepositoryTest {
 
     @Test
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoEmailSupera100Caracteres() {
-        String emailLargo = "A".repeat(95) + "@a.com"; // 101 caracteres
+        String emailLargo = "A".repeat(95) + "@a.com";
         EmpresaRequest request = moficarRequestBase("Conesa", emailLargo, 33307120828L, 4, logoValido);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El correo electrónico no puede superar los 100 caracteres", respuesta.getBody().getMessage());
+        IllegalArgumentException excepcion = assertThrows(
+    	        IllegalArgumentException.class, 
+    	        () -> empresaService.saveEmpresa(request)
+    	    );
+        assertEquals("El correo electrónico no puede superar los 100 caracteres", excepcion.getMessage() );
     }
 
     @Test
@@ -95,10 +94,12 @@ public class EmpresaRepositoryTest {
         empresaPrevia.setEmail("vieja@hotmail.com");
         empresaPrevia.setRubro(rubroPersistido);
         empresaRepository.saveAndFlush(empresaPrevia);
-        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 33303120828L, logoValido);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El Cuit ya está registrado", respuesta.getBody().getMessage());
+        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 33303120828L, null, logoValido);
+        IllegalArgumentException excepcion = assertThrows(
+    	        IllegalArgumentException.class, 
+    	        () -> empresaService.saveEmpresa(request)
+    	    );
+        assertEquals("El cuit ya existe", excepcion.getMessage() );
     }
 
     @Test
@@ -109,19 +110,23 @@ public class EmpresaRepositoryTest {
         empresaPrevia.setEmail("piche@hotmail.com");
         empresaPrevia.setRubro(rubroPersistido);
         empresaRepository.saveAndFlush(empresaPrevia);
-        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 22222222222L, logoValido);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El email ya está registrado", respuesta.getBody().getMessage());
+        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 22222222222L, null, logoValido);
+        IllegalArgumentException excepcion = assertThrows(
+    	        IllegalArgumentException.class, 
+    	        () -> empresaService.saveEmpresa(request)
+    	    );
+        assertEquals("El email ya está registrado", excepcion.getMessage() );
     }
 
   
     @Test
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoCuitNoTiene11Digitos() {
-        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 123456789L, logoValido);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El CUIT debe tener exactamente 11 dígitos", respuesta.getBody().getMessage());
+        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 123456789L, null, logoValido);
+        IllegalArgumentException excepcion = assertThrows(
+    	        IllegalArgumentException.class, 
+    	        () -> empresaService.saveEmpresa(request)
+    	    );
+        assertEquals("El cuit no tiene 11 digitos", excepcion.getMessage() );
     }
 
 
@@ -129,10 +134,12 @@ public class EmpresaRepositoryTest {
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoNombreDeLogoEsMuyLargo() {
         String nombreArchivoLargo = "A".repeat(242) + ".png";
         MockMultipartFile logoLargo = new MockMultipartFile("logo", nombreArchivoLargo, "image/png", "bytes".getBytes());
-        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 33307120828L, logoLargo);
-        ResponseEntity<ResponseRest<Empresa>> respuesta = empresaService.saveEmpresa(request);
-        assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
-        assertEquals("El nombre del archivo del logo es demasiado largo (máximo 245 caracteres)", respuesta.getBody().getMessage());
+        EmpresaRequest request = moficarRequestBase("Conesa", "piche@hotmail.com", 33307120828L, null, logoLargo);
+        IllegalArgumentException excepcion = assertThrows(
+    	        IllegalArgumentException.class, 
+    	        () -> empresaService.saveEmpresa(request)
+    	    );
+        assertEquals("El nombre del archivo del logo es demasiado largo (máximo 245 caracteres)", excepcion.getMessage() );
     }
 
  

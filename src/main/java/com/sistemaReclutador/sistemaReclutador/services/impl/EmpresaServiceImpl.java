@@ -52,14 +52,10 @@ public class EmpresaServiceImpl implements EmpresaService {
     public Empresa updateEmpresa(Long id, EmpresaRequest empresaDetails) {
         Empresa empresa = empresaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("La empresa con ID " + id + " no existe."));
-
         validarEmpresaRequest(empresaDetails, empresa);
-
         Rubro rubro = obtenerRubroOThrow(empresaDetails.getIdRubro());
-
         actualizarCamposEmpresa(empresa, empresaDetails, rubro);
         procesarLogoSiExiste(empresaDetails.getLogo(), empresa::setLogo);
-
         return empresaRepository.save(empresa);
     }
 
@@ -73,7 +69,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Iterable<Empresa> buscarPorEmpresa() {
+    public List<Empresa> buscarPorEmpresa() {
         return empresaRepository.findAllDesc();
     }
 
@@ -89,16 +85,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         return empresaRepository.findById(id).orElse(null);
     }
 
-    // ==========================================
-    // MÉTODOS PRIVADOS AUXILIARES Y VALIDACIONES
-    // ==========================================
-
-    /**
-     * Valida reglas de negocio del DTO. 
-     * Si empresaExistente es null, asume que es una creación (save).
-     */
     private void validarEmpresaRequest(EmpresaRequest request, Empresa empresaExistente) {
-        // --- NOMBRE ---
         if (request.getNombre() == null || request.getNombre().isBlank()) {
             throw new IllegalArgumentException("El nombre de la empresa es obligatorio");
         }
@@ -106,7 +93,6 @@ public class EmpresaServiceImpl implements EmpresaService {
             throw new IllegalArgumentException("El nombre no puede superar los 100 caracteres");
         }
 
-        // --- CUIT ---
         if (request.getCuit() == null || String.valueOf(request.getCuit()).length() != 11) {
             throw new IllegalArgumentException("El CUIT debe tener exactamente 11 dígitos");
         }
@@ -115,7 +101,6 @@ public class EmpresaServiceImpl implements EmpresaService {
             throw new IllegalArgumentException(empresaExistente == null ? "El Cuit ya está registrado" : "El nuevo CUIT ya se encuentra en uso.");
         }
 
-        // --- EMAIL ---
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new IllegalArgumentException("El correo electrónico es obligatorio");
         }
@@ -130,7 +115,6 @@ public class EmpresaServiceImpl implements EmpresaService {
             throw new IllegalArgumentException(empresaExistente == null ? "El email ya está registrado" : "El nuevo email ya se encuentra en uso.");
         }
 
-        // --- LOGO ---
         if (request.getLogo() != null && !request.getLogo().isEmpty()) {
             String nombreOriginal = request.getLogo().getOriginalFilename();
             if (nombreOriginal != null && nombreOriginal.length() > 245) {

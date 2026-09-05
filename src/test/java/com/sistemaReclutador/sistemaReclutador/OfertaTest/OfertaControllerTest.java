@@ -1,14 +1,13 @@
 package com.sistemaReclutador.sistemaReclutador.OfertaTest;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,24 +18,19 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.controllers.OfertaController;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
-import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
-import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
+import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
 
 @WebMvcTest(controllers = OfertaController.class, excludeAutoConfiguration = { SecurityAutoConfiguration.class,
@@ -51,11 +45,8 @@ public class OfertaControllerTest {
 	private JwtUtil jwtUtil;
 	@MockBean
 	private UserDetailsService userDetailsService;
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	private Rubro requestRubro;
-	private Empresa requestEmpresa;
+	@MockBean
+    private PerfilRepository perfilRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -91,100 +82,63 @@ public class OfertaControllerTest {
 
 	@Test
 	void createOferta_DebeRetornarResponse() throws Exception {
-		requestRubro = new Rubro();
-		requestRubro.setIdRubro(1);
-		requestRubro.setDescripcionRubro("Educacion");
-
-		requestEmpresa = new Empresa();
-		requestEmpresa.setId_empresa(1L);
-		requestEmpresa.setNombre("Conesa");
-		requestEmpresa.setDireccion("Formosa 2020");
-		requestEmpresa.setHistoriaEmpresa("empresa dedicada a la compra y venta textil");
-		requestEmpresa.setObservaciones("Nadaaaaa");
-		requestEmpresa.setCuit(31111120828L);
-		requestEmpresa.setLogo("logoSimulado");
-		requestEmpresa.setEmail("piche@hotmail.com");
-		requestEmpresa.setTelefono("3854177555");
-		requestEmpresa.setRubro(requestRubro);
-
-		OfertaRequest ofertarequest = new OfertaRequest();
-		ofertarequest.setNombreOferta("Desarrollador Backend");
-		ofertarequest.setDescripcionOferta("Experiencia en Spring Boot");
-		ofertarequest.setEstadoOferta(true);
-		ofertarequest.setFotoOferta("foto.png");
-		ofertarequest.setIdEmpresa(requestEmpresa);
-
-		Oferta ofertaSimulada = new Oferta();
-		ofertaSimulada.setIdOferta(100L);
-		ofertaSimulada.setNombreOferta(ofertarequest.getNombreOferta());
-
-		ResponseRest<Oferta> responseRest = new ResponseRest<>(true, "Oferta creada con éxito", ofertaSimulada,
-				LocalDateTime.now(), "200");
-		ResponseEntity<ResponseRest<Oferta>> responseEntity = new ResponseEntity<>(responseRest, HttpStatus.CREATED);
-		
-		Mockito.when(ofertaService.saveOferta(any(OfertaRequest.class))).thenReturn(responseEntity);
-		mockMvc.perform(post("/ofertas/crear").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(ofertarequest))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.message").value("Oferta creada con éxito"))
-				.andExpect(jsonPath("$.data.nombreOferta").value("Desarrollador Backend"))
-				.andExpect(jsonPath("$.data.idOferta").value(100));
-
+	    OfertaRequest ofertarequest = new OfertaRequest();
+	    ofertarequest.setNombreOferta("Desarrollador Backend");
+	    ofertarequest.setDescripcionOferta("Experiencia en Spring Boot");
+	    ofertarequest.setEstadoOferta(true);
+	    ofertarequest.setFotoOferta("foto.png");
+	    ofertarequest.setIdEmpresa(1L);
+	    Oferta ofertaSimulada = new Oferta();
+	    ofertaSimulada.setIdOferta(100L);
+	    ofertaSimulada.setNombreOferta(ofertarequest.getNombreOferta());
+	    Mockito.when(ofertaService.saveOferta(any(OfertaRequest.class))).thenReturn(ofertaSimulada);
+	    mockMvc.perform(multipart("/ofertas/crear")
+	            .param("nombreOferta", "Desarrollador Backend")
+	            .param("descripcionOferta", "Experiencia en Spring Boot")
+	            .param("estadoOferta", "true")
+	            .param("fotoOferta", "foto.png")
+	            .param("idEmpresa", "1"))
+	            .andExpect(status().isCreated())
+	            .andExpect(jsonPath("$.success").value(true))
+	            .andExpect(jsonPath("$.message").value("Oferta creada satisfactoriamente"))
+	            .andExpect(jsonPath("$.data.nombreOferta").value("Desarrollador Backend"))
+	            .andExpect(jsonPath("$.data.idOferta").value(100));
 	}
 
 	
 	@Test
-	void actualizarOferta_DebeRetornarResponse() throws Exception {
-		Oferta ofertaSimulada = new Oferta();
-		ofertaSimulada.setIdOferta(100L);
-		ofertaSimulada.setNombreOferta("ofertarequest.getNombreOferta()");
-
-		ResponseRest<Oferta> responseRest = new ResponseRest<>(true, "Oferta actualizada satisfactoriamente",
-				ofertaSimulada, LocalDateTime.now(), "200");
-		ResponseEntity<ResponseRest<Oferta>> responseEntity = new ResponseEntity<>(responseRest, HttpStatus.CREATED);
-		Mockito.when(ofertaService.updateOferta(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
-				Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyString(), Mockito.any()))
-				.thenReturn(responseEntity);
-
-		MockMultipartFile archivoMock = new MockMultipartFile("fotoArchivo",
-				"foto.png",
-				MediaType.IMAGE_PNG_VALUE,
-				"contenido-de-imagen".getBytes()
-		);
-
-		mockMvc.perform(MockMvcRequestBuilders.multipart("/ofertas/actualizar/100").file(archivoMock).param("id", "100")
-				.param("nombreOferta", "Desarrollador Backend").param("descripcionOferta", "Experiencia en Spring Boot")
-				.param("estadoOferta", "true").param("idEmpresa", "1").param("fotoOferta", "foto.png").with(request -> {
-					request.setMethod("PUT");
-					return request;
-				})).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.success").value(true))
-				.andExpect(jsonPath("$.message").value("Oferta actualizada satisfactoriamente"))
-				.andExpect(jsonPath("$.data.idOferta").value(100));
-
+	void updateOferta_DebeRetornarResponse() throws Exception {
+	    Long idOferta = 100L;
+	    Oferta ofertaSimulada = new Oferta();
+	    ofertaSimulada.setIdOferta(idOferta);
+	    ofertaSimulada.setNombreOferta("Desarrollador Senior Backend");
+	    Mockito.when(ofertaService.updateOferta(eq(idOferta), any(OfertaUpdateRequest.class)))
+	            .thenReturn(ofertaSimulada);
+	    MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/ofertas/actualizar/{id}", idOferta);
+	    builder.with(request -> {
+	        request.setMethod("PUT");
+	        return request;
+	    });
+	    mockMvc.perform(builder
+	            .param("nombreOferta", "Desarrollador Senior Backend")
+	            .param("descripcionOferta", "Experiencia avanzada en Java")
+	            .param("estadoOferta", "false"))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.success").value(false))
+	            .andExpect(jsonPath("$.message").value("Oferta actualizada satisfactoriamente"))
+	            .andExpect(jsonPath("$.data.idOferta").value(100))
+	            .andExpect(jsonPath("$.data.nombreOferta").value("Desarrollador Senior Backend"));
 	}
 	
 	@Test
 	void eliminarOferta_DebeRetornarResponse() throws Exception {
-	    // 1. ARRANGE (Preparación)
-		Oferta ofertaSimulada = new Oferta();
-		ofertaSimulada.setIdOferta(100L);
-		ofertaSimulada.setNombreOferta("ofertarequest.getNombreOferta()");
-	    // Construimos la respuesta que debería devolver el servicio
-		ResponseRest<Oferta> responseRest = new ResponseRest<>(true, "Oferta eliminada satisfactoriamente",
-				ofertaSimulada, LocalDateTime.now(), "200");
-	    ResponseEntity<ResponseRest<Oferta>> responseEntity = new ResponseEntity<>(responseRest, HttpStatus.OK);
-	    // Indicarle a Mockito qué hacer cuando el controlador llame al servicio
-	    Mockito.when(ofertaService.eliminarOferta(100L)).thenReturn(responseEntity);
-	    // 2. ACT & ASSERT (Acción y Verificación)
-	    mockMvc.perform(delete("/ofertas/eliminar/100")
+	    Long idOferta = 100L;
+	    Mockito.doNothing().when(ofertaService).eliminarOferta(idOferta);
+	    mockMvc.perform(delete("/ofertas/eliminar/{id}", idOferta)
 	            .contentType(MediaType.APPLICATION_JSON))
 	            .andExpect(status().isOk())
 	            .andExpect(jsonPath("$.success").value(true))
-	            .andExpect(jsonPath("$.message").value("Oferta eliminada satisfactoriamente"))
-	            .andExpect(jsonPath("$.data.idOferta").value(100));
-		
+	            .andExpect(jsonPath("$.message").value("Oferta eliminada satisfactoriamente"));
 	}
-
 	
 }

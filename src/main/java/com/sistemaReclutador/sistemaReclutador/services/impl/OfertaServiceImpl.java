@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
@@ -49,25 +50,28 @@ public class OfertaServiceImpl implements OfertaService {
 
 	@Transactional
 	@Override
-	public Oferta updateOferta(Long id, String nombreOferta, String descripcionOferta, boolean estadoOferta,
-			Long idEmpresa, String fotoOferta, MultipartFile fotoArchivo) {
-		Oferta ofertaUpdate = ofertaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + id));
-		ofertaUpdate.setNombreOferta(nombreOferta);
-		ofertaUpdate.setDescripcionOferta(descripcionOferta);
-		ofertaUpdate.setEstadoOferta(estadoOferta);
-		if (idEmpresa != null) {
-			Empresa empresa = empresaRepository.findById(idEmpresa)
-					.orElseThrow(() -> new ResourceNotFoundException("Empresa no encontrada con ID: " + idEmpresa));
-			ofertaUpdate.setEmpresa(empresa);
-		}
-		if (fotoArchivo != null && !fotoArchivo.isEmpty()) {
-			String nombreGuardado = guardarArchivoFoto(fotoArchivo);
-			ofertaUpdate.setFotoOferta(nombreGuardado);
-		} else if (fotoOferta != null) {
-			ofertaUpdate.setFotoOferta(fotoOferta);
-		}
-		return ofertaRepository.save(ofertaUpdate);
+	public Oferta updateOferta(Long id, OfertaUpdateRequest request) {
+	    Oferta ofertaUpdate = ofertaRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + id));
+
+	    ofertaUpdate.setNombreOferta(request.getNombreOferta());
+	    ofertaUpdate.setDescripcionOferta(request.getDescripcionOferta());
+	    ofertaUpdate.setEstadoOferta(request.isEstadoOferta());
+
+	    if (request.getIdEmpresa() != null) {
+	        Empresa empresa = empresaRepository.findById(request.getIdEmpresa())
+	                .orElseThrow(() -> new ResourceNotFoundException("Empresa no encontrada con ID: " + request.getIdEmpresa()));
+	        ofertaUpdate.setEmpresa(empresa);
+	    }
+
+	    if (request.getFotoArchivo() != null && !request.getFotoArchivo().isEmpty()) {
+	        String nombreGuardado = guardarArchivoFoto(request.getFotoArchivo());
+	        ofertaUpdate.setFotoOferta(nombreGuardado);
+	    } else if (request.getFotoOferta() != null) {
+	        ofertaUpdate.setFotoOferta(request.getFotoOferta());
+	    }
+
+	    return ofertaRepository.save(ofertaUpdate);
 	}
 
 	@Transactional
@@ -118,18 +122,18 @@ public class OfertaServiceImpl implements OfertaService {
     }
 	
 	private Oferta convertirDtoAEntidad(OfertaRequest dto) {
-		Oferta oferta = new Oferta();
-		oferta.setNombreOferta(dto.getNombreOferta());
-		oferta.setDescripcionOferta(dto.getDescripcionOferta());
-		oferta.setEstadoOferta(dto.isEstadoOferta());
-		oferta.setFotoOferta(dto.getFotoOferta());
-		if (dto.getIdEmpresa() != null && dto.getIdEmpresa().getId_empresa() != null) {
-			Empresa empresa = empresaRepository.findById(dto.getIdEmpresa().getId_empresa())
-					.orElseThrow(() -> new ResourceNotFoundException("Empresa asociada no encontrada."));
-			oferta.setEmpresa(empresa);
-		}
+	    Oferta oferta = new Oferta();
+	    oferta.setNombreOferta(dto.getNombreOferta());
+	    oferta.setDescripcionOferta(dto.getDescripcionOferta());
+	    oferta.setEstadoOferta(dto.isEstadoOferta());
+	    oferta.setFotoOferta(dto.getFotoOferta());
+	    if (dto.getIdEmpresa() != null) {
+	        Empresa empresa = empresaRepository.findById(dto.getIdEmpresa())
+	                .orElseThrow(() -> new ResourceNotFoundException("Empresa asociada no encontrada con ID: " + dto.getIdEmpresa()));
+	        oferta.setEmpresa(empresa);
+	    }
 
-		return oferta;
+	    return oferta;
 	}
 
 	private String guardarArchivoFoto(MultipartFile foto) {

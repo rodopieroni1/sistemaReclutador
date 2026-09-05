@@ -1,17 +1,15 @@
 package com.sistemaReclutador.sistemaReclutador.services;
 
 import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 
 public interface OfertaService {
 
 	Oferta obtenerOferta(Long id);
 	Oferta saveOferta(OfertaRequest ofertaDetail);
-	Oferta updateOferta(Long id, String nombreOferta, String descripcionOferta,
-			boolean estadoOferta, Long idEmpresa, String fotoOferta, MultipartFile fotoArchivo);
+	Oferta updateOferta(Long id, OfertaUpdateRequest request);
 	void eliminarOferta(Long id);
 	List<Oferta> findAllOfertas();
 	List<Oferta> findAllOfertasActivas();

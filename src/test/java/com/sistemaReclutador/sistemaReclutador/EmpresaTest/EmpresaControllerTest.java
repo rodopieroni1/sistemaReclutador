@@ -75,6 +75,7 @@ class EmpresaControllerTest {
 
 	    mockMvc.perform(multipart("/empresas")
 	    		.file(logo)
+	    		.param("idEmpresa", "1")
 	            .param("nombre", "Nueva Empresa")
 	            .param("cuit", "20300000000")
 	            .param("email", "contacto@empresa.com")

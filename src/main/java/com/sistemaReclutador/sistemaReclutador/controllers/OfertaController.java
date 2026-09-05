@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
@@ -55,19 +55,16 @@ public class OfertaController {
 	    
 	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
+	
 	@PutMapping(value = "/actualizar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ResponseRest<Oferta>> updateOferta(
-			@PathVariable Long id,
-			@RequestParam("nombreOferta") String nombreOferta,
-			@RequestParam("descripcionOferta") String descripcionOferta,
-			@RequestParam("estadoOferta") boolean estadoOferta,
-			@RequestParam("idEmpresa") Long idEmpresa,
-			@RequestParam(value = "fotoOferta", required = false) String fotoOferta,
-			@RequestParam(value = "fotoArchivo", required = false) MultipartFile fotoArchivo) {
+	        @PathVariable Long id,
+	        @Valid @ModelAttribute OfertaUpdateRequest ofertaUpdateRequest) {
 
-		Oferta ofertaActualizada = ofertaService.updateOferta(id, nombreOferta, descripcionOferta, estadoOferta, idEmpresa, fotoOferta, fotoArchivo);
-		ResponseRest<Oferta> response = new ResponseRest<>(true, "Oferta actualizada satisfactoriamente", ofertaActualizada, LocalDateTime.now(), "200");
-		return ResponseEntity.ok(response);
+	    Oferta ofertaActualizada = ofertaService.updateOferta(id, ofertaUpdateRequest);
+	    ResponseRest<Oferta> response = new ResponseRest<>(true, "Oferta actualizada satisfactoriamente", 
+	        ofertaActualizada, LocalDateTime.now(), "200");	    
+	    return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/eliminar/{id}")
