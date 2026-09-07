@@ -83,7 +83,7 @@ public class EmpresaRepositoryTest {
     	        IllegalArgumentException.class, 
     	        () -> empresaService.saveEmpresa(request)
     	    );
-        assertEquals("El correo electrónico no puede superar los 100 caracteres", excepcion.getMessage() );
+        assertEquals("El correo electronico no puede superar los 100 caracteres", excepcion.getMessage() );
     }
 
     @Test
@@ -115,7 +115,7 @@ public class EmpresaRepositoryTest {
     	        IllegalArgumentException.class, 
     	        () -> empresaService.saveEmpresa(request)
     	    );
-        assertEquals("El email ya está registrado", excepcion.getMessage() );
+        assertEquals("El email ya esta registrado", excepcion.getMessage() );
     }
 
   
@@ -126,7 +126,7 @@ public class EmpresaRepositoryTest {
     	        IllegalArgumentException.class, 
     	        () -> empresaService.saveEmpresa(request)
     	    );
-        assertEquals("El cuit no tiene 11 digitos", excepcion.getMessage() );
+        assertEquals("El CUIT debe tener exactamente 11 digitos", excepcion.getMessage() );
     }
 
 
