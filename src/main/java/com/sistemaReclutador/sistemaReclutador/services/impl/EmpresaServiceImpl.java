@@ -63,7 +63,7 @@ public class EmpresaServiceImpl implements EmpresaService {
     @Override
     public void deleteEmpresa(Long id) {
         Empresa empresa = empresaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("No se encontró la empresa con el ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("No se encontro la empresa con el ID: " + id));
         empresaRepository.delete(empresa);
     }
 
@@ -94,7 +94,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         }
 
         if (request.getCuit() == null || String.valueOf(request.getCuit()).length() != 11) {
-            throw new IllegalArgumentException("El CUIT debe tener exactamente 11 dígitos");
+            throw new IllegalArgumentException("El CUIT debe tener exactamente 11 digitos");
         }
         boolean cuitCambio = empresaExistente == null || !empresaExistente.getCuit().equals(request.getCuit());
         if (cuitCambio && empresaRepository.existsByCuit(request.getCuit())) {
@@ -102,17 +102,17 @@ public class EmpresaServiceImpl implements EmpresaService {
         }
 
         if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new IllegalArgumentException("El correo electrónico es obligatorio");
+            throw new IllegalArgumentException("El correo electronico es obligatorio");
         }
         if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new IllegalArgumentException("El formato del correo electrónico no es válido");
         }
         if (request.getEmail().length() > 100) {
-            throw new IllegalArgumentException("El correo electrónico no puede superar los 100 caracteres");
+            throw new IllegalArgumentException("El correo electronico no puede superar los 100 caracteres");
         }
         boolean emailCambio = empresaExistente == null || !empresaExistente.getEmail().equalsIgnoreCase(request.getEmail());
         if (emailCambio && empresaRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException(empresaExistente == null ? "El email ya está registrado" : "El nuevo email ya se encuentra en uso.");
+            throw new IllegalArgumentException(empresaExistente == null ? "El email ya esta registrado" : "El nuevo email ya se encuentra en uso.");
         }
 
         if (request.getLogo() != null && !request.getLogo().isEmpty()) {

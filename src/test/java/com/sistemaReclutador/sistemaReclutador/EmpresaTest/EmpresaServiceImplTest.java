@@ -82,7 +82,7 @@ class EmpresaServiceImplTest {
         when(empresaRepository.existsByCuit(request.getCuit())).thenReturn(true);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> empresaService.saveEmpresa(request));
-        assertEquals("El CUIT ya está registrado.", ex.getMessage());
+        assertEquals("El CUIT ya esta registrado.", ex.getMessage());
         verify(empresaRepository, never()).save(any());
     }
 
