@@ -57,7 +57,6 @@ class EmpresaServiceImplTest {
         request.setIdRubro(1);
 
         empresa = new Empresa();
-        empresa.getRubro().setIdRubro(1);
         empresa.setCuit(20300000000L);
         empresa.setEmail("contacto@empresa.com");
         empresa.setNombre("Empresa Test");

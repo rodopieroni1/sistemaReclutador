@@ -98,7 +98,7 @@ public class EmpresaServiceImpl implements EmpresaService {
         }
         boolean cuitCambio = empresaExistente == null || !empresaExistente.getCuit().equals(request.getCuit());
         if (cuitCambio && empresaRepository.existsByCuit(request.getCuit())) {
-            throw new IllegalArgumentException(empresaExistente == null ? "El Cuit ya está registrado" : "El nuevo CUIT ya se encuentra en uso.");
+            throw new IllegalArgumentException(empresaExistente == null ? "El cuit ya existe" : "El nuevo CUIT ya se encuentra en uso.");
         }
 
         if (request.getEmail() == null || request.getEmail().isBlank()) {
