@@ -13,4 +13,6 @@ public interface RubroRepository extends JpaRepository<Rubro, Integer>{
 	@Query("SELECT r FROM Rubro r WHERE r.idRubro = :idRubro")
 	Optional<Rubro> findById(Long idRubro);
 
+	boolean existsByDescripcionRubroIgnoreCase(String descripcionLimpia);
+
 }

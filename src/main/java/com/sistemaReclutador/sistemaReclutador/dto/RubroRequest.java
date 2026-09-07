@@ -1,17 +1,13 @@
 package com.sistemaReclutador.sistemaReclutador.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RubroRequest {
 
-    @JsonProperty("idRubro")
-    private int idRubro;
-
-    @JsonProperty("descripcionRubro")
+    @NotBlank(message = "La descripción del rubro es obligatoria.")
+    @Size(min = 3, max = 100, message = "La descripción debe tener entre 3 y 100 caracteres.")
     private String descripcionRubro;
 }

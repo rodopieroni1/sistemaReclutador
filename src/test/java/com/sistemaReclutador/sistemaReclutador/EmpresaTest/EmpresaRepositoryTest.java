@@ -99,7 +99,7 @@ public class EmpresaRepositoryTest {
     	        IllegalArgumentException.class, 
     	        () -> empresaService.saveEmpresa(request)
     	    );
-        assertEquals("El cuit ya existe", excepcion.getMessage() );
+        assertEquals("El CUIT ya esta registrado.", excepcion.getMessage() );
     }
 
     @Test

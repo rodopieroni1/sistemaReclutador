@@ -91,10 +91,7 @@ public class RubroControllerTest {
 
     @Test
     void crearRubro_CuandoFallaValidacion_DeberiaRetornarBadRequest() throws Exception {
-        // CORRECCIÓN: Al ser un error de validaciones (@Valid), el servicio NUNCA llega a invocarse.
-        // No se coloca ningún when(rubroService...) aquí.
         requestValido.setDescripcionRubro(""); 
-
         mockMvc.perform(post("/rubro/crear")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestValido)))

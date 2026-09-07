@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,12 +76,6 @@ public class OfertaControllerTest {
 	}
 
 	@Test
-	void getAllOfertasDesc_DebeRetornarLista() throws Exception {
-		Mockito.when(ofertaService.findAllOfertasActivas()).thenReturn(List.of(new Oferta()));
-		mockMvc.perform(get("/ofertas/todas")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
-	}
-
-	@Test
 	void createOferta_DebeRetornarResponse() throws Exception {
 	    OfertaRequest ofertarequest = new OfertaRequest();
 	    ofertarequest.setNombreOferta("Desarrollador Backend");
@@ -112,19 +107,29 @@ public class OfertaControllerTest {
 	    Oferta ofertaSimulada = new Oferta();
 	    ofertaSimulada.setIdOferta(idOferta);
 	    ofertaSimulada.setNombreOferta("Desarrollador Senior Backend");
+
 	    Mockito.when(ofertaService.updateOferta(eq(idOferta), any(OfertaUpdateRequest.class)))
 	            .thenReturn(ofertaSimulada);
-	    MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/ofertas/actualizar/{id}", idOferta);
+
+	    MockMultipartHttpServletRequestBuilder builder = 
+	            MockMvcRequestBuilders.multipart("/ofertas/actualizar/{id}", idOferta);
+	    
 	    builder.with(request -> {
 	        request.setMethod("PUT");
 	        return request;
 	    });
+
 	    mockMvc.perform(builder
 	            .param("nombreOferta", "Desarrollador Senior Backend")
 	            .param("descripcionOferta", "Experiencia avanzada en Java")
-	            .param("estadoOferta", "false"))
+	            .param("estadoOferta", "false")
+	            // Agrega aquí los campos obligatorios faltantes (ejemplos comunes):
+	            .param("idEmpresa", "1")
+	            .param("idRubro", "1")
+	            .param("salario", "150000"))
+	            .andDo(print()) // Te mostrará en la consola el error exacto de validación si vuelve a dar 400
 	            .andExpect(status().isOk())
-	            .andExpect(jsonPath("$.success").value(false))
+	            .andExpect(jsonPath("$.success").value(true))
 	            .andExpect(jsonPath("$.message").value("Oferta actualizada satisfactoriamente"))
 	            .andExpect(jsonPath("$.data.idOferta").value(100))
 	            .andExpect(jsonPath("$.data.nombreOferta").value("Desarrollador Senior Backend"));

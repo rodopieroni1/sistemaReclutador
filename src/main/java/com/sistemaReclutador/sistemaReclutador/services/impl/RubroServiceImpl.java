@@ -22,9 +22,27 @@ public class RubroServiceImpl implements RubroService {
 	@Transactional
 	@Override
 	public Rubro crearRubro(RubroRequest request) {
-		Rubro rubro = new Rubro();
-		rubro.setDescripcionRubro(request.getDescripcionRubro().trim());
-		return rubroRepository.save(rubro);
+	    if (request == null || request.getDescripcionRubro() == null) {
+	        throw new IllegalArgumentException("La descripción del rubro no puede ser nula.");
+	    }
+
+	    String descripcionLimpia = request.getDescripcionRubro().trim();
+
+	    if (descripcionLimpia.isEmpty()) {
+	        throw new IllegalArgumentException("La descripción del rubro no puede estar vacía.");
+	    }
+
+	    if (descripcionLimpia.length() < 3) {
+	        throw new IllegalArgumentException("La descripción del rubro debe tener al menos 3 caracteres.");
+	    }
+
+	    if (rubroRepository.existsByDescripcionRubroIgnoreCase(descripcionLimpia)) {
+	        throw new IllegalArgumentException("Ya existe un rubro con la descripción: " + descripcionLimpia);
+	    }
+
+	    Rubro rubro = new Rubro();
+	    rubro.setDescripcionRubro(descripcionLimpia);
+	    return rubroRepository.save(rubro);
 	}
 
 	@Transactional
