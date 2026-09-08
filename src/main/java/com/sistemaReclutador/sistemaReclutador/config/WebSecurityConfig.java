@@ -51,8 +51,13 @@ public class WebSecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
 		
-		List<String> origins = Arrays.asList(allowedOrigins.split(","));
-		config.setAllowedOriginPatterns(origins); 
+		// Permitir orígenes explícitos para entornos locales y Jenkins
+		config.setAllowedOriginPatterns(List.of(
+			"http://localhost:4200",
+			"http://localhost:8080",
+			"http://localhost:8081",
+			"http://127.0.0.1:4200"
+		));
 		
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
