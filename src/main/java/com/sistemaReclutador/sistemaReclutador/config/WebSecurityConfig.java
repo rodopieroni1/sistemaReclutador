@@ -1,10 +1,8 @@
 package com.sistemaReclutador.sistemaReclutador.config;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,9 +25,6 @@ public class WebSecurityConfig {
 	@Autowired
 	private JwtAuthFilter jwtAuthFilter;
 
-	@Value("${cors.allowed-origins:http://localhost:4200}")
-	private String allowedOrigins;
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
@@ -51,14 +46,8 @@ public class WebSecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
 		
-		// Permitir orígenes explícitos para entornos locales y Jenkins
-		config.setAllowedOriginPatterns(List.of(
-			"http://localhost:4200",
-			"http://localhost:8080",
-			"http://localhost:8081",
-			"http://127.0.0.1:4200"
-		));
-		
+		// Permitir cualquier origen en entorno de desarrollo/Jenkins para evitar bloqueos
+		config.setAllowedOriginPatterns(List.of("*"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
