@@ -22,6 +22,7 @@ import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
+import com.sistemaReclutador.sistemaReclutador.factory.AplicacionFactory;
 import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
@@ -46,6 +47,8 @@ public class AplicacionServiceTests {
 
 	@Mock
 	private ValidacionAplicacionHandler validador;
+	@Mock
+	private AplicacionFactory aplicacionFactory;
 
 	private AplicacionServiceImpl aplicacionService;
 
@@ -53,7 +56,7 @@ public class AplicacionServiceTests {
 	void setUp() {
 
 		aplicacionService = new AplicacionServiceImpl(aplicacionRepository, perfilRepository, ofertaRepository,
-				mappingStrategies, List.of(validador));
+				mappingStrategies, List.of(validador), aplicacionFactory);
 	}
 
 // CREAR NUEVA APLICACION
@@ -62,7 +65,6 @@ public class AplicacionServiceTests {
 	void crearAplicacion_CuandoNoExiste_DebeCrearNueva() {
 
 		AplicacionRequest request = armarRequest();
-
 		Perfil perfil = request.getIdPerfil();
 		Oferta oferta = request.getIdOferta();
 		when(validador.validar(request)).thenReturn(Optional.empty());
@@ -70,11 +72,15 @@ public class AplicacionServiceTests {
 		when(ofertaRepository.findById(oferta.getIdOferta())).thenReturn(Optional.of(oferta));
 		when(aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta()))
 				.thenReturn(Optional.empty());
+
+		Aplicacion aplicacionNueva = new Aplicacion();
+		when(aplicacionFactory.crear(perfil, oferta)).thenReturn(aplicacionNueva);
 		when(aplicacionRepository.save(any(Aplicacion.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		AplicacionResponseDTO respuesta = aplicacionService.crearAplicacion(request);
 		assertEquals(ResultadosAplicacion.APLICACION_CREADA, respuesta.getStatus());
 		assertEquals("Te postulaste correctamente a la oferta.", respuesta.getMensaje());
-		verify(aplicacionRepository).save(any(Aplicacion.class));
+		verify(aplicacionFactory).crear(perfil, oferta);
+		verify(aplicacionRepository).save(aplicacionNueva);
 	}
 
 // APLICACION EXISTENTE Y ACTIVA

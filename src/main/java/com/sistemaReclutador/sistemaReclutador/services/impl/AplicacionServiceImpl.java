@@ -1,24 +1,17 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.sistemaReclutador.sistemaReclutador.Enum.ResultadosAplicacion;
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
-import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
-import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
-import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
-import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
+import com.sistemaReclutador.sistemaReclutador.dto.*;
+import com.sistemaReclutador.sistemaReclutador.repositories.*;
+import com.sistemaReclutador.sistemaReclutador.entities.*;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
-import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
-import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
-import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
+import com.sistemaReclutador.sistemaReclutador.factory.AplicacionFactory;
+
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 import com.sistemaReclutador.sistemaReclutador.strategies.AplicacionesMiasStrategy;
 import com.sistemaReclutador.sistemaReclutador.validators.ValidacionAplicacionHandler;
@@ -36,6 +29,7 @@ public class AplicacionServiceImpl implements AplicacionService {
 	private final OfertaRepository ofertaRepository;
 	private final Map<String, AplicacionesMiasStrategy> mappingStrategies;
 	private final List<ValidacionAplicacionHandler> validadores;
+	private final AplicacionFactory aplicacionFactory;
 
 	@Transactional
 	@Override
@@ -69,12 +63,8 @@ public class AplicacionServiceImpl implements AplicacionService {
     }
 	
 	private AplicacionResponseDTO crearNueva(Perfil perfil, Oferta oferta) {
-        Aplicacion nueva = new Aplicacion();
-        nueva.setFecha(LocalDateTime.now());
-        nueva.setEstadoaplicaciones(true);
-        nueva.setPerfil(perfil);
-        nueva.setOferta(oferta);
-
+		 
+	    Aplicacion nueva = aplicacionFactory.crear(perfil, oferta);
         aplicacionRepository.save(nueva);
         return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA, "Te postulaste correctamente a la oferta.");
     }

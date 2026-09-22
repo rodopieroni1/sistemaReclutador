@@ -12,7 +12,6 @@ import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 @Repository
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     
-	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.cuit = :cuit")
     boolean existsByCuit(@Param("cuit") Long cuit);
 	
 	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.email = :email")

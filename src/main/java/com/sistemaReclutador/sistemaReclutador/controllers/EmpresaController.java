@@ -43,7 +43,7 @@ public class EmpresaController {
         );
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseRest<Empresa>> crearEmpresa(@Valid @ModelAttribute EmpresaRequest empresaRequest) {
         Empresa empresaCreada = empresaService.saveEmpresa(empresaRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
