@@ -32,12 +32,12 @@ import lombok.RequiredArgsConstructor;
 public class PerfilServiceImpl implements PerfilService {
 
 	private final PasswordResetTokenRepository tokenRepository;
-    private final EmailService emailService;
-    private final PerfilRepository perfilRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final FileStorageStrategy fileStorageService;
-    private final List<PerfilStrategy> validationStrategies; 
-	
+	private final EmailService emailService;
+	private final PerfilRepository perfilRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final FileStorageStrategy fileStorageService;
+	private final List<PerfilStrategy> validationStrategies;
+
 	// cambiar uando se haga el desliegue
 	@Value("${app.api.front}")
 	private String apiFront;
@@ -48,68 +48,78 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, 
-	                                           String clave, String password, MultipartFile foto, MultipartFile uploadcv) {
-	    
-	    PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, clave);
-	    validarDatosPerfil(dto);
-	    Perfil perfil = new Perfil();
-	    perfil.setNombre(nombre);
-	    perfil.setDni(dni);
-	    perfil.setDireccion(direccion);
-	    perfil.setEmail(email);
-	    perfil.setClave(clave);
-	    perfil.setPassword(passwordEncoder.encode(password));
+	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String clave,
+			String password, MultipartFile foto, MultipartFile uploadcv) {
 
-	    perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
-	    perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
+		try {
 
-	    perfilRepository.save(perfil);
-	    
-	    return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
+			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, clave);
+
+			// Validaciones del backend
+			validarDatosPerfil(dto);
+
+			Perfil perfil = new Perfil();
+
+			perfil.setNombre(nombre);
+			perfil.setDni(dni);
+			perfil.setDireccion(direccion);
+			perfil.setEmail(email);
+			perfil.setClave(clave);
+			perfil.setPassword(passwordEncoder.encode(password));
+
+			perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
+
+			perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
+
+			perfilRepository.save(perfil);
+
+			return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
+
+		} catch (IllegalArgumentException e) {
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"" + e.getMessage() + "\"}");
+		}
 	}
 
 	@Override
-	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, 
-	                                              String email, String clave, MultipartFile foto, MultipartFile uploadcv) {
-	
-	        Optional<Perfil> perfilOpt = perfilRepository.findById(id);
-	        if (perfilOpt.isEmpty()) {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                    .body("{\"error\":\"Perfil no encontrado\"}");
-	        }
-	        PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, clave);
-	         validarDatosPerfil(dto);
-
-	        Perfil perfil = perfilOpt.get();
-	        perfil.setNombre(nombre);
-	        perfil.setDni(dni);
-	        perfil.setDireccion(direccion);
-	        perfil.setEmail(email);
-	        perfil.setClave(clave);
-
-	        if (foto != null && !foto.isEmpty()) {
-	            perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
-	        }
-
-	        if (uploadcv != null && !uploadcv.isEmpty()) {
-	            perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
-	        }
-
-	        perfilRepository.save(perfil);
-	        return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
+	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String email,
+			String clave, MultipartFile foto, MultipartFile uploadcv) {
+		Optional<Perfil> perfilOpt = perfilRepository.findById(id);
+		if (perfilOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"Perfil no encontrado\"}");
+		}
+		try {
+			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, clave);
+			// Validaciones del backend
+			validarDatosPerfil(dto);
+			Perfil perfil = perfilOpt.get();
+			perfil.setNombre(nombre);
+			perfil.setDni(dni);
+			perfil.setDireccion(direccion);
+			perfil.setEmail(email);
+			perfil.setClave(clave);
+			if (foto != null && !foto.isEmpty()) {
+				perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
+			}
+			if (uploadcv != null && !uploadcv.isEmpty()) {
+				perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
+			}
+			perfilRepository.save(perfil);
+			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"" + e.getMessage() + "\"}");
+		}
 	}
 
 	private void validarDatosPerfil(PerfilDTO dto) {
-	    for (PerfilStrategy strategy : validationStrategies) {
-	        Optional<String> error = strategy.validar(dto, perfilRepository);
-	        if (error.isPresent()) {
-	            throw new IllegalArgumentException(error.get());
-	        }
-	    }
+		for (PerfilStrategy strategy : validationStrategies) {
+			Optional<String> error = strategy.validar(dto, perfilRepository);
+			if (error.isPresent()) {
+				throw new IllegalArgumentException(error.get());
+			}
+		}
 	}
-	
-	
+
 	@Override
 	public ResponseEntity<?> eliminarPerfil(int id) {
 		perfilRepository.deleteById(id);
@@ -128,9 +138,9 @@ public class PerfilServiceImpl implements PerfilService {
 					// no permitimos un nuevo login
 					if (tiempoSinActividad.toMinutes() < 1) {
 						long minutosRestantes = 1 - tiempoSinActividad.toMinutes();
-						return ResponseEntity.status(HttpStatus.CONFLICT)
-								.body(Map.of("error", "Ya existe una sesión activa para este usuario, o Espere 1 minuto, si no CERRO CORRECTAMENTE la sesion anterior",
-										"minutosRestantes", minutosRestantes));
+						return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error",
+								"Ya existe una sesión activa para este usuario, o Espere 1 minuto, si no CERRO CORRECTAMENTE la sesion anterior",
+								"minutosRestantes", minutosRestantes));
 					}
 				}
 				// La sesión anterior expiró, se reemplaza por una nueva
@@ -155,31 +165,29 @@ public class PerfilServiceImpl implements PerfilService {
 		try {
 			if (perfilOpt.isPresent()) {
 				Perfil perfil = perfilOpt.get();
-				PasswordResetToken tokenExistente =  tokenRepository.findByPerfil(perfil).orElse(null);
+				PasswordResetToken tokenExistente = tokenRepository.findByPerfil(perfil).orElse(null);
 				if (tokenExistente != null) {
-				    tokenExistente.setToken(UUID.randomUUID().toString());
-				    tokenExistente.setExpiryDate(LocalDateTime.now().plusHours(1));
-				    tokenRepository.save(tokenExistente);
-				    String resetLink = apiFront + "/reset-password?token=" + tokenExistente.getToken();
-				    emailService.send(perfil.getEmail(), "Recuperación de contraseña",
+					tokenExistente.setToken(UUID.randomUUID().toString());
+					tokenExistente.setExpiryDate(LocalDateTime.now().plusHours(1));
+					tokenRepository.save(tokenExistente);
+					String resetLink = apiFront + "/reset-password?token=" + tokenExistente.getToken();
+					emailService.send(perfil.getEmail(), "Recuperación de contraseña",
 							"ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: "
 									+ resetLink);
 					return ResponseEntity.ok(Map.of("message", "Se envió el enlace al mail ingresado"));
 				} else {
-				    PasswordResetToken token = new PasswordResetToken();
-				    token.setPerfil(perfil);
-				    token.setToken(UUID.randomUUID().toString());
-				    token.setExpiryDate(LocalDateTime.now().plusHours(1));
-				    tokenRepository.save(token);
-				    String resetLink = apiFront + "/reset-password?token=" + token.getToken();
-				    emailService.send(perfil.getEmail(), "Recuperación de contraseña",
+					PasswordResetToken token = new PasswordResetToken();
+					token.setPerfil(perfil);
+					token.setToken(UUID.randomUUID().toString());
+					token.setExpiryDate(LocalDateTime.now().plusHours(1));
+					tokenRepository.save(token);
+					String resetLink = apiFront + "/reset-password?token=" + token.getToken();
+					emailService.send(perfil.getEmail(), "Recuperación de contraseña",
 							"ATENCION!, si usted no pidio un reseteo de contraseña, desestime este mail. /n Hacé clic en el siguiente enlace para restablecer tu contraseña: "
 									+ resetLink);
 					return ResponseEntity.ok(Map.of("message", "Se envió el enlace al mail ingresado"));
 				}
-				
-				
-				
+
 			} else {
 				return ResponseEntity.ok(Map.of("message", "Esta clave no se corresponde al mail ingersado"));
 			}
@@ -232,7 +240,8 @@ public class PerfilServiceImpl implements PerfilService {
 
 	@Override
 	public Perfil findById(int id) {
-	    return perfilRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Perfil con ID " + id + " no encontrado"));
+		return perfilRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Perfil con ID " + id + " no encontrado"));
 	}
 
 	@Override

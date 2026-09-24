@@ -77,24 +77,47 @@ public class PerfilStrategiesImpl {
 
 	@Component
 	public static class DatosBasicosValidationStrategy implements PerfilStrategy {
-		@Override
-		public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
-			if (dto.nombre() != null && dto.nombre().length() > 100) {
-				return Optional.of("El Nombre no debe ser mayor de 100 caracteres.");
-			}
-			if (dto.direccion() != null && dto.direccion().length() > 255) {
-				return Optional.of("La dirección no debe ser mayor de 255 caracteres.");
-			}
-			if (dto.clave() != null && dto.clave().length() > 100) {
-				return Optional.of("La clave no debe ser mayor de 100 caracteres.");
-			}
 
-			Optional<Perfil> existenteClave = repository.findByClave(dto.clave());
-			if (existenteClave.isPresent() && !existenteClave.get().getId_perfil().equals(dto.id())) {
-				return Optional.of("El nombre de usuario/clave ya se encuentra registrado.");
-			}
+	    @Override
+	    public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
 
-			return Optional.empty();
-		}
+	        // NOMBRE
+	        if (dto.nombre() == null || dto.nombre().isBlank()) {
+	            return Optional.of("El nombre es obligatorio.");
+	        }
+
+	        if (dto.nombre().length() > 100) {
+	            return Optional.of("El nombre no debe ser mayor de 100 caracteres.");
+	        }
+
+	        // DIRECCIÓN
+	        if (dto.direccion() == null || dto.direccion().isBlank()) {
+	            return Optional.of("La dirección es obligatoria.");
+	        }
+
+	        if (dto.direccion().length() > 255) {
+	            return Optional.of("La dirección no debe ser mayor de 255 caracteres.");
+	        }
+
+	        // CLAVE
+	        if (dto.clave() == null || dto.clave().isBlank()) {
+	            return Optional.of("La clave es obligatoria.");
+	        }
+
+	        if (dto.clave().length() > 100) {
+	            return Optional.of("La clave no debe ser mayor de 100 caracteres.");
+	        }
+
+	        // CLAVE ÚNICA
+	        Optional<Perfil> existenteClave = repository.findByClave(dto.clave());
+	        if (existenteClave.isPresent()
+	                && !existenteClave.get().getId_perfil().equals(dto.id())) {
+	            return Optional.of(
+	                "El nombre de usuario/clave ya se encuentra registrado."
+	            );
+	        }
+
+	        return Optional.empty();
+	    }
 	}
 }

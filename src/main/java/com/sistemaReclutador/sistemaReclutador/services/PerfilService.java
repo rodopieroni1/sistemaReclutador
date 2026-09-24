@@ -2,11 +2,8 @@ package com.sistemaReclutador.sistemaReclutador.services;
 
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 
