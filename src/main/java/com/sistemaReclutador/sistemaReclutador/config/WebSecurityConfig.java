@@ -22,31 +22,37 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
+	/*el recorrido es el siguiente
+	 * El filtro extrae el JWT.
+	 Reconoce tipo = USUARIO.
+
+	Busca reclutador1 mediante usuarioRepository.findByClave(username).	
+	Encuentra al usuario y establece la autenticación en el SecurityContext.
+	Spring Security permite acceder a /usuarios.*/
+	
 	@Autowired
 	private JwtAuthFilter jwtAuthFilter;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http
-				.csrf(csrf -> csrf.disable())
-				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+		return http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/uploads/**", "/login", "/ws").permitAll()
-						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/usuarios/**", "/perfiles/**").permitAll()
-						.anyRequest().authenticated()
-				)
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-				.build();
+						.requestMatchers(HttpMethod.POST, "/usuarios/auth/login").permitAll()
+						.requestMatchers("/usuarios/**").authenticated()
+						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/perfiles/**")
+						.permitAll().anyRequest().authenticated())
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
 	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		
-		// Permitir cualquier origen en entorno de desarrollo/Jenkins para evitar bloqueos
+
+		// Permitir cualquier origen en entorno de desarrollo/Jenkins para evitar
+		// bloqueos
 		config.setAllowedOriginPatterns(List.of("*"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -67,12 +73,10 @@ public class WebSecurityConfig {
 				if (!uploadDir.endsWith("/")) {
 					uploadDir += "/";
 				}
-				
+
 				String resourcePath = "file:///" + uploadDir.replace("\\", "/");
-				
-				registry.addResourceHandler("/uploads/**")
-						.addResourceLocations(resourcePath)
-						.setCachePeriod(0);
+
+				registry.addResourceHandler("/uploads/**").addResourceLocations(resourcePath).setCachePeriod(0);
 			}
 
 			@Override

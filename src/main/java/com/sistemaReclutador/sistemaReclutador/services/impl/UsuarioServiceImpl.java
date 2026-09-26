@@ -1,12 +1,12 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,41 +17,35 @@ import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.repositories.UsuarioRepository;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-@Configuration
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-	
-	private UsuarioRepository usuarioRepository;
-	private JwtUtil jwtUtil;
-	
-	 public UsuarioServiceImpl(UsuarioRepository usuarioRepository, JwtUtil jwtUtil) {
-	        this.usuarioRepository = usuarioRepository;
-	        this.jwtUtil = jwtUtil;
-	    }
+	private final UsuarioRepository usuarioRepository;
+	private final JwtUtil jwtUtil;
+	private final PasswordEncoder passwordEncoder;
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+	public UsuarioServiceImpl(UsuarioRepository usuarioRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+		this.usuarioRepository = usuarioRepository;
+		this.jwtUtil = jwtUtil;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	public ResponseEntity<?> login(LoginRequest credential) {
 		try {
 			Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
-			if (user.isPresent() && passwordEncoder().matches(credential.getPassword(), user.get().getContraseña())) {
-				String token = jwtUtil.generateTokenUsuario(user.get().getNombre());
+			if (user.isPresent()
+					&& this.passwordEncoder.matches(credential.getPassword(), user.get().getContraseña())) {
+				String token = jwtUtil.generateTokenUsuario(user.get().getClave());
 				return ResponseEntity.ok().body(Map.of("token", token));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Error en el ingreso"));
 
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Error interno en el servidor"));
 		}
 	}
 
@@ -67,6 +61,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Override
 	public Usuario saveUsuario(Usuario usuario) {
+		usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
 		return usuarioRepository.save(usuario);
 	}
 
@@ -81,7 +76,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 				usuario.setContraseña(usuarioDetails.getContraseña());
 				usuario.setNombre(usuarioDetails.getNombre());
 				usuarioRepository.save(usuario);
-				response = new ResponseRest<>(true, "Usuario actualizado satisfactoriamente", usuario,LocalDateTime.now(), "200");
+				response = new ResponseRest<>(true, "Usuario actualizado satisfactoriamente", usuario,
+						LocalDateTime.now(), "200");
 				return ResponseEntity.ok(response);
 			} else {
 				response = new ResponseRest<>(false, "No se encontró el usuario", null, LocalDateTime.now(), "404");
@@ -102,18 +98,19 @@ public class UsuarioServiceImpl implements UsuarioService {
 		try {
 			if (usuarioOptional.isPresent()) {
 				usuarioRepository.deleteById(id);
-				response = new ResponseRest<>(true, "Usuario eliminado satisfactoriamente", null,
-						LocalDateTime.now(), "200");
+				response = new ResponseRest<>(true, "Usuario eliminado satisfactoriamente", null, LocalDateTime.now(),
+						"200");
 				return ResponseEntity.status(HttpStatus.CREATED).body(response);
 			} else {
-				response = new ResponseRest<>(false, "No se pudo eliminar el usuario", null, LocalDateTime.now(), "400");
+				response = new ResponseRest<>(false, "No se pudo eliminar el usuario", null, LocalDateTime.now(),
+						"400");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			response = new ResponseRest<>(false, "Ocurrió un error al eliminar el usuario: " + e.getMessage(), null,
 					LocalDateTime.now(), "500");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
 	}
 

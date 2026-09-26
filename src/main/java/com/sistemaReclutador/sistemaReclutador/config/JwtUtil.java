@@ -27,6 +27,7 @@ public class JwtUtil {
 	public static String generateTokenUsuario(String username) {
 	    return Jwts.builder()
 	            .setSubject(username)
+	            .claim("tipo", "USUARIO")
 	            .setIssuedAt(new Date())
 	            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
 	            .signWith(SECRET_KEY)
@@ -42,7 +43,15 @@ public class JwtUtil {
 	            .getSubject();
 	}
 	
+	public String extraerTipo(String token) {
+	    Claims claims = Jwts.parserBuilder()
+	            .setSigningKey(SECRET_KEY)
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
 
+	    return claims.get("tipo", String.class);
+	}
 
 	public static boolean validateToken(String token) {
 		try {
