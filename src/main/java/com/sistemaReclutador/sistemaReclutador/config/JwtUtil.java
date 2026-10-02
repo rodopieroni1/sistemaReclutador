@@ -2,55 +2,37 @@ package com.sistemaReclutador.sistemaReclutador.config;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import java.util.Date;
 import javax.crypto.SecretKey;
-
 import org.springframework.stereotype.Component;
+import com.sistemaReclutador.sistemaReclutador.Enum.TipoUsuario;
 
+@RequiredArgsConstructor
 @Component
 public class JwtUtil {
 	private static final long EXPIRATION_TIME = 5 * 60 * 1000;
 	private static final String SECRET = "clave-secreta-super-segura-clave-muy-larga";
 	private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-
 	public static String generateToken(String username, String sessionId) {
-	    return Jwts.builder()
-	            .setSubject(username)
-	            .claim("sessionId", sessionId)
-	            .setIssuedAt(new Date())
-	            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-	            .signWith(SECRET_KEY)
-	            .compact();
+		return Jwts.builder().setSubject(username).claim("sessionId", sessionId).setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).signWith(SECRET_KEY).compact();
 	}
-	
-	public static String generateTokenUsuario(String username) {
-	    return Jwts.builder()
-	            .setSubject(username)
-	            .claim("tipo", "USUARIO")
-	            .setIssuedAt(new Date())
-	            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-	            .signWith(SECRET_KEY)
-	            .compact();
+
+	public static String generateTokenUsuario(String username, TipoUsuario tipoUsuario) {
+		return Jwts.builder().setSubject(username).claim("tipo", tipoUsuario.name()).setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).signWith(SECRET_KEY).compact();
 	}
 
 	public String extraerUsername(String token) {
-	    return Jwts.parserBuilder()
-	            .setSigningKey(SECRET_KEY)
-	            .build()
-	            .parseClaimsJws(token)
-	            .getBody()
-	            .getSubject();
+		return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody().getSubject();
 	}
-	
-	public String extraerTipo(String token) {
-	    Claims claims = Jwts.parserBuilder()
-	            .setSigningKey(SECRET_KEY)
-	            .build()
-	            .parseClaimsJws(token)
-	            .getBody();
 
-	    return claims.get("tipo", String.class);
+	public String extraerTipo(String token) {
+		Claims claims = Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody();
+
+		return claims.get("tipo", String.class);
 	}
 
 	public static boolean validateToken(String token) {
@@ -74,12 +56,8 @@ public class JwtUtil {
 	}
 
 	public String extraerSessionId(String token) {
-	    return Jwts.parserBuilder()
-	            .setSigningKey(SECRET_KEY)
-	            .build()
-	            .parseClaimsJws(token)
-	            .getBody()
-	            .get("sessionId", String.class);
+		return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody().get("sessionId",
+				String.class);
 	}
 
 }

@@ -19,6 +19,9 @@ public interface PerfilRepository extends JpaRepository<Perfil, Integer> {
 	
 	@Query("SELECT p FROM Perfil p WHERE p.id = :id")
 	Optional<Perfil> findById(@Param("id") Long id);
+	
+	@Query("SELECT p FROM Perfil p WHERE p.id = :id")
+	Optional<Perfil> findByIdLimitado(@Param("id") Long id);
 
     Optional<Perfil> findByClave(String clave);
 

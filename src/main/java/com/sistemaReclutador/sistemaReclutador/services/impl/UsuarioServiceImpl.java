@@ -4,12 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
@@ -17,7 +15,9 @@ import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.repositories.UsuarioRepository;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
@@ -25,18 +25,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 	private final JwtUtil jwtUtil;
 	private final PasswordEncoder passwordEncoder;
 
-	public UsuarioServiceImpl(UsuarioRepository usuarioRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
-		this.usuarioRepository = usuarioRepository;
-		this.jwtUtil = jwtUtil;
-		this.passwordEncoder = passwordEncoder;
-	}
-
 	public ResponseEntity<?> login(LoginRequest credential) {
 		try {
 			Optional<Usuario> user = usuarioRepository.findByClave(credential.getClave());
 			if (user.isPresent()
 					&& this.passwordEncoder.matches(credential.getPassword(), user.get().getContraseña())) {
-				String token = jwtUtil.generateTokenUsuario(user.get().getClave());
+				String token = jwtUtil.generateTokenUsuario(
+				        user.get().getClave(),
+				        user.get().getTipoUsuario()
+				);
 				return ResponseEntity.ok().body(Map.of("token", token));
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciales incorrectas"));

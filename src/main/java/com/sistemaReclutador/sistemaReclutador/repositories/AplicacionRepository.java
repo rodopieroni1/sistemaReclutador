@@ -30,6 +30,10 @@ public interface AplicacionRepository extends JpaRepository<Aplicacion, Integer>
 			+ "ORDER BY a.idaplicacion DESC")
 	List<Object[]> obtenerAplicacionesPerfil(@Param("idPerfil") int idPerfil);
 
+	@Query("SELECT o.nombreOferta FROM Aplicacion a JOIN a.oferta o WHERE a.perfil.id = :idPerfil"
+			+ " ORDER BY a.idaplicacion DESC")
+	List<String> obtenerNombreAplicacionesPerfil(@Param("idPerfil") int idPerfil);
+	
 	@Query("SELECT a FROM Aplicacion a WHERE a.perfil.id = :idPerfil AND a.oferta.idOferta = :idOferta")
 	Optional<Aplicacion> findByPerfilAndOferta(int idPerfil, Long idOferta);
 

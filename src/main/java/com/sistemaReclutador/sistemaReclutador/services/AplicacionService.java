@@ -17,5 +17,6 @@ public interface AplicacionService {
 	List<Aplicacion> findAllDesc();
 	List<Aplicacion> findAllDescActivas();
 	void deleteById(int id);
+	List<String> findByPerfilId(Integer id);
 	
 }

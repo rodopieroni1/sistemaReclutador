@@ -14,12 +14,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.PerfilConAplicacionesDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilDTO;
+import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.entities.PasswordResetToken;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
 import com.sistemaReclutador.sistemaReclutador.repositories.PasswordResetTokenRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
+import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 import com.sistemaReclutador.sistemaReclutador.services.EmailService;
 import com.sistemaReclutador.sistemaReclutador.services.PerfilService;
 import com.sistemaReclutador.sistemaReclutador.strategies.FileStorageStrategy;
@@ -37,6 +40,7 @@ public class PerfilServiceImpl implements PerfilService {
 	private final PasswordEncoder passwordEncoder;
 	private final FileStorageStrategy fileStorageService;
 	private final List<PerfilStrategy> validationStrategies;
+	private final AplicacionService aplicacionService;
 
 	// cambiar uando se haga el desliegue
 	@Value("${app.api.front}")
@@ -48,48 +52,38 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String clave,
+	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String telefono, String clave,
 			String password, MultipartFile foto, MultipartFile uploadcv) {
-
 		try {
-
-			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, clave);
-
+			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, telefono, clave);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
-
 			Perfil perfil = new Perfil();
-
 			perfil.setNombre(nombre);
 			perfil.setDni(dni);
 			perfil.setDireccion(direccion);
 			perfil.setEmail(email);
+			perfil.setTelefono(telefono);
 			perfil.setClave(clave);
 			perfil.setPassword(passwordEncoder.encode(password));
-
 			perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
-
 			perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
-
 			perfilRepository.save(perfil);
-
 			return ResponseEntity.ok("{\"message\":\"Perfil creado correctamente\"}");
-
 		} catch (IllegalArgumentException e) {
-
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"" + e.getMessage() + "\"}");
 		}
 	}
 
 	@Override
 	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String email,
-			String clave, MultipartFile foto, MultipartFile uploadcv) {
+			String telefono, String clave, MultipartFile foto, MultipartFile uploadcv) {
 		Optional<Perfil> perfilOpt = perfilRepository.findById(id);
 		if (perfilOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"Perfil no encontrado\"}");
 		}
 		try {
-			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, clave);
+			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, telefono, clave);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
 			Perfil perfil = perfilOpt.get();
@@ -97,6 +91,7 @@ public class PerfilServiceImpl implements PerfilService {
 			perfil.setDni(dni);
 			perfil.setDireccion(direccion);
 			perfil.setEmail(email);
+			perfil.setTelefono(telefono);
 			perfil.setClave(clave);
 			if (foto != null && !foto.isEmpty()) {
 				perfil.setFotoUrl(fileStorageService.storeFile(foto, "fotos"));
@@ -245,9 +240,23 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<List<Perfil>> listarPerfiles() {
+	public ResponseEntity<List<PerfilConAplicacionesDTO>> listarPerfiles() {
 		List<Perfil> perfiles = perfilRepository.findAll();
-		return new ResponseEntity<>(perfiles, HttpStatus.OK);
+		List<PerfilConAplicacionesDTO> perfilAplicacionResponse = new ArrayList<>();
+		
+		for(Perfil perfil : perfiles) {
+			List<String> aplicacionesPefil = aplicacionService.findByPerfilId(perfil.getId_perfil());
+		
+			perfilAplicacionResponse.add(
+					new PerfilConAplicacionesDTO(
+					        perfil,
+					        aplicacionesPefil
+					    )
+					);
+		}
+		
+		int i= 1;
+		return new ResponseEntity<>(perfilAplicacionResponse, HttpStatus.OK);
 	}
 
 	@Override

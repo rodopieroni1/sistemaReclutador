@@ -22,14 +22,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-	/*el recorrido es el siguiente
-	 * El filtro extrae el JWT.
-	 Reconoce tipo = USUARIO.
+	/*
+	 * el recorrido es el siguiente El filtro extrae el JWT. Reconoce tipo =
+	 * USUARIO. Busca reclutador1 mediante usuarioRepository.findByClave(username).
+	 * Encuentra al usuario y establece la autenticación en el SecurityContext.
+	 * Spring Security permite acceder a /usuarios. la administracion de Usuarios es
+	 * mediante .requestMatchers("/usuarios/**").hasAuthority("SUPER_ADMIN")
+	 */
 
-	Busca reclutador1 mediante usuarioRepository.findByClave(username).	
-	Encuentra al usuario y establece la autenticación en el SecurityContext.
-	Spring Security permite acceder a /usuarios.*/
-	
 	@Autowired
 	private JwtAuthFilter jwtAuthFilter;
 
@@ -40,7 +40,7 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/uploads/**", "/login", "/ws").permitAll()
 						.requestMatchers(HttpMethod.POST, "/usuarios/auth/login").permitAll()
-						.requestMatchers("/usuarios/**").authenticated()
+						.requestMatchers("/usuarios/**").hasAuthority("SUPER_ADMIN")
 						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/perfiles/**")
 						.permitAll().anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();

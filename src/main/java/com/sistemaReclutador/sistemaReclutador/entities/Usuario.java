@@ -1,5 +1,7 @@
 package com.sistemaReclutador.sistemaReclutador.entities;
 
+import com.sistemaReclutador.sistemaReclutador.Enum.TipoUsuario;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +29,7 @@ public class Usuario {
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
-    @Column(name = "tipoUsuario", nullable = false, length = 100)
-    private String tipoUsuario;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipoUsuario", nullable = false, length = 20)
+    private TipoUsuario tipoUsuario;
 }

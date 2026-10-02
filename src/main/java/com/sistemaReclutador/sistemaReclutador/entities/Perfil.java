@@ -36,6 +36,9 @@ public class Perfil {
     @Column(name = "email", length = 100, unique = true)
     private String email;
 
+    @Column(name = "telefono", length = 25, unique = true)
+    private String telefono;
+
     @Column(name = "session_id")
     private String sessionId;
 

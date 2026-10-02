@@ -11,6 +11,7 @@ import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 	
 	 Optional<Usuario> findByClave(String clave);
+	 boolean existsByClave(String clave);
 	boolean existsByEmail(String email);
 
 }

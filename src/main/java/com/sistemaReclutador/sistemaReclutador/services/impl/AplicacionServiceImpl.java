@@ -20,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class AplicacionServiceImpl implements AplicacionService {
 
 	private final AplicacionRepository aplicacionRepository;
@@ -109,6 +109,12 @@ public class AplicacionServiceImpl implements AplicacionService {
     public List<Aplicacion> findAllDescActivas() {
         return aplicacionRepository.findAllDescActivas();
     }
+	
+	@Transactional(readOnly = true)
+    @Override
+    public List<String>findByPerfilId(Integer id){
+		return aplicacionRepository.obtenerNombreAplicacionesPerfil(id);
+	}
 
 	@Transactional
     @Override

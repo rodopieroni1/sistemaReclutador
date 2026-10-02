@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,7 +31,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, java.io.IOException {
-
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			String token = authHeader.substring(7);
@@ -43,16 +43,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			String username = jwtUtil.extraerUsername(token);
 			String tipo = jwtUtil.extraerTipo(token);
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				// 3. Si es un Usuario (reclutador/administrador)
-				if ("USUARIO".equals(tipo)) {
+				// 3. Si es un Usuario administrativo
+				if ("SUPER_ADMIN".equals(tipo) || "RECLUTADOR".equals(tipo)) {
 					Optional<Usuario> usuario = usuarioRepository.findByClave(username);
 					if (usuario.isEmpty()) {
 						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 						return;
 					}
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username,
-							null, java.util.Collections.emptyList());
-
+							null, java.util.Collections.singletonList(new SimpleGrantedAuthority(tipo)));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				} else {
 					// 4. Si es Perfil, mantenemos la lógica actual
