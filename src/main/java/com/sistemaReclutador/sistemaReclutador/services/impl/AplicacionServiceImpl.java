@@ -34,41 +34,49 @@ public class AplicacionServiceImpl implements AplicacionService {
 	@Transactional
 	@Override
 	public AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest) {
-	    
-	    for (ValidacionAplicacionHandler validador : validadores) {
-	        Optional<AplicacionResponseDTO> error = validador.validar(aplicacionRequest);
-	        if (error.isPresent()) {
-	            return error.get();
-	        }
-	    }
-	    
-	    Perfil perfil = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil())
-	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró el perfil con ID: " + aplicacionRequest.getIdPerfil().getId_perfil()));
-	            
-	    Oferta oferta = ofertaRepository.findById(aplicacionRequest.getIdOferta().getIdOferta())
-	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + aplicacionRequest.getIdOferta().getIdOferta()));
 
-	    return aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta())
-	            .map(this::procesarExistente)
-	            .orElseGet(() -> crearNueva(perfil, oferta));
+		for (ValidacionAplicacionHandler validador : validadores) {
+			Optional<AplicacionResponseDTO> error = validador.validar(aplicacionRequest);
+			if (error.isPresent()) {
+				return error.get();
+			}
+		}
+
+		Perfil perfil = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"No se encontró el perfil con ID: " + aplicacionRequest.getIdPerfil().getId_perfil()));
+
+		Oferta oferta = ofertaRepository.findById(aplicacionRequest.getIdOferta().getIdOferta())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"No se encontró la oferta con ID: " + aplicacionRequest.getIdOferta().getIdOferta()));
+		// Validar nuevamente el estado en el backend
+		if (!Boolean.TRUE.equals(oferta.isEstadoOferta())) {
+			return new AplicacionResponseDTO(ResultadosAplicacion.OFERTA_INACTIVA,
+					"Esta oferta ya no se encuentra activa y no admite nuevas postulaciones.");
+		}
+		return aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta())
+				.map(this::procesarExistente).orElseGet(() -> crearNueva(perfil, oferta));
 	}
 
 	private AplicacionResponseDTO procesarExistente(Aplicacion aplicacion) {
-        if (Boolean.TRUE.equals(aplicacion.isEstadoaplicaciones())) {
-            return new AplicacionResponseDTO(ResultadosAplicacion.YA_APLICO, "Ya aplicaste anteriormente a esta oferta.");
-        }
-        aplicacion.reactivar();
-        aplicacionRepository.save(aplicacion);
-        return new AplicacionResponseDTO(ResultadosAplicacion.ACTUALIZACION_ESTADO, "Tu postulación fue reactivada correctamente.");
-    }
-	
+		if (Boolean.TRUE.equals(aplicacion.isEstadoaplicaciones())) {
+			return new AplicacionResponseDTO(ResultadosAplicacion.YA_APLICO,
+					"Ya aplicaste anteriormente a esta oferta.");
+		}
+		aplicacion.reactivar();
+		aplicacionRepository.save(aplicacion);
+		return new AplicacionResponseDTO(ResultadosAplicacion.ACTUALIZACION_ESTADO,
+				"Tu postulación fue reactivada correctamente.");
+	}
+
 	private AplicacionResponseDTO crearNueva(Perfil perfil, Oferta oferta) {
-		 
-	    Aplicacion nueva = aplicacionFactory.crear(perfil, oferta);
-        aplicacionRepository.save(nueva);
-        return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA, "Te postulaste correctamente a la oferta.");
-    }
-	
+
+		Aplicacion nueva = aplicacionFactory.crear(perfil, oferta);
+		aplicacionRepository.save(nueva);
+		return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA,
+				"Te postulaste correctamente a la oferta.");
+	}
+
 	@Transactional(readOnly = true)
 	@Override
 	public boolean existsById(Integer id) {
@@ -78,50 +86,46 @@ public class AplicacionServiceImpl implements AplicacionService {
 	@Transactional(readOnly = true)
 	@Override
 	public List<AplicacionesMiasResponse> obtenerAplicacionesPerfil(int idPerfil, String format) {
-	    List<Object[]> resultado = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
-	    AplicacionesMiasStrategy strategy = mappingStrategies.getOrDefault(
-	            format, 
-	            mappingStrategies.get("standardMappingStrategy")
-	    );
-	    return resultado.stream()
-	            .map(strategy::map)
-	            .toList();
+		List<Object[]> resultado = aplicacionRepository.obtenerAplicacionesPerfil(idPerfil);
+		AplicacionesMiasStrategy strategy = mappingStrategies.getOrDefault(format,
+				mappingStrategies.get("standardMappingStrategy"));
+		return resultado.stream().map(strategy::map).toList();
 	}
 
 	@Transactional
 	@Override
 	public void cambiarEstado(Integer id, boolean estado) {
-	    Aplicacion aplicacion = aplicacionRepository.findById(id)
-	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la aplicación con ID: " + id));
-	    
-	    aplicacion.setEstadoaplicaciones(estado);
-	    aplicacionRepository.save(aplicacion);
+		Aplicacion aplicacion = aplicacionRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("No se encontró la aplicación con ID: " + id));
+
+		aplicacion.setEstadoaplicaciones(estado);
+		aplicacionRepository.save(aplicacion);
 	}
 
 	@Transactional(readOnly = true)
-    @Override
-    public List<Aplicacion> findAllDesc() {
-        return aplicacionRepository.findAllDesc();
-    }
+	@Override
+	public List<Aplicacion> findAllDesc() {
+		return aplicacionRepository.findAllDesc();
+	}
 
 	@Transactional(readOnly = true)
-    @Override
-    public List<Aplicacion> findAllDescActivas() {
-        return aplicacionRepository.findAllDescActivas();
-    }
-	
+	@Override
+	public List<Aplicacion> findAllDescActivas() {
+		return aplicacionRepository.findAllDescActivas();
+	}
+
 	@Transactional(readOnly = true)
-    @Override
-    public List<String>findByPerfilId(Integer id){
+	@Override
+	public List<String> findByPerfilId(Integer id) {
 		return aplicacionRepository.obtenerNombreAplicacionesPerfil(id);
 	}
 
 	@Transactional
-    @Override
-    public void deleteById(int id) {
-        if (!aplicacionRepository.existsById(id)) {
-            throw new ResourceNotFoundException("No se encontró la aplicación con ID: " + id);
-        }
-        aplicacionRepository.deleteById(id);
-    }
+	@Override
+	public void deleteById(int id) {
+		if (!aplicacionRepository.existsById(id)) {
+			throw new ResourceNotFoundException("No se encontró la aplicación con ID: " + id);
+		}
+		aplicacionRepository.deleteById(id);
+	}
 }

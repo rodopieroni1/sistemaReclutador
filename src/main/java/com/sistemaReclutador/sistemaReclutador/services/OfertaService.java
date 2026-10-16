@@ -14,5 +14,6 @@ public interface OfertaService {
 	List<Oferta> findAllOfertas();
 	List<Oferta> findAllOfertasActivas();
 	List<Oferta> findEmpresaByOferta();
+	boolean existsByEmpresa_Id_empresa(Long id);
 	List<Oferta> buscarPorCampo(String nombreOferta, String descripcionEmpresa, String descripcionRubro);
 }

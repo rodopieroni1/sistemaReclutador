@@ -8,11 +8,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ResponseRest<Object>> handleDataIntegrityViolation(
+	        DataIntegrityViolationException ex) {
+
+	    ResponseRest<Object> response = new ResponseRest<>(
+	        false,
+	        "No se puede eliminar la empresa porque está vinculada a una oferta...",
+	        null,
+	        LocalDateTime.now(),
+	        "409"
+	    );
+
+	    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+	}
 
 	@ExceptionHandler(BaseBusinessException.class)
     public ResponseEntity<ResponseRest<Object>> handleBaseBusinessException(BaseBusinessException ex) {

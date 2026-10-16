@@ -1,14 +1,19 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.sistemaReclutador.sistemaReclutador.dto.CambiarPasswordRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
+
 
 @RestController
 @RequestMapping("/usuarios")
@@ -41,6 +46,30 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<ResponseRest<Usuario>> updateUsuario(@PathVariable int id, @RequestBody Usuario usuarioDetails) {
 		return usuarioService.actualizarUsuario(usuarioDetails);
+    }
+    
+    @PutMapping("/contrasena-admin")
+    public ResponseEntity<?> modificarContrasena(
+            Authentication authentication,
+            @RequestBody CambiarPasswordRequest request) {
+
+        try {
+            usuarioService.cambiarPasswordAutenticado(
+                    authentication.getName(),
+                    request.getPassword()
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                        "message",
+                        "Contraseña modificada correctamente"
+                    )
+            );
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")

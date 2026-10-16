@@ -45,6 +45,33 @@ public class UsuarioServiceImpl implements UsuarioService {
 					.body(Map.of("error", "Error interno en el servidor"));
 		}
 	}
+	
+	@Override
+	public void cambiarPasswordAutenticado(
+	        String claveUsuario,
+	        String nuevaPassword) {
+
+	    if (nuevaPassword == null ||
+	            nuevaPassword.length() < 8) {
+	        throw new IllegalArgumentException(
+	                "La contraseña debe tener al menos 8 caracteres"
+	        );
+	    }
+
+	    Usuario usuario = usuarioRepository
+	            .findByClave(claveUsuario)
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException(
+	                            "No se encontró el usuario"
+	                    )
+	            );
+
+	    usuario.setContraseña(
+	            passwordEncoder.encode(nuevaPassword)
+	    );
+
+	    usuarioRepository.save(usuario);
+	}
 
 	@Override
 	public List<Usuario> findAll() {

@@ -40,7 +40,9 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/uploads/**", "/login", "/ws").permitAll()
 						.requestMatchers(HttpMethod.POST, "/usuarios/auth/login").permitAll()
-						.requestMatchers("/usuarios/**").hasAuthority("SUPER_ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/usuarios/contrasena-admin")
+						.hasAnyAuthority("SUPER_ADMIN", "RECLUTADOR").requestMatchers("/usuarios/**")
+						.hasAuthority("SUPER_ADMIN")
 						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/perfiles/**")
 						.permitAll().anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();

@@ -19,7 +19,7 @@ public class Oferta {
     @Column(name = "nombreOferta")
     private String nombreOferta;
 
-    @Column(name = "descripcion_oferta", columnDefinition = "TEXT")
+    @Column(name = "descripcion_oferta", columnDefinition = "MEDIUMTEXT")
     private String descripcionOferta;
 
     @Lob

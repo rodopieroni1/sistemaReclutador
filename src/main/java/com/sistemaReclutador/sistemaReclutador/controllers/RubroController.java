@@ -49,9 +49,9 @@ public class RubroController {
 	}
 
 	@DeleteMapping("/eliminar/{id}")
-	public ResponseEntity<ResponseRest<Void>> deleteRubro(@PathVariable Integer id) {
+	public ResponseEntity<ResponseRest<Rubro>> deleteRubro(@PathVariable Integer id) {
 		rubroService.eliminarRubro(id);
-		ResponseRest<Void> response = new ResponseRest<>(true, "Rubro eliminado satisfactoriamente", null, LocalDateTime.now(), "200");
-		return ResponseEntity.ok(response);
+		ResponseRest<Rubro> response = new ResponseRest<>(true, "Rubro eliminado satisfactoriamente", null, LocalDateTime.now(), "200");
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

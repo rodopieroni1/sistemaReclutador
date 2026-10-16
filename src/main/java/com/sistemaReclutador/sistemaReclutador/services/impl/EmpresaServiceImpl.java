@@ -10,8 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
+import com.sistemaReclutador.sistemaReclutador.exceptions.EmpresaVinculadaException;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
+import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.services.EmpresaService;
+import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
 import com.sistemaReclutador.sistemaReclutador.services.RubroService;
 import com.sistemaReclutador.sistemaReclutador.strategies.EmpresaValidationStrategy;
 import com.sistemaReclutador.sistemaReclutador.strategies.FileStorageStrategy;
@@ -28,6 +31,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 	private final RubroService rubroService;
 	private final FileStorageStrategy fileStorageStrategy;
 	private final List<EmpresaValidationStrategy> validationStrategies;
+	private final OfertaService ofertaService;
 
 	@Transactional
 	@Override
@@ -69,6 +73,11 @@ public class EmpresaServiceImpl implements EmpresaService {
 	public void deleteEmpresa(Long id) {
 		Empresa empresa = empresaRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("No se encontro la empresa con el ID: " + id));
+		 if (ofertaService.existsByEmpresa_Id_empresa(id)) {
+		        throw new EmpresaVinculadaException(
+		            "No se puede eliminar la empresa porque está vinculada a una oferta."
+		        );
+		    }
 		empresaRepository.delete(empresa);
 	}
 

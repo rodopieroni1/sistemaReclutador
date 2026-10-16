@@ -153,4 +153,9 @@ public class OfertaServiceImpl implements OfertaService {
 		}
 	}
 
+	@Override
+	public boolean existsByEmpresa_Id_empresa(Long id) {
+	    return ofertaRepository.existsByEmpresa_Id_empresa(id);
+	}
+
 }

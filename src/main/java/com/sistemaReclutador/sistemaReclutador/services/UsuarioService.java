@@ -15,4 +15,5 @@ public interface UsuarioService {
 	Usuario saveUsuario(Usuario usuario);
 	ResponseEntity<ResponseRest<Usuario>> actualizarUsuario(Usuario usuarioDetails);
 	ResponseEntity<?> eliminarUsuario(int id);
+	void cambiarPasswordAutenticado(String claveUsuario, String nuevaPassword);
 }

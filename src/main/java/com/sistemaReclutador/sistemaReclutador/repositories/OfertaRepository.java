@@ -10,6 +10,9 @@ import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 
 @Repository
 public interface OfertaRepository extends JpaRepository<Oferta, Long> {
+	
+	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Oferta o WHERE o.empresa.id_empresa = :idEmpresa")
+	boolean existsByEmpresa_Id_empresa(@Param("idEmpresa")Long id);
 
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e order by o.idOferta desc")
 	List<Oferta> findEmpresaByOferta();
