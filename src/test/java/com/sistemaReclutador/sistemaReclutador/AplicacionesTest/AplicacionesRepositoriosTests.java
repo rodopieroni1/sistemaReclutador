@@ -49,9 +49,9 @@ public class AplicacionesRepositoriosTests {
 		Perfil perfil = new Perfil();
 		Oferta oferta = new Oferta();
 		if (valor == "APLICO") {
-			perfil.setId_perfil(4);
+			perfil.setIdPerfil(4);
 		} else {
-			perfil.setId_perfil(2);
+			perfil.setIdPerfil(2);
 		}
 		perfil.setNombre("Juan PérezAR");
 		perfil.setClave("password123AR");
@@ -69,7 +69,7 @@ public class AplicacionesRepositoriosTests {
 		oferta.setEstadoOferta(true);
 
 		aplicacion.setFechaAplicacion(LocalDateTime.of(2026, java.time.Month.JULY, 23, 10, 30, 0));
-		aplicacion.setEstadoaplicaciones(false);
+		aplicacion.setEstadoAplicaciones(false);
 		aplicacion.setIdPerfil(perfil);
 		aplicacion.setIdOferta(oferta);
 		return aplicacion;

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AplicacionesMiasResponse {
 
-    private Integer idAplicacion;
+    private Long idAplicacion;
     private String puesto;
     private String empresa;
     private LocalDateTime fecha;

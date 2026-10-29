@@ -3,6 +3,7 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 import java.io.*;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,10 +12,12 @@ import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
+import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
+import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
 import com.sistemaReclutador.sistemaReclutador.strategies.OfertasStrategy;
 
 import lombok.RequiredArgsConstructor;
@@ -28,17 +31,26 @@ public class OfertaServiceImpl implements OfertaService {
 	private final OfertaRepository ofertaRepository;
 	private final EmpresaRepository empresaRepository;
 	private final List<OfertasStrategy> ofertaStrategy;
+	private final UsuarioService usuarioService;
 
 	@Value("${app.upload.dir}")
 	private String uploadDir;
 
 	@Transactional
 	@Override
-	public Oferta saveOferta(OfertaRequest ofertaDetail) {
+	public Oferta saveOferta(OfertaRequest ofertaDetail, Authentication authentication) {
 	    if (ofertaDetail == null) {
 	        throw new IllegalArgumentException("Los datos de la oferta no pueden ser nulos.");
 	    }
 	    Oferta oferta = convertirDtoAEntidad(ofertaDetail);
+	    Usuario usuario = usuarioService.findByClave(authentication.getName());
+
+	    if (usuario == null) {
+	        throw new IllegalArgumentException(
+	            "No se encontró el usuario autenticado."
+	        );
+	    }
+	    oferta.setUsuario(usuario);
 	    oferta.setIdOferta(null);
 	    MultipartFile foto = ofertaDetail.getFotoArchivo();
 	    if (foto != null && !foto.isEmpty()) {
@@ -50,30 +62,54 @@ public class OfertaServiceImpl implements OfertaService {
 
 	@Transactional
 	@Override
-	public Oferta updateOferta(Long id, OfertaUpdateRequest request) {
+	public Oferta updateOferta(
+	        Long id,
+	        OfertaUpdateRequest request,
+	        Authentication authentication) {
+
 	    Oferta ofertaUpdate = ofertaRepository.findById(id)
-	            .orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + id));
+	            .orElseThrow(() -> new ResourceNotFoundException(
+	                    "No se encontró la oferta con ID: " + id));
 
 	    ofertaUpdate.setNombreOferta(request.getNombreOferta());
 	    ofertaUpdate.setDescripcionOferta(request.getDescripcionOferta());
 	    ofertaUpdate.setEstadoOferta(request.isEstadoOferta());
 
+	    // Asociar al reclutador autenticado
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        throw new IllegalStateException("El usuario no está autenticado.");
+	    }
+
+	    Usuario usuario = usuarioService.findByClave(authentication.getName());
+
+	    if (usuario == null) {
+	        throw new ResourceNotFoundException(
+	                "No se encontró el usuario autenticado.");
+	    }
+
+	    ofertaUpdate.setUsuario(usuario);
+
 	    if (request.getIdEmpresa() != null) {
 	        Empresa empresa = empresaRepository.findById(request.getIdEmpresa())
-	                .orElseThrow(() -> new ResourceNotFoundException("Empresa no encontrada con ID: " + request.getIdEmpresa()));
+	                .orElseThrow(() -> new ResourceNotFoundException(
+	                        "Empresa no encontrada con ID: "
+	                                + request.getIdEmpresa()));
+
 	        ofertaUpdate.setEmpresa(empresa);
 	    }
 
-	    if (request.getFotoArchivo() != null && !request.getFotoArchivo().isEmpty()) {
+	    if (request.getFotoArchivo() != null
+	            && !request.getFotoArchivo().isEmpty()) {
+
 	        String nombreGuardado = guardarArchivoFoto(request.getFotoArchivo());
 	        ofertaUpdate.setFotoOferta(nombreGuardado);
+
 	    } else if (request.getFotoOferta() != null) {
 	        ofertaUpdate.setFotoOferta(request.getFotoOferta());
 	    }
 
 	    return ofertaRepository.save(ofertaUpdate);
 	}
-
 	@Transactional
 	@Override
 	public void eliminarOferta(Long id) {

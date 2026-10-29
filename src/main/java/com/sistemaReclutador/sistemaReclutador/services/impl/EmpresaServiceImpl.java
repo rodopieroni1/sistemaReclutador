@@ -1,24 +1,20 @@
 package com.sistemaReclutador.sistemaReclutador.services.impl;
 
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.sistemaReclutador.sistemaReclutador.dto.EmpresaRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Rubro;
 import com.sistemaReclutador.sistemaReclutador.exceptions.EmpresaVinculadaException;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
-import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.services.EmpresaService;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
 import com.sistemaReclutador.sistemaReclutador.services.RubroService;
 import com.sistemaReclutador.sistemaReclutador.strategies.EmpresaValidationStrategy;
 import com.sistemaReclutador.sistemaReclutador.strategies.FileStorageStrategy;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -109,7 +105,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 
 	private Empresa convertirDtoAEntidad(EmpresaRequest dto, Rubro rubro) {
 		Empresa empresa = new Empresa();
-		empresa.setNombre(dto.getNombre());
+		empresa.setNombreEmpresa(dto.getNombre());
 		empresa.setDireccion(dto.getDireccion());
 		empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
 		empresa.setObservaciones(dto.getObservaciones());
@@ -122,7 +118,7 @@ public class EmpresaServiceImpl implements EmpresaService {
 
 	private void actualizarCamposEmpresa(Empresa empresa, EmpresaRequest dto, Rubro rubro) {
 		empresa.setCuit(dto.getCuit());
-		empresa.setNombre(dto.getNombre());
+		empresa.setNombreEmpresa(dto.getNombre());
 		empresa.setEmail(dto.getEmail());
 		empresa.setTelefono(dto.getTelefono());
 		empresa.setDireccion(dto.getDireccion());

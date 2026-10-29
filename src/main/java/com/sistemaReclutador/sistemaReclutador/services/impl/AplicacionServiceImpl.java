@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sistemaReclutador.sistemaReclutador.Enum.ResultadosAplicacion;
 import com.sistemaReclutador.sistemaReclutador.dto.*;
-import com.sistemaReclutador.sistemaReclutador.repositories.*;
 import com.sistemaReclutador.sistemaReclutador.entities.*;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
 import com.sistemaReclutador.sistemaReclutador.factory.AplicacionFactory;
-
+import com.sistemaReclutador.sistemaReclutador.mensajeria.NotificacionProductor;
+import com.sistemaReclutador.sistemaReclutador.repositories.AplicacionRepository;
+import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
+import com.sistemaReclutador.sistemaReclutador.repositories.PerfilRepository;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 import com.sistemaReclutador.sistemaReclutador.strategies.AplicacionesMiasStrategy;
 import com.sistemaReclutador.sistemaReclutador.validators.ValidacionAplicacionHandler;
@@ -30,21 +32,20 @@ public class AplicacionServiceImpl implements AplicacionService {
 	private final Map<String, AplicacionesMiasStrategy> mappingStrategies;
 	private final List<ValidacionAplicacionHandler> validadores;
 	private final AplicacionFactory aplicacionFactory;
+	private final NotificacionProductor notificacionProductor;
 
 	@Transactional
 	@Override
 	public AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest) {
-
 		for (ValidacionAplicacionHandler validador : validadores) {
 			Optional<AplicacionResponseDTO> error = validador.validar(aplicacionRequest);
 			if (error.isPresent()) {
 				return error.get();
 			}
 		}
-
-		Perfil perfil = perfilRepository.findById(aplicacionRequest.getIdPerfil().getId_perfil())
+		Perfil perfil = perfilRepository.findById(aplicacionRequest.getIdPerfil().getIdPerfil())
 				.orElseThrow(() -> new ResourceNotFoundException(
-						"No se encontró el perfil con ID: " + aplicacionRequest.getIdPerfil().getId_perfil()));
+						"No se encontró el perfil con ID: " + aplicacionRequest.getIdPerfil().getIdPerfil()));
 
 		Oferta oferta = ofertaRepository.findById(aplicacionRequest.getIdOferta().getIdOferta())
 				.orElseThrow(() -> new ResourceNotFoundException(
@@ -54,12 +55,12 @@ public class AplicacionServiceImpl implements AplicacionService {
 			return new AplicacionResponseDTO(ResultadosAplicacion.OFERTA_INACTIVA,
 					"Esta oferta ya no se encuentra activa y no admite nuevas postulaciones.");
 		}
-		return aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta())
+		return aplicacionRepository.findByPerfilAndOferta(perfil.getIdPerfil(), oferta.getIdOferta())
 				.map(this::procesarExistente).orElseGet(() -> crearNueva(perfil, oferta));
 	}
 
 	private AplicacionResponseDTO procesarExistente(Aplicacion aplicacion) {
-		if (Boolean.TRUE.equals(aplicacion.isEstadoaplicaciones())) {
+		if (Boolean.TRUE.equals(aplicacion.isEstadoAplicaciones())) {
 			return new AplicacionResponseDTO(ResultadosAplicacion.YA_APLICO,
 					"Ya aplicaste anteriormente a esta oferta.");
 		}
@@ -70,16 +71,24 @@ public class AplicacionServiceImpl implements AplicacionService {
 	}
 
 	private AplicacionResponseDTO crearNueva(Perfil perfil, Oferta oferta) {
-
 		Aplicacion nueva = aplicacionFactory.crear(perfil, oferta);
 		aplicacionRepository.save(nueva);
+		if (oferta.getUsuario() == null || oferta.getUsuario().getEmail() == null
+				|| oferta.getUsuario().getEmail().isBlank()) {
+			log.warn("No se puede notificar: la oferta {} no tiene un reclutador con email.", oferta.getIdOferta());
+		} else {
+			String destinatario = oferta.getUsuario().getEmail();
+			String mensaje = "Se recibió una nueva postulación.\n" + "Oferta: " + oferta.getNombreOferta() + "\n"
+					+ "Postulante: " + perfil.getNombre();
+			//notificacionProductor.enviarMensaje(destinatario, mensaje);
+		}
 		return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA,
 				"Te postulaste correctamente a la oferta.");
 	}
 
 	@Transactional(readOnly = true)
 	@Override
-	public boolean existsById(Integer id) {
+	public boolean existsById(Long id) {
 		return aplicacionRepository.existsById(id);
 	}
 
@@ -94,11 +103,11 @@ public class AplicacionServiceImpl implements AplicacionService {
 
 	@Transactional
 	@Override
-	public void cambiarEstado(Integer id, boolean estado) {
+	public void cambiarEstado(Long id, boolean estado) {
 		Aplicacion aplicacion = aplicacionRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("No se encontró la aplicación con ID: " + id));
 
-		aplicacion.setEstadoaplicaciones(estado);
+		aplicacion.setEstadoAplicaciones(estado);
 		aplicacionRepository.save(aplicacion);
 	}
 
@@ -122,7 +131,7 @@ public class AplicacionServiceImpl implements AplicacionService {
 
 	@Transactional
 	@Override
-	public void deleteById(int id) {
+	public void deleteById(Long id) {
 		if (!aplicacionRepository.existsById(id)) {
 			throw new ResourceNotFoundException("No se encontró la aplicación con ID: " + id);
 		}

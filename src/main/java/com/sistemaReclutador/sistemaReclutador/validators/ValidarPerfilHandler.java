@@ -21,10 +21,10 @@ public class ValidarPerfilHandler implements ValidacionAplicacionHandler {
 	
 	@Override
     public Optional<AplicacionResponseDTO> validar(AplicacionRequest request) {
-        if (request.getIdPerfil() == null || request.getIdPerfil().getId_perfil() == null) {
+        if (request.getIdPerfil() == null || request.getIdPerfil().getIdPerfil() == null) {
             return Optional.of(new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_INVALIDO, "Debe indicar un perfil válido."));
         }
-        if (!perfilRepository.existsById(request.getIdPerfil().getId_perfil())) {
+        if (!perfilRepository.existsById(request.getIdPerfil().getIdPerfil())) {
             return Optional.of(new AplicacionResponseDTO(ResultadosAplicacion.PERFIL_NO_ENCONTRADO, "El perfil indicado no existe."));
         }
         return Optional.empty();

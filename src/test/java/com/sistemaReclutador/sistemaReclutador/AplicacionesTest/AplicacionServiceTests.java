@@ -56,7 +56,7 @@ public class AplicacionServiceTests {
 	void setUp() {
 
 		aplicacionService = new AplicacionServiceImpl(aplicacionRepository, perfilRepository, ofertaRepository,
-				mappingStrategies, List.of(validador), aplicacionFactory);
+				mappingStrategies, List.of(validador), aplicacionFactory, null);
 	}
 
 // CREAR NUEVA APLICACION
@@ -68,9 +68,9 @@ public class AplicacionServiceTests {
 		Perfil perfil = request.getIdPerfil();
 		Oferta oferta = request.getIdOferta();
 		when(validador.validar(request)).thenReturn(Optional.empty());
-		when(perfilRepository.findById(perfil.getId_perfil())).thenReturn(Optional.of(perfil));
+		when(perfilRepository.findById(perfil.getIdPerfil())).thenReturn(Optional.of(perfil));
 		when(ofertaRepository.findById(oferta.getIdOferta())).thenReturn(Optional.of(oferta));
-		when(aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta()))
+		when(aplicacionRepository.findByPerfilAndOferta(perfil.getIdPerfil(), oferta.getIdOferta()))
 				.thenReturn(Optional.empty());
 
 		Aplicacion aplicacionNueva = new Aplicacion();
@@ -91,11 +91,11 @@ public class AplicacionServiceTests {
 		Perfil perfil = request.getIdPerfil();
 		Oferta oferta = request.getIdOferta();
 		Aplicacion existente = new Aplicacion();
-		existente.setEstadoaplicaciones(true);
+		existente.setEstadoAplicaciones(true);
 		when(validador.validar(request)).thenReturn(Optional.empty());
-		when(perfilRepository.findById(perfil.getId_perfil())).thenReturn(Optional.of(perfil));
+		when(perfilRepository.findById(perfil.getIdPerfil())).thenReturn(Optional.of(perfil));
 		when(ofertaRepository.findById(oferta.getIdOferta())).thenReturn(Optional.of(oferta));
-		when(aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta()))
+		when(aplicacionRepository.findByPerfilAndOferta(perfil.getIdPerfil(), oferta.getIdOferta()))
 				.thenReturn(Optional.of(existente));
 		AplicacionResponseDTO respuesta = aplicacionService.crearAplicacion(request);
 		assertEquals(ResultadosAplicacion.YA_APLICO, respuesta.getStatus());
@@ -115,17 +115,17 @@ public class AplicacionServiceTests {
 		Perfil perfil = request.getIdPerfil();
 		Oferta oferta = request.getIdOferta();
 		Aplicacion existente = new Aplicacion();
-		existente.setEstadoaplicaciones(false);
+		existente.setEstadoAplicaciones(false);
 		when(validador.validar(request)).thenReturn(Optional.empty());
-		when(perfilRepository.findById(perfil.getId_perfil())).thenReturn(Optional.of(perfil));
+		when(perfilRepository.findById(perfil.getIdPerfil())).thenReturn(Optional.of(perfil));
 		when(ofertaRepository.findById(oferta.getIdOferta())).thenReturn(Optional.of(oferta));
-		when(aplicacionRepository.findByPerfilAndOferta(perfil.getId_perfil(), oferta.getIdOferta()))
+		when(aplicacionRepository.findByPerfilAndOferta(perfil.getIdPerfil(), oferta.getIdOferta()))
 				.thenReturn(Optional.of(existente));
 		when(aplicacionRepository.save(any(Aplicacion.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		AplicacionResponseDTO respuesta = aplicacionService.crearAplicacion(request);
 		assertEquals(ResultadosAplicacion.ACTUALIZACION_ESTADO, respuesta.getStatus());
 		assertEquals("Tu postulación fue reactivada correctamente.", respuesta.getMensaje());
-		assertTrue(existente.isEstadoaplicaciones());
+		assertTrue(existente.isEstadoAplicaciones());
 		verify(aplicacionRepository).save(existente);
 	}
 
@@ -135,7 +135,7 @@ public class AplicacionServiceTests {
 	void crearAplicacion_CuandoPerfilNoExiste_DebeLanzarExcepcion() {
 
 		AplicacionRequest request = armarRequest();
-		Integer idPerfil = request.getIdPerfil().getId_perfil();
+		Integer idPerfil = request.getIdPerfil().getIdPerfil();
 		when(validador.validar(request)).thenReturn(Optional.empty());
 		when(perfilRepository.findById(idPerfil)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> aplicacionService.crearAplicacion(request));
@@ -153,10 +153,10 @@ public class AplicacionServiceTests {
 		Perfil perfil = request.getIdPerfil();
 		Long idOferta = request.getIdOferta().getIdOferta();
 		when(validador.validar(request)).thenReturn(Optional.empty());
-		when(perfilRepository.findById(perfil.getId_perfil())).thenReturn(Optional.of(perfil));
+		when(perfilRepository.findById(perfil.getIdPerfil())).thenReturn(Optional.of(perfil));
 		when(ofertaRepository.findById(idOferta)).thenReturn(Optional.empty());
 		assertThrows(ResourceNotFoundException.class, () -> aplicacionService.crearAplicacion(request));
-		verify(perfilRepository).findById(perfil.getId_perfil());
+		verify(perfilRepository).findById(perfil.getIdPerfil());
 		verify(ofertaRepository).findById(idOferta);
 		verifyNoInteractions(aplicacionRepository);
 	}
@@ -188,7 +188,7 @@ public class AplicacionServiceTests {
 		Perfil perfil = new Perfil();
 		Oferta oferta = new Oferta();
 
-		perfil.setId_perfil(22);
+		perfil.setIdPerfil(22);
 		perfil.setNombre("Juan Pérez TEST");
 		perfil.setClave("password123TEST");
 		perfil.setDni("35123456TEST");

@@ -1,6 +1,9 @@
 package com.sistemaReclutador.sistemaReclutador.controllers;
 
-import com.sistemaReclutador.sistemaReclutador.dto.*;
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;
+import com.sistemaReclutador.sistemaReclutador.dto.AplicacionesMiasResponse;
+import com.sistemaReclutador.sistemaReclutador.dto.CambiarEstadoRequestDTO;
 import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.services.AplicacionService;
 import lombok.RequiredArgsConstructor;
@@ -30,27 +33,8 @@ public class AplicacionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Boolean> getAplicacionById(@PathVariable Integer id) {
+    public ResponseEntity<Boolean> getAplicacionById(@PathVariable Long id) {
         return ResponseEntity.ok(aplicacionService.existsById(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<AplicacionResponseDTO> createAplicacion(@RequestBody AplicacionRequest aplicacion) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(aplicacionService.crearAplicacion(aplicacion));
-    }
-
-    @PatchMapping("/estado/{idPost}")
-    public ResponseEntity<Void> cambiarEstado(
-            @PathVariable Integer idPost, 
-            @RequestBody CambiarEstadoRequestDTO request) {
-        aplicacionService.cambiarEstado(idPost, request.estado());
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAplicacion(@PathVariable Integer id) {
-        aplicacionService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/perfil/{idPerfil}")
@@ -59,4 +43,25 @@ public class AplicacionController {
             @RequestParam(defaultValue = "standardMappingStrategy") String format) {
         return ResponseEntity.ok(aplicacionService.obtenerAplicacionesPerfil(idPerfil, format));
     }
+    
+    @PostMapping
+    public ResponseEntity<AplicacionResponseDTO> createAplicacion(@RequestBody AplicacionRequest aplicacion) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(aplicacionService.crearAplicacion(aplicacion));
+    }
+
+    @PatchMapping("/estado/{idPost}")
+    public ResponseEntity<Void> cambiarEstado(
+            @PathVariable Long idPost, 
+            @RequestBody CambiarEstadoRequestDTO request) {
+        aplicacionService.cambiarEstado(idPost, request.estado());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAplicacion(@PathVariable Long id) {
+        aplicacionService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+ 
 }

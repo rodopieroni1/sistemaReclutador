@@ -11,23 +11,35 @@ import com.sistemaReclutador.sistemaReclutador.strategies.PerfilStrategy;
 public class PerfilStrategiesImpl {
 
 	private static final String ALFANUMERICO_REGEX = "^[a-zA-Z0-9]+$";
+	private static final String PASSWORD_REGEX = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[a-zA-Z0-9]{8,12}$";
 
 	@Component
 	public static class DniValidationStrategy implements PerfilStrategy {
+
 		@Override
 		public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
+
 			String dni = dto.dni();
 
-			if (dni == null || !dni.matches("\\d+")) {
-				return Optional
-						.of("El DNI debe contener solo números, no se permiten letras ni caracteres especiales.");
+			if (dni == null || dni.isBlank()) {
+				return Optional.of("El DNI es obligatorio.");
 			}
-			if (dni.length() > 20) {
-				return Optional.of("El DNI no debe ser mayor de 20 caracteres.");
+
+			if (!dni.matches("\\d+")) {
+				return Optional.of("El DNI debe contener solamente números.");
+			}
+
+			if (dni.startsWith("0")) {
+				return Optional.of("El DNI no puede comenzar con cero.");
+			}
+
+			if (dni.length() < 7 || dni.length() > 8) {
+				return Optional.of("El DNI debe tener entre 7 y 8 dígitos.");
 			}
 
 			Optional<Perfil> existente = repository.findByDni(dni);
-			if (existente.isPresent() && !existente.get().getId_perfil().equals(dto.id())) {
+
+			if (existente.isPresent() && !existente.get().getIdPerfil().equals(dto.id())) {
 				return Optional.of("El DNI ya se encuentra registrado.");
 			}
 
@@ -67,7 +79,7 @@ public class PerfilStrategiesImpl {
 			}
 
 			Optional<Perfil> existente = repository.findByEmail(email);
-			if (existente.isPresent() && !existente.get().getId_perfil().equals(dto.id())) {
+			if (existente.isPresent() && !existente.get().getIdPerfil().equals(dto.id())) {
 				return Optional.of("El correo electrónico ya se encuentra registrado.");
 			}
 
@@ -76,48 +88,65 @@ public class PerfilStrategiesImpl {
 	}
 
 	@Component
+	public static class ContraseñaStrategy implements PerfilStrategy {
+
+		@Override
+		public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
+			String contraseña = dto.passord();
+
+			if (contraseña == null || contraseña.isBlank()) {
+				return Optional.empty();
+			}
+
+			if (!contraseña.matches(PASSWORD_REGEX)) {
+				return Optional.of("La contraseña debe tener entre 8 y 12 caracteres, "
+						+ "al menos una mayúscula, una minúscula y un número, " + "sin caracteres especiales.");
+			}
+			return Optional.empty();
+		}
+
+	}
+
+	@Component
 	public static class DatosBasicosValidationStrategy implements PerfilStrategy {
 
-	    @Override
-	    public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
+		@Override
+		public Optional<String> validar(PerfilDTO dto, PerfilRepository repository) {
 
-	        // NOMBRE
-	        if (dto.nombre() == null || dto.nombre().isBlank()) {
-	            return Optional.of("El nombre es obligatorio.");
-	        }
+			// NOMBRE
+			if (dto.nombre() == null || dto.nombre().isBlank()) {
+				return Optional.of("El nombre es obligatorio.");
+			}
 
-	        if (dto.nombre().length() > 100) {
-	            return Optional.of("El nombre no debe ser mayor de 100 caracteres.");
-	        }
+			if (dto.nombre().length() > 100) {
+				return Optional.of("El nombre no debe ser mayor de 100 caracteres.");
+			}
 
-	        // DIRECCIÓN
-	        if (dto.direccion() == null || dto.direccion().isBlank()) {
-	            return Optional.of("La dirección es obligatoria.");
-	        }
+			// DIRECCIÓN
+			if (dto.direccion() == null || dto.direccion().isBlank()) {
+				return Optional.of("La dirección es obligatoria.");
+			}
 
-	        if (dto.direccion().length() > 255) {
-	            return Optional.of("La dirección no debe ser mayor de 255 caracteres.");
-	        }
+			if (dto.direccion().length() > 255) {
+				return Optional.of("La dirección no debe ser mayor de 255 caracteres.");
+			}
 
-	        // CLAVE
-	        if (dto.clave() == null || dto.clave().isBlank()) {
-	            return Optional.of("La clave es obligatoria.");
-	        }
+			// CLAVE
+			if (dto.clave() == null || dto.clave().isBlank()) {
+				return Optional.of("La clave es obligatoria.");
+			}
 
-	        if (dto.clave().length() > 100) {
-	            return Optional.of("La clave no debe ser mayor de 100 caracteres.");
-	        }
+			if (dto.clave().length() > 100) {
+				return Optional.of("La clave no debe ser mayor de 100 caracteres.");
+			}
 
-	        // CLAVE ÚNICA
-	        Optional<Perfil> existenteClave = repository.findByClave(dto.clave());
-	        if (existenteClave.isPresent()
-	                && !existenteClave.get().getId_perfil().equals(dto.id())) {
-	            return Optional.of(
-	                "El nombre de usuario/clave ya se encuentra registrado."
-	            );
-	        }
+			// CLAVE ÚNICA
+			Optional<Perfil> existenteClave = repository.findByClave(dto.clave());
+			if (existenteClave.isPresent() && !existenteClave.get().getIdPerfil().equals(dto.id())) {
+				return Optional.of("El nombre de usuario/clave ya se encuentra registrado.");
+			}
 
-	        return Optional.empty();
-	    }
+			return Optional.empty();
+		}
 	}
 }

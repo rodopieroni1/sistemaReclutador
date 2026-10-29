@@ -10,13 +10,13 @@ import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 
 @Service
 public interface AplicacionService {
-    boolean existsById(Integer id);
+    boolean existsById(Long id);
     AplicacionResponseDTO crearAplicacion(AplicacionRequest aplicacionRequest);
     List<AplicacionesMiasResponse> obtenerAplicacionesPerfil(int idPerfil, String format);
-	void cambiarEstado(Integer id, boolean estado);
+	void cambiarEstado(Long id, boolean estado);
 	List<Aplicacion> findAllDesc();
 	List<Aplicacion> findAllDescActivas();
-	void deleteById(int id);
+	void deleteById(Long id);
 	List<String> findByPerfilId(Integer id);
 	
 }

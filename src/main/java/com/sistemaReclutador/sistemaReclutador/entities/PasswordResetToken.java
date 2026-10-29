@@ -10,7 +10,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "passwordResetToken")
 	public class PasswordResetToken {
@@ -27,39 +35,7 @@ import jakarta.persistence.Table;
 	    private LocalDateTime expiryDate;
 
 	    @OneToOne
-	    @JoinColumn(name = "id_perfil", referencedColumnName = "id_perfil")
+	    @JoinColumn(name = "idPerfil", referencedColumnName = "idPerfil")
 	    private Perfil perfil;
-
-		public Long getIdReset() {
-			return idReset;
-		}
-
-		public void setIdReset(Long idReset) {
-			this.idReset = idReset;
-		}
-
-		public String getToken() {
-			return token;
-		}
-
-		public void setToken(String token) {
-			this.token = token;
-		}
-
-		public LocalDateTime getExpiryDate() {
-			return expiryDate;
-		}
-
-		public void setExpiryDate(LocalDateTime expiryDate) {
-			this.expiryDate = expiryDate;
-		}
-
-		public Perfil getPerfil() {
-			return perfil;
-		}
-
-		public void setPerfil(Perfil perfil) {
-			this.perfil = perfil;
-		}
 	    
 }

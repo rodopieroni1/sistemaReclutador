@@ -11,6 +11,7 @@ public class OfertaRequest {
     private Boolean estadoOferta; 
     @NotNull(message = "El ID de la empresa es obligatorio")
     private Long idEmpresa; 
+    private Long idUsuario;
     private String fotoOferta;
     private MultipartFile fotoArchivo;
     public boolean isEstadoOferta() {

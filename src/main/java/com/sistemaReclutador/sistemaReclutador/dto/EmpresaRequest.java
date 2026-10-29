@@ -18,8 +18,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmpresaRequest {
 
-    @JsonProperty("id_empresa")
-    private Integer idempresa;
+    @JsonProperty("idEmpresa")
+    private Integer idEmpresa;
 
     @NotBlank(message = "El nombre de la empresa es obligatorio")
     @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")

@@ -10,8 +10,8 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PerfilSignupRequest {
 
-    @JsonProperty("id_perfil")
-    private Integer id;
+    @JsonProperty("idPerfil")
+    private Integer idPerfil;
 
     @JsonProperty("email")
     private String email;

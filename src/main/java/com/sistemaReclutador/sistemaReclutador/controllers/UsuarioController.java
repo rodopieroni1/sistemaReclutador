@@ -2,32 +2,24 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.security.core.Authentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.sistemaReclutador.sistemaReclutador.dto.CambiarPasswordRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
 import com.sistemaReclutador.sistemaReclutador.services.UsuarioService;
+import lombok.RequiredArgsConstructor;
 
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    @Autowired
     private UsuarioService usuarioService;
 	
-
-	@PostMapping("/auth/login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
-	    return usuarioService.login(credential);
-	}
-
 	@GetMapping
     public List<Usuario> getAllUsuarios() {
         return usuarioService.findAll();
@@ -37,6 +29,11 @@ public class UsuarioController {
     public Usuario getUsuarioById(@PathVariable int id) {
         return usuarioService.findById(id);
     }
+
+    @PostMapping("/auth/login")
+	public ResponseEntity<?> login(@RequestBody LoginRequest credential) {
+	    return usuarioService.login(credential);
+	}
 
     @PostMapping
     public Usuario createUsuario(@RequestBody Usuario usuario) {
@@ -58,14 +55,12 @@ public class UsuarioController {
                     authentication.getName(),
                     request.getPassword()
             );
-
             return ResponseEntity.ok(
                     Map.of(
                         "message",
                         "Contraseña modificada correctamente"
                     )
             );
-
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));

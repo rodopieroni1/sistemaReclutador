@@ -15,7 +15,7 @@ public class AplicacionFactory {
 
         return Aplicacion.builder()
                 .fecha(LocalDateTime.now())
-                .estadoaplicaciones(true)
+                .estadoAplicaciones(true)
                 .perfil(perfil)
                 .oferta(oferta)
                 .build();

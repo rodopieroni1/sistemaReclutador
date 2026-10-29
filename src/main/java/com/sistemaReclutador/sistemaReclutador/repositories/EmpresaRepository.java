@@ -17,12 +17,12 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.email = :email")
     boolean existsByEmail(@Param("email") String email);
 	
-	@Query("SELECT a FROM Empresa a ORDER BY a.id_empresa DESC")
+	@Query("SELECT a FROM Empresa a ORDER BY a.idEmpresa DESC")
 	List<Empresa> findAllDesc();
 	
-	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.id_empresa = :id")
-	 boolean findByIdEmpresa(@Param("id") Long id_empresa);
+	@Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM Empresa e WHERE e.idEmpresa = :id")
+	 boolean findByIdEmpresa(@Param("id") Long idEmpresa);
 	
-	@Query("SELECT e FROM Empresa e WHERE e.id_empresa = :id")
-	 Empresa findEmpresa(@Param("id") Long id_empresa);	
+	@Query("SELECT e FROM Empresa e WHERE e.idEmpresa = :id")
+	 Empresa findEmpresa(@Param("id") Long idEmpresa);	
 }

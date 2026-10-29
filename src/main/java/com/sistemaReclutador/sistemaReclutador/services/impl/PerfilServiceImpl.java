@@ -5,6 +5,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,7 +17,6 @@ import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilConAplicacionesDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilDTO;
-import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.entities.PasswordResetToken;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
@@ -30,6 +30,7 @@ import com.sistemaReclutador.sistemaReclutador.strategies.PerfilStrategy;
 
 import lombok.RequiredArgsConstructor;
 
+@Configuration
 @Service
 @RequiredArgsConstructor
 public class PerfilServiceImpl implements PerfilService {
@@ -54,8 +55,13 @@ public class PerfilServiceImpl implements PerfilService {
 	@Override
 	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String telefono, String clave,
 			String password, MultipartFile foto, MultipartFile uploadcv) {
+		if (password == null || password.isBlank()) {
+		    throw new IllegalArgumentException(
+		        "La contraseña es obligatoria."
+		    );
+		}
 		try {
-			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, telefono, clave);
+			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, telefono, clave, password);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
 			Perfil perfil = new Perfil();
@@ -83,7 +89,7 @@ public class PerfilServiceImpl implements PerfilService {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"Perfil no encontrado\"}");
 		}
 		try {
-			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, telefono, clave);
+			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, telefono, clave, null);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
 			Perfil perfil = perfilOpt.get();
@@ -100,6 +106,7 @@ public class PerfilServiceImpl implements PerfilService {
 				perfil.setDocumentoUrl(fileStorageService.storeFile(uploadcv, "documentos"));
 			}
 			perfilRepository.save(perfil);
+			
 			return ResponseEntity.ok("{\"message\":\"Perfil actualizado correctamente\"}");
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"" + e.getMessage() + "\"}");
@@ -145,7 +152,8 @@ public class PerfilServiceImpl implements PerfilService {
 			String sessionId = UUID.randomUUID().toString();
 			perfil.get().setSessionId(sessionId);
 			perfil.get().setFechaUltimaActividad(LocalDateTime.now());
-			perfilRepository.save(perfil.get());
+			Perfil perfilPrueba = perfil.get(); 
+			perfilRepository.save(perfilPrueba);
 			String token = JwtUtil.generateToken(perfil.get().getClave(), sessionId);
 			return ResponseEntity.ok().body(Map.of("token", token));
 		}
@@ -156,7 +164,7 @@ public class PerfilServiceImpl implements PerfilService {
 	public ResponseEntity<?> olvideContraseña(Map<String, String> body) {
 		String clave = body.get("clave");
 		String email = body.get("email");
-		Optional<Perfil> perfilOpt = perfilRepository.findByEmail(clave, email);
+		Optional<Perfil> perfilOpt = perfilRepository.findByClaveAndEmail(clave, email);
 		try {
 			if (perfilOpt.isPresent()) {
 				Perfil perfil = perfilOpt.get();
@@ -245,7 +253,7 @@ public class PerfilServiceImpl implements PerfilService {
 		List<PerfilConAplicacionesDTO> perfilAplicacionResponse = new ArrayList<>();
 		
 		for(Perfil perfil : perfiles) {
-			List<String> aplicacionesPefil = aplicacionService.findByPerfilId(perfil.getId_perfil());
+			List<String> aplicacionesPefil = aplicacionService.findByPerfilId(perfil.getIdPerfil());
 		
 			perfilAplicacionResponse.add(
 					new PerfilConAplicacionesDTO(
@@ -254,8 +262,6 @@ public class PerfilServiceImpl implements PerfilService {
 					    )
 					);
 		}
-		
-		int i= 1;
 		return new ResponseEntity<>(perfilAplicacionResponse, HttpStatus.OK);
 	}
 

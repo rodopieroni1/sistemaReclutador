@@ -7,5 +7,6 @@ public record PerfilDTO(
 	    String direccion, 
 	    String email, 
 	    String telefono,
-	    String clave
+	    String clave,
+	    String passord
 	) {}

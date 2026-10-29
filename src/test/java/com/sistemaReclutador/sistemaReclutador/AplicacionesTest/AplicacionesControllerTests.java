@@ -95,25 +95,25 @@ void getAllAplicacionesActivas_DebeRetornarListaVacia() throws Exception {
 
 @Test
 void getAplicacionById_DebeRetornarTrue() throws Exception {
-    when(aplicacionService.existsById(1))
+    when(aplicacionService.existsById(1L))
             .thenReturn(true);
     mockMvc.perform(get("/aplicaciones/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").value(true));
     verify(aplicacionService, times(1))
-            .existsById(1);
+            .existsById(1L);
 }
 
 @Test
 void getAplicacionById_DebeRetornarFalse() throws Exception {
 
-    when(aplicacionService.existsById(999))
+    when(aplicacionService.existsById(999L))
             .thenReturn(false);
     mockMvc.perform(get("/aplicaciones/999"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").value(false));
     verify(aplicacionService, times(1))
-            .existsById(999);
+            .existsById(999L);
 }
 
 // PATCH /aplicaciones/estado/{idPost}
@@ -123,7 +123,7 @@ void getAplicacionById_DebeRetornarFalse() throws Exception {
 		Map<String, Boolean> body = Map.of("estado", true);
 		mockMvc.perform(patch("/aplicaciones/estado/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isNoContent());
-		verify(aplicacionService, times(1)).cambiarEstado(1, true);
+		verify(aplicacionService, times(1)).cambiarEstado(1L, true);
 	}
 
 	@Test
@@ -131,16 +131,16 @@ void getAplicacionById_DebeRetornarFalse() throws Exception {
 		Map<String, Boolean> body = Map.of("estado", false);
 		mockMvc.perform(patch("/aplicaciones/estado/1").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(body))).andExpect(status().isNoContent());
-		verify(aplicacionService, times(1)).cambiarEstado(1, false);
+		verify(aplicacionService, times(1)).cambiarEstado(1L, false);
 	}
 
 // DELETE /aplicaciones/{id}
 
 	@Test
 	void deleteAplicacion_DebeRetornarNoContent() throws Exception {
-		doNothing().when(aplicacionService).deleteById(1);
+		doNothing().when(aplicacionService).deleteById(1L);
 		mockMvc.perform(delete("/aplicaciones/1")).andExpect(status().isNoContent());
-		verify(aplicacionService, times(1)).deleteById(1);
+		verify(aplicacionService, times(1)).deleteById(1L);
 	}
 
 // GET /aplicaciones/perfil/{idPerfil}
