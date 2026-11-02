@@ -35,5 +35,8 @@ public interface PerfilRepository extends JpaRepository<Perfil, Integer> {
 	boolean existsByClave(String clave);
 
 	Optional<Perfil> findByDni(String dni);
+	
+	@Query("SELECT p FROM Perfil p WHERE p.email IS NOT NULL AND TRIM(p.email) <> ''")
+	List<Perfil> findPerfilesConEmailValido();
 
 }

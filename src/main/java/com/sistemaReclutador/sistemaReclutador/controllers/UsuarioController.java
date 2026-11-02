@@ -18,8 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    private UsuarioService usuarioService;
-	
+	private final UsuarioService usuarioService;	
 	@GetMapping
     public List<Usuario> getAllUsuarios() {
         return usuarioService.findAll();

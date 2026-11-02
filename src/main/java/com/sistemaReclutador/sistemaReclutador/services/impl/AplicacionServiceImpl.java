@@ -80,7 +80,7 @@ public class AplicacionServiceImpl implements AplicacionService {
 			String destinatario = oferta.getUsuario().getEmail();
 			String mensaje = "Se recibió una nueva postulación.\n" + "Oferta: " + oferta.getNombreOferta() + "\n"
 					+ "Postulante: " + perfil.getNombre();
-			//notificacionProductor.enviarMensaje(destinatario, mensaje);
+			notificacionProductor.enviarMensaje(destinatario, mensaje);
 		}
 		return new AplicacionResponseDTO(ResultadosAplicacion.APLICACION_CREADA,
 				"Te postulaste correctamente a la oferta.");

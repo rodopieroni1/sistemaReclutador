@@ -14,6 +14,7 @@ import com.sistemaReclutador.sistemaReclutador.entities.Empresa;
 import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;
+import com.sistemaReclutador.sistemaReclutador.mensajeria.NotificacionProductor;
 import com.sistemaReclutador.sistemaReclutador.repositories.EmpresaRepository;
 import com.sistemaReclutador.sistemaReclutador.repositories.OfertaRepository;
 import com.sistemaReclutador.sistemaReclutador.services.OfertaService;
@@ -32,6 +33,7 @@ public class OfertaServiceImpl implements OfertaService {
 	private final EmpresaRepository empresaRepository;
 	private final List<OfertasStrategy> ofertaStrategy;
 	private final UsuarioService usuarioService;
+	private final NotificacionProductor notificacionProductor;
 
 	@Value("${app.upload.dir}")
 	private String uploadDir;
@@ -51,13 +53,15 @@ public class OfertaServiceImpl implements OfertaService {
 	        );
 	    }
 	    oferta.setUsuario(usuario);
-	    oferta.setIdOferta(null);
 	    MultipartFile foto = ofertaDetail.getFotoArchivo();
 	    if (foto != null && !foto.isEmpty()) {
 	        String nombreGuardado = guardarArchivoFoto(foto);
 	        oferta.setFotoOferta(nombreGuardado);
 	    }
-	    return ofertaRepository.save(oferta);
+	    Oferta ofertaGuardada = ofertaRepository.save(oferta);
+	    // Después enviamos el mensaje a RabbitMQ.
+	    notificacionProductor.enviarNuevaOferta(ofertaGuardada);
+	    return ofertaGuardada;
 	}
 
 	@Transactional
