@@ -13,23 +13,29 @@ public class Oferta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_oferta")
+    @Column(name = "idOferta")
     private Long idOferta;
 
     @Column(name = "nombreOferta")
     private String nombreOferta;
 
-    @Column(name = "descripcion_oferta", columnDefinition = "MEDIUMTEXT")
+    @Column(name = "descripcionOferta", columnDefinition = "MEDIUMTEXT")
     private String descripcionOferta;
 
     @Lob
-    @Column(name = "foto_oferta")
+    @Column(name = "fotoOferta")
     private String fotoOferta;
 
     @Column(name = "estadoOferta")
     private boolean estadoOferta;
+    
+    @ManyToOne
+    @JoinColumn(name="idUsuario", referencedColumnName = "idUsuario")
+    private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "id_empresa", referencedColumnName = "id_empresa")
+    @JoinColumn(name = "idEmpresa", referencedColumnName = "idEmpresa")
     private Empresa empresa;
+    
+    
 }

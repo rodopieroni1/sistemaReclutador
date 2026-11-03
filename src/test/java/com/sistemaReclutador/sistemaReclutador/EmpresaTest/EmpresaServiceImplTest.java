@@ -66,7 +66,7 @@ class EmpresaServiceImplTest {
         empresa = new Empresa();
         empresa.setCuit(20300000000L);
         empresa.setEmail("contacto@empresa.com");
-        empresa.setNombre("Empresa Test");
+        empresa.setNombreEmpresa("Empresa Test");
         empresa.setRubro(rubro);
     }
 
@@ -88,7 +88,7 @@ class EmpresaServiceImplTest {
         Empresa resultado = empresaService.saveEmpresa(request);
 
         assertNotNull(resultado);
-        assertEquals("Empresa Test", resultado.getNombre());
+        assertEquals("Empresa Test", resultado.getNombreEmpresa());
 
         verify(empresaRepository, times(1))
                 .save(any(Empresa.class));

@@ -42,8 +42,8 @@ class EmpresaControllerTest {
 	@Test
 	void listarEmpresas_DevuelveResponseRestConLista() throws Exception {
 		Empresa empresa = new Empresa();
-		empresa.setId_empresa(1L);
-		empresa.setNombre("Tech Corp");
+		empresa.setIdEmpresa(1L);
+		empresa.setNombreEmpresa("Tech Corp");
 
 		when(empresaService.buscarPorEmpresa()).thenReturn(List.of(empresa));
 
@@ -55,7 +55,7 @@ class EmpresaControllerTest {
 	@Test
 	void obtenerEmpresaPorId_DevuelveEmpresa() throws Exception {
 		Empresa empresa = new Empresa();
-		empresa.setId_empresa(1L);
+		empresa.setIdEmpresa(1L);
 
 		when(empresaService.findEmpresa(1L)).thenReturn(empresa);
 
@@ -67,8 +67,8 @@ class EmpresaControllerTest {
 	@Test
 	void crearEmpresa_Multipart_Retorna201() throws Exception {
 	    Empresa empresa = new Empresa();
-	    empresa.setId_empresa(1L);
-	    empresa.setNombre("Nueva Empresa");
+	    empresa.setIdEmpresa(1L);
+	    empresa.setNombreEmpresa("Nueva Empresa");
 
 	    when(empresaService.saveEmpresa(any(EmpresaRequest.class))).thenReturn(empresa);
 	    MockMultipartFile logo = new MockMultipartFile("logo", "logo.png", "image/png", "bytes".getBytes());

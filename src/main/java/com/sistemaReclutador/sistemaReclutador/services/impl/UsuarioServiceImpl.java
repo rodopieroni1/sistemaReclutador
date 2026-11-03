@@ -93,7 +93,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 	public ResponseEntity<ResponseRest<Usuario>> actualizarUsuario(Usuario usuarioDetails) {
 		ResponseRest<Usuario> response;
 		try {
-			Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioDetails.getId());
+			Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioDetails.getIdUsuario());
 			if (usuarioOptional.isPresent()) {
 				Usuario usuario = usuarioOptional.get();
 				usuario.setClave(usuarioDetails.getClave());
@@ -136,6 +136,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 					LocalDateTime.now(), "500");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
+	}
+
+	@Override
+	public Usuario findByClave(String name) {
+		return usuarioRepository.findByClaveSendMail(name);
 	}
 
 }

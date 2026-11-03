@@ -16,12 +16,12 @@ public class AplicacionRequest {
     @JsonProperty("fechaAplicacion")
     private LocalDateTime fechaAplicacion;
 
-    @JsonProperty("estadoaplicaciones")
-    private boolean estadoaplicaciones;
+    @JsonProperty("estadoAplicaciones")
+    private boolean estadoAplicaciones;
 
-    @JsonProperty("id_perfil")
+    @JsonProperty("idPerfil")
     private Perfil idPerfil;
 
-    @JsonProperty("id_oferta")
+    @JsonProperty("idOferta")
     private Oferta idOferta;
 }

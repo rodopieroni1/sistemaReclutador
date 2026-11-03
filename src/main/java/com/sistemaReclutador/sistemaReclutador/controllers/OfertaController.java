@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaUpdateRequest;
@@ -41,10 +42,18 @@ public class OfertaController {
 		return ResponseEntity.ok(ofertaService.obtenerOferta(id));
 	}
 
-
+	@GetMapping("/buscar")
+	public ResponseEntity<List<Oferta>> buscarOferta(
+			@RequestParam(required = false) String nombreOferta,
+			@RequestParam(required = false) String descripcionEmpresa,
+			@RequestParam(required = false) String descripcionRubro) {
+		return ResponseEntity.ok(ofertaService.buscarPorCampo(nombreOferta, descripcionEmpresa, descripcionRubro));
+	}
+	
 	@PostMapping(value = "/crear", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ResponseRest<Oferta>> createOferta(@Valid @ModelAttribute OfertaRequest ofertaRequest) {
-	    Oferta ofertaCreada = ofertaService.saveOferta(ofertaRequest);
+	public ResponseEntity<ResponseRest<Oferta>> createOferta(@Valid @ModelAttribute OfertaRequest ofertaRequest,
+			Authentication authentication) {
+	    Oferta ofertaCreada = ofertaService.saveOferta(ofertaRequest, authentication);
 	    ResponseRest<Oferta> response = new ResponseRest<>(
 	        true, 
 	        "Oferta creada satisfactoriamente", 
@@ -59,9 +68,10 @@ public class OfertaController {
 	@PutMapping(value = "/actualizar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ResponseRest<Oferta>> updateOferta(
 	        @PathVariable Long id,
-	        @Valid @ModelAttribute OfertaUpdateRequest ofertaUpdateRequest) {
+	        @Valid @ModelAttribute OfertaUpdateRequest ofertaUpdateRequest,
+	        Authentication authentication) {
 
-	    Oferta ofertaActualizada = ofertaService.updateOferta(id, ofertaUpdateRequest);
+	    Oferta ofertaActualizada = ofertaService.updateOferta(id, ofertaUpdateRequest, authentication);
 	    ResponseRest<Oferta> response = new ResponseRest<>(true, "Oferta actualizada satisfactoriamente", 
 	        ofertaActualizada, LocalDateTime.now(), "200");	    
 	    return ResponseEntity.ok(response);
@@ -74,11 +84,4 @@ public class OfertaController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/buscar")
-	public ResponseEntity<List<Oferta>> buscarOferta(
-			@RequestParam(required = false) String nombreOferta,
-			@RequestParam(required = false) String descripcionEmpresa,
-			@RequestParam(required = false) String descripcionRubro) {
-		return ResponseEntity.ok(ofertaService.buscarPorCampo(nombreOferta, descripcionEmpresa, descripcionRubro));
-	}
 }

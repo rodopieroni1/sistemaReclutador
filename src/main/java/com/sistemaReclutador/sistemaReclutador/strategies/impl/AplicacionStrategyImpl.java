@@ -13,7 +13,7 @@ public class AplicacionStrategyImpl implements AplicacionesMiasStrategy {
 	@Override
 	public AplicacionesMiasResponse map(Object[] row) {
 	    return AplicacionesMiasResponse.builder()
-	            .idAplicacion((Integer) row[0])
+	            .idAplicacion((Long) row[0])
 	            .puesto((String) row[1])
 	            .empresa((String) row[2])
 	            .fecha(row[3] instanceof java.sql.Timestamp ? 

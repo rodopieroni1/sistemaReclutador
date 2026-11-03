@@ -10,12 +10,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "idUsuario", nullable = false)
+    private Integer idUsuario;
 
     @Column(name = "clave", nullable = false, length = 50)
     private String clave;

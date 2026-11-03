@@ -11,7 +11,7 @@ import com.sistemaReclutador.sistemaReclutador.entities.Oferta;
 @Repository
 public interface OfertaRepository extends JpaRepository<Oferta, Long> {
 	
-	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Oferta o WHERE o.empresa.id_empresa = :idEmpresa")
+	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Oferta o WHERE o.empresa.idEmpresa = :idEmpresa")
 	boolean existsByEmpresa_Id_empresa(@Param("idEmpresa")Long id);
 
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e order by o.idOferta desc")
@@ -27,7 +27,7 @@ public interface OfertaRepository extends JpaRepository<Oferta, Long> {
 	Oferta findOferta(@Param("id") Long id);
 
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e "
-			+ "WHERE LOWER(e.nombre) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%'))")
+			+ "WHERE LOWER(e.nombreEmpresa) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%'))")
 	List<Oferta> buscarPorDescripcionEmpresa(@Param("descripcionEmpresa") String descripcionEmpresa);
 
 	@Query("SELECT o FROM Oferta o " + "WHERE LOWER(o.nombreOferta) LIKE LOWER(CONCAT('%', :nombreOferta, '%'))")
@@ -38,7 +38,7 @@ public interface OfertaRepository extends JpaRepository<Oferta, Long> {
 		List<Oferta> buscarPorRubro(@Param("descripcionRubro") String descripcionRubro);
 
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e " +
-		       "WHERE LOWER(e.nombre) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%')) " +
+		       "WHERE LOWER(e.nombreEmpresa) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%')) " +
 		       "AND LOWER(e.rubro.descripcionRubro) LIKE LOWER(CONCAT('%', :descripcionRubro, '%'))")
 		List<Oferta> buscarPorDescripcionYRubro(@Param("descripcionEmpresa") String descripcionEmpresa,
 		                                        @Param("descripcionRubro") String descripcionRubro);
@@ -50,7 +50,7 @@ public interface OfertaRepository extends JpaRepository<Oferta, Long> {
 
 	@Query("SELECT o FROM Oferta o JOIN o.empresa e " +
 		       "WHERE LOWER(o.nombreOferta) LIKE LOWER(CONCAT('%', :nombreOferta, '%')) " +
-		       "AND LOWER(e.nombre) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%')) " +
+		       "AND LOWER(e.nombreEmpresa) LIKE LOWER(CONCAT('%', :descripcionEmpresa, '%')) " +
 		       "AND LOWER(e.rubro.descripcionRubro) LIKE LOWER(CONCAT('%', :descripcionRubro, '%'))")
 		List<Oferta> buscarPorCampos(@Param("nombreOferta") String nombreOferta,
 		                             @Param("descripcionEmpresa") String descripcionEmpresa,

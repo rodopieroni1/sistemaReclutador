@@ -8,20 +8,21 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "empresas")
+@Table(name = "empresa")
 public class Empresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_empresa;
+    @Column(name = "idEmpresa")
+    private Long idEmpresa;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
+    @Column(name = "nombreEmpresa", nullable = false, length = 100)
+    private String nombreEmpresa;
 
     @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @Column(name = "historia_empresa", columnDefinition = "TEXT")
+    @Column(name = "historiaEmpresa", columnDefinition = "TEXT")
     private String historiaEmpresa;
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
@@ -40,6 +41,6 @@ public class Empresa {
     private String telefono;
 
     @ManyToOne
-    @JoinColumn(name = "id_rubro", nullable = false)
+    @JoinColumn(name = "idRubro", nullable = false)
     private Rubro rubro;
 }

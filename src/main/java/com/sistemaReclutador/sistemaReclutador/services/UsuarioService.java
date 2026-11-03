@@ -2,8 +2,6 @@ package com.sistemaReclutador.sistemaReclutador.services;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.entities.Usuario;
 import com.sistemaReclutador.sistemaReclutador.response.ResponseRest;
@@ -16,4 +14,5 @@ public interface UsuarioService {
 	ResponseEntity<ResponseRest<Usuario>> actualizarUsuario(Usuario usuarioDetails);
 	ResponseEntity<?> eliminarUsuario(int id);
 	void cambiarPasswordAutenticado(String claveUsuario, String nuevaPassword);
+	Usuario findByClave(String name);
 }

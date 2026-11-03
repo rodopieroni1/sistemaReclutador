@@ -54,7 +54,7 @@ public class EmpresaRepositoryTest {
 	@Test
     void existsByCuit_DeberiaRetornarTrue_CuandoElCuitYaExisteEnLaBaseDeDatos() {
         Empresa empresa = new Empresa();
-        empresa.setNombre("Conesa");
+        empresa.setNombreEmpresa("Conesa");
         empresa.setCuit(33397120828L);
         empresa.setRubro(rubroPersistido);
         empresa.setEmail("pedrogmail.com");
@@ -89,7 +89,7 @@ public class EmpresaRepositoryTest {
     @Test
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoCuitYaExiste() {
         Empresa empresaPrevia = new Empresa();
-        empresaPrevia.setNombre("Empresa Vieja");
+        empresaPrevia.setNombreEmpresa("Empresa Vieja");
         empresaPrevia.setCuit(33303120828L);
         empresaPrevia.setEmail("vieja@hotmail.com");
         empresaPrevia.setRubro(rubroPersistido);
@@ -105,7 +105,7 @@ public class EmpresaRepositoryTest {
     @Test
     void saveEmpresa_DeberiaRetornarBadRequest_CuandoEmailYaExiste() {
         Empresa empresaPrevia = new Empresa();
-        empresaPrevia.setNombre("Empresa Vieja");
+        empresaPrevia.setNombreEmpresa("Empresa Vieja");
         empresaPrevia.setCuit(11111111111L);
         empresaPrevia.setEmail("piche@hotmail.com");
         empresaPrevia.setRubro(rubroPersistido);

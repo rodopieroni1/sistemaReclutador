@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -48,6 +49,8 @@ public class OfertaControllerTest {
 	private UserDetailsService userDetailsService;
 	@MockBean
     private PerfilRepository perfilRepository;
+	@MockBean
+	private Authentication authentication;
 
 	@BeforeEach
 	void setUp() {
@@ -86,7 +89,7 @@ public class OfertaControllerTest {
 	    Oferta ofertaSimulada = new Oferta();
 	    ofertaSimulada.setIdOferta(100L);
 	    ofertaSimulada.setNombreOferta(ofertarequest.getNombreOferta());
-	    Mockito.when(ofertaService.saveOferta(any(OfertaRequest.class))).thenReturn(ofertaSimulada);
+	    Mockito.when(ofertaService.saveOferta(any(OfertaRequest.class), authentication)).thenReturn(ofertaSimulada);
 	    mockMvc.perform(multipart("/ofertas/crear")
 	            .param("nombreOferta", "Desarrollador Backend")
 	            .param("descripcionOferta", "Experiencia en Spring Boot")
@@ -107,13 +110,10 @@ public class OfertaControllerTest {
 	    Oferta ofertaSimulada = new Oferta();
 	    ofertaSimulada.setIdOferta(idOferta);
 	    ofertaSimulada.setNombreOferta("Desarrollador Senior Backend");
-
-	    Mockito.when(ofertaService.updateOferta(eq(idOferta), any(OfertaUpdateRequest.class)))
+	    Mockito.when(ofertaService.updateOferta(eq(idOferta), any(OfertaUpdateRequest.class), authentication))
 	            .thenReturn(ofertaSimulada);
-
 	    MockMultipartHttpServletRequestBuilder builder = 
-	            MockMvcRequestBuilders.multipart("/ofertas/actualizar/{id}", idOferta);
-	    
+	            MockMvcRequestBuilders.multipart("/ofertas/actualizar/{id}", idOferta);  
 	    builder.with(request -> {
 	        request.setMethod("PUT");
 	        return request;

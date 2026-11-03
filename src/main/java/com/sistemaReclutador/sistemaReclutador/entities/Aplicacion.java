@@ -17,26 +17,26 @@ public class Aplicacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idaplicacion")
-    private Integer idaplicacion;
+    @Column(name = "idAplicacion")
+    private Long idAplicacion;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(name = "Fecha")
+    @Column(name = "fecha")
     private LocalDateTime fecha;
 
-    @Column(name = "estadoaplicaciones")
-    private boolean estadoaplicaciones;
+    @Column(name = "estadoAplicaciones")
+    private boolean estadoAplicaciones;
 
     @ManyToOne
-    @JoinColumn(name = "id_perfil", referencedColumnName = "id_perfil")
+    @JoinColumn(name = "idPerfil", referencedColumnName = "idPerfil")
     private Perfil perfil;
 
     @ManyToOne
-    @JoinColumn(name = "id_oferta")
+    @JoinColumn(name = "idOferta", referencedColumnName ="idOferta")
     private Oferta oferta;
     
     public void reactivar() {
-        this.estadoaplicaciones = true;
+        this.estadoAplicaciones = true;
         this.fecha = LocalDateTime.now();
     }
 }
