@@ -16,7 +16,6 @@ import com.sistemaReclutador.sistemaReclutador.config.JwtUtil;
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilConAplicacionesDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilDTO;
-import com.sistemaReclutador.sistemaReclutador.entities.Aplicacion;
 import com.sistemaReclutador.sistemaReclutador.entities.PasswordResetToken;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.exceptions.ResourceNotFoundException;

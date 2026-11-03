@@ -51,7 +51,7 @@ class EmpresaServiceImplTest {
                 empresaRepository,
                 rubroService,
                 fileStorageStrategy,
-                List.of(validationStrategy)
+                List.of(validationStrategy), null
         );
 
         rubro = new Rubro();

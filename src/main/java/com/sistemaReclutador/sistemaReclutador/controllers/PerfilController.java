@@ -2,18 +2,19 @@ package com.sistemaReclutador.sistemaReclutador.controllers;
 
 import java.util.List;
 import java.util.Map;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.sistemaReclutador.sistemaReclutador.dto.LoginRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.PerfilConAplicacionesDTO;
 import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.services.PerfilService;
-
+import com.sistemaReclutador.sistemaReclutador.services.impl.GeneradorCvService;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PerfilController {
 
 	private final PerfilService perfilService;
+	private final GeneradorCvService generadorCvService;
 
 	@GetMapping("/auth/ping")
 	public ResponseEntity<Void> ping() {
@@ -100,6 +102,19 @@ public class PerfilController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> eliminarPerfil(@PathVariable Integer id) {
 		return perfilService.eliminarPerfil(id);
+	}
+	
+	@PostMapping("/generar-cv/docx")
+	public ResponseEntity<byte[]> generarCvDocx() throws IOException {
+
+	    byte[] archivo = generadorCvService.generarPlantillaDocx();
+
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+	            .header(HttpHeaders.CONTENT_DISPOSITION,
+	                "attachment; filename=\"plantilla-cv.docx\"")
+	            .body(archivo);
 	}
 
 }
