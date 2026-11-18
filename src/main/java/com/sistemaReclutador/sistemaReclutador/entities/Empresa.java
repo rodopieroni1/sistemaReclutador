@@ -22,6 +22,16 @@ public class Empresa {
     @Column(name = "direccion", length = 255)
     private String direccion;
 
+    // Ubicación de la sede de la empresa
+    @Column(name = "localidad", length = 100)
+    private String localidad;
+
+    @Column(name = "provincia", length = 100)
+    private String provincia;
+
+    @Column(name = "pais", length = 100)
+    private String pais;
+
     @Column(name = "historiaEmpresa", columnDefinition = "TEXT")
     private String historiaEmpresa;
 

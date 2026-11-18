@@ -107,6 +107,9 @@ public class EmpresaServiceImpl implements EmpresaService {
 		Empresa empresa = new Empresa();
 		empresa.setNombreEmpresa(dto.getNombre());
 		empresa.setDireccion(dto.getDireccion());
+		empresa.setLocalidad(dto.getLocalidad());
+		empresa.setProvincia(dto.getProvincia());
+		empresa.setPais(dto.getPais());
 		empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
 		empresa.setObservaciones(dto.getObservaciones());
 		empresa.setTelefono(dto.getTelefono());
@@ -125,6 +128,18 @@ public class EmpresaServiceImpl implements EmpresaService {
 		empresa.setHistoriaEmpresa(dto.getHistoriaEmpresa());
 		empresa.setObservaciones(dto.getObservaciones());
 		empresa.setRubro(rubro);
+		// Actualizar ubicación solamente si llega un valor.
+		if (dto.getLocalidad() != null) {
+		    empresa.setLocalidad(dto.getLocalidad());
+		}
+
+		if (dto.getProvincia() != null) {
+		    empresa.setProvincia(dto.getProvincia());
+		}
+
+		if (dto.getPais() != null) {
+		    empresa.setPais(dto.getPais());
+		}
 	}
 
 }

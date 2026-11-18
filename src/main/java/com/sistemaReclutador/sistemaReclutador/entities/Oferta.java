@@ -1,4 +1,7 @@
+
 package com.sistemaReclutador.sistemaReclutador.entities;
+
+import com.sistemaReclutador.sistemaReclutador.Enum.ModalidadTrabajo;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,14 +31,29 @@ public class Oferta {
 
     @Column(name = "estadoOferta")
     private boolean estadoOferta;
-    
+
     @ManyToOne
-    @JoinColumn(name="idUsuario", referencedColumnName = "idUsuario")
+    @JoinColumn(name = "idUsuario", referencedColumnName = "idUsuario")
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "idEmpresa", referencedColumnName = "idEmpresa")
     private Empresa empresa;
-    
-    
+
+    // Ubicación específica donde se realizará el trabajo
+    @Column(name = "direccionTrabajo", length = 255)
+    private String direccionTrabajo;
+
+    @Column(name = "localidadTrabajo", length = 100)
+    private String localidadTrabajo;
+
+    @Column(name = "provinciaTrabajo", length = 100)
+    private String provinciaTrabajo;
+
+    @Column(name = "paisTrabajo", length = 100)
+    private String paisTrabajo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modalidad", length = 20)
+    private ModalidadTrabajo modalidad;
 }

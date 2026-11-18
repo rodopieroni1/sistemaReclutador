@@ -24,6 +24,15 @@ public class Perfil {
     @Column(name = "direccion", length = 255)
     private String direccion;
     
+    @Column(name = "localidad", length = 100)
+    private String localidad;
+
+    @Column(name = "provincia", length = 100)
+    private String provincia;
+
+    @Column(name = "pais", length = 100)
+    private String pais;
+    
     @Column(name = "dni", length = 20, unique = true)
     private String dni;
     

@@ -30,6 +30,19 @@ public class EmpresaRequest {
     @JsonProperty("direccionEmpresa")
     private String direccion;
 
+    // Ubicación de la sede de la empresa
+    @Size(max = 100)
+    @JsonProperty("localidadEmpresa")
+    private String localidad;
+
+    @Size(max = 100)
+    @JsonProperty("provinciaEmpresa")
+    private String provincia;
+
+    @Size(max = 100)
+    @JsonProperty("paisEmpresa")
+    private String pais;
+
     @JsonProperty("historiaEmpresa")
     private String historiaEmpresa;
 

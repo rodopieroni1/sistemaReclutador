@@ -41,79 +41,91 @@ public class OfertaServiceImpl implements OfertaService {
 	@Transactional
 	@Override
 	public Oferta saveOferta(OfertaRequest ofertaDetail, Authentication authentication) {
-	    if (ofertaDetail == null) {
-	        throw new IllegalArgumentException("Los datos de la oferta no pueden ser nulos.");
-	    }
-	    Oferta oferta = convertirDtoAEntidad(ofertaDetail);
-	    Usuario usuario = usuarioService.findByClave(authentication.getName());
+		if (ofertaDetail == null) {
+			throw new IllegalArgumentException("Los datos de la oferta no pueden ser nulos.");
+		}
+		Oferta oferta = convertirDtoAEntidad(ofertaDetail);
+		Usuario usuario = usuarioService.findByClave(authentication.getName());
 
-	    if (usuario == null) {
-	        throw new IllegalArgumentException(
-	            "No se encontró el usuario autenticado."
-	        );
-	    }
-	    oferta.setUsuario(usuario);
-	    MultipartFile foto = ofertaDetail.getFotoArchivo();
-	    if (foto != null && !foto.isEmpty()) {
-	        String nombreGuardado = guardarArchivoFoto(foto);
-	        oferta.setFotoOferta(nombreGuardado);
-	    }
-	    Oferta ofertaGuardada = ofertaRepository.save(oferta);
-	    // Después enviamos el mensaje a RabbitMQ.
-	    notificacionProductor.enviarNuevaOferta(ofertaGuardada);
-	    return ofertaGuardada;
+		if (usuario == null) {
+			throw new IllegalArgumentException("No se encontró el usuario autenticado.");
+		}
+		oferta.setUsuario(usuario);
+		MultipartFile foto = ofertaDetail.getFotoArchivo();
+		if (foto != null && !foto.isEmpty()) {
+			String nombreGuardado = guardarArchivoFoto(foto);
+			oferta.setFotoOferta(nombreGuardado);
+		}
+		Oferta ofertaGuardada = ofertaRepository.save(oferta);
+		// Después enviamos el mensaje a RabbitMQ.
+		notificacionProductor.enviarNuevaOferta(ofertaGuardada);
+		return ofertaGuardada;
 	}
 
 	@Transactional
 	@Override
-	public Oferta updateOferta(
-	        Long id,
-	        OfertaUpdateRequest request,
-	        Authentication authentication) {
+	public Oferta updateOferta(Long id, OfertaUpdateRequest request, Authentication authentication) {
 
-	    Oferta ofertaUpdate = ofertaRepository.findById(id)
-	            .orElseThrow(() -> new ResourceNotFoundException(
-	                    "No se encontró la oferta con ID: " + id));
+		Oferta ofertaUpdate = ofertaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("No se encontró la oferta con ID: " + id));
 
-	    ofertaUpdate.setNombreOferta(request.getNombreOferta());
-	    ofertaUpdate.setDescripcionOferta(request.getDescripcionOferta());
-	    ofertaUpdate.setEstadoOferta(request.isEstadoOferta());
+		ofertaUpdate.setNombreOferta(request.getNombreOferta());
+		ofertaUpdate.setDescripcionOferta(request.getDescripcionOferta());
+		ofertaUpdate.setEstadoOferta(request.isEstadoOferta());
+		
+		// Actualizar ubicación solamente si llega un valor.
+		if (request.getDireccionTrabajo() != null) {
+		    ofertaUpdate.setDireccionTrabajo(request.getDireccionTrabajo());
+		}
 
-	    // Asociar al reclutador autenticado
-	    if (authentication == null || !authentication.isAuthenticated()) {
-	        throw new IllegalStateException("El usuario no está autenticado.");
-	    }
+		if (request.getLocalidadTrabajo() != null) {
+		    ofertaUpdate.setLocalidadTrabajo(request.getLocalidadTrabajo());
+		}
 
-	    Usuario usuario = usuarioService.findByClave(authentication.getName());
+		if (request.getProvinciaTrabajo() != null) {
+		    ofertaUpdate.setProvinciaTrabajo(request.getProvinciaTrabajo());
+		}
 
-	    if (usuario == null) {
-	        throw new ResourceNotFoundException(
-	                "No se encontró el usuario autenticado.");
-	    }
+		if (request.getPaisTrabajo() != null) {
+		    ofertaUpdate.setPaisTrabajo(request.getPaisTrabajo());
+		}
 
-	    ofertaUpdate.setUsuario(usuario);
+		if (request.getModalidad() != null) {
+		    ofertaUpdate.setModalidad(request.getModalidad());
+		}
 
-	    if (request.getIdEmpresa() != null) {
-	        Empresa empresa = empresaRepository.findById(request.getIdEmpresa())
-	                .orElseThrow(() -> new ResourceNotFoundException(
-	                        "Empresa no encontrada con ID: "
-	                                + request.getIdEmpresa()));
+		// Asociar al reclutador autenticado
+		if (authentication == null || !authentication.isAuthenticated()) {
+			throw new IllegalStateException("El usuario no está autenticado.");
+		}
 
-	        ofertaUpdate.setEmpresa(empresa);
-	    }
+		Usuario usuario = usuarioService.findByClave(authentication.getName());
 
-	    if (request.getFotoArchivo() != null
-	            && !request.getFotoArchivo().isEmpty()) {
+		if (usuario == null) {
+			throw new ResourceNotFoundException("No se encontró el usuario autenticado.");
+		}
 
-	        String nombreGuardado = guardarArchivoFoto(request.getFotoArchivo());
-	        ofertaUpdate.setFotoOferta(nombreGuardado);
+		ofertaUpdate.setUsuario(usuario);
 
-	    } else if (request.getFotoOferta() != null) {
-	        ofertaUpdate.setFotoOferta(request.getFotoOferta());
-	    }
+		if (request.getIdEmpresa() != null) {
+			Empresa empresa = empresaRepository.findById(request.getIdEmpresa()).orElseThrow(
+					() -> new ResourceNotFoundException("Empresa no encontrada con ID: " + request.getIdEmpresa()));
 
-	    return ofertaRepository.save(ofertaUpdate);
+			ofertaUpdate.setEmpresa(empresa);
+		}
+
+		if (request.getFotoArchivo() != null && !request.getFotoArchivo().isEmpty()) {
+
+			String nombreGuardado = guardarArchivoFoto(request.getFotoArchivo());
+			ofertaUpdate.setFotoOferta(nombreGuardado);
+
+		} else if (request.getFotoOferta() != null) {
+			ofertaUpdate.setFotoOferta(request.getFotoOferta());
+		}
+
+		return ofertaRepository.save(ofertaUpdate);
 	}
+
 	@Transactional
 	@Override
 	public void eliminarOferta(Long id) {
@@ -149,31 +161,40 @@ public class OfertaServiceImpl implements OfertaService {
 	}
 
 	@Override
-    @Transactional(readOnly = true)
-    public List<Oferta> buscarPorCampo(String nombreOferta, String descripcionEmpresa, String descripcionRubro) {
-        String nombre = (nombreOferta != null && !nombreOferta.trim().isEmpty()) ? nombreOferta.trim() : null;
-        String empresa = (descripcionEmpresa != null && !descripcionEmpresa.trim().isEmpty()) ? descripcionEmpresa.trim() : null;
-        String rubro = (descripcionRubro != null && !descripcionRubro.trim().isEmpty()) ? descripcionRubro.trim() : null;
-        return ofertaStrategy.stream()
-                .filter(strategy -> strategy.aplica(nombre, empresa, rubro))
-                .findFirst()
-                .map(strategy -> strategy.buscar(ofertaRepository, nombre, empresa, rubro))
-                .orElseGet(ofertaRepository::findAll);
-    }
-	
-	private Oferta convertirDtoAEntidad(OfertaRequest dto) {
-	    Oferta oferta = new Oferta();
-	    oferta.setNombreOferta(dto.getNombreOferta());
-	    oferta.setDescripcionOferta(dto.getDescripcionOferta());
-	    oferta.setEstadoOferta(dto.isEstadoOferta());
-	    oferta.setFotoOferta(dto.getFotoOferta());
-	    if (dto.getIdEmpresa() != null) {
-	        Empresa empresa = empresaRepository.findById(dto.getIdEmpresa())
-	                .orElseThrow(() -> new ResourceNotFoundException("Empresa asociada no encontrada con ID: " + dto.getIdEmpresa()));
-	        oferta.setEmpresa(empresa);
-	    }
+	@Transactional(readOnly = true)
+	public List<Oferta> buscarPorCampo(String nombreOferta, String descripcionEmpresa, String descripcionRubro) {
+		String nombre = (nombreOferta != null && !nombreOferta.trim().isEmpty()) ? nombreOferta.trim() : null;
+		String empresa = (descripcionEmpresa != null && !descripcionEmpresa.trim().isEmpty())
+				? descripcionEmpresa.trim()
+				: null;
+		String rubro = (descripcionRubro != null && !descripcionRubro.trim().isEmpty()) ? descripcionRubro.trim()
+				: null;
+		return ofertaStrategy.stream().filter(strategy -> strategy.aplica(nombre, empresa, rubro)).findFirst()
+				.map(strategy -> strategy.buscar(ofertaRepository, nombre, empresa, rubro))
+				.orElseGet(ofertaRepository::findAll);
+	}
 
-	    return oferta;
+	private Oferta convertirDtoAEntidad(OfertaRequest dto) {
+		Oferta oferta = new Oferta();
+		oferta.setNombreOferta(dto.getNombreOferta());
+		oferta.setDescripcionOferta(dto.getDescripcionOferta());
+		oferta.setEstadoOferta(dto.isEstadoOferta());
+		oferta.setFotoOferta(dto.getFotoOferta());
+		// Ubicación laboral
+		oferta.setDireccionTrabajo(dto.getDireccionTrabajo());
+		oferta.setLocalidadTrabajo(dto.getLocalidadTrabajo());
+		oferta.setProvinciaTrabajo(dto.getProvinciaTrabajo());
+		oferta.setPaisTrabajo(dto.getPaisTrabajo());
+		// Modalidad de trabajo
+		oferta.setModalidad(dto.getModalidad());
+		if (dto.getIdEmpresa() != null) {
+			Empresa empresa = empresaRepository.findById(dto.getIdEmpresa())
+					.orElseThrow(() -> new ResourceNotFoundException(
+							"Empresa asociada no encontrada con ID: " + dto.getIdEmpresa()));
+			oferta.setEmpresa(empresa);
+		}
+
+		return oferta;
 	}
 
 	private String guardarArchivoFoto(MultipartFile foto) {
@@ -195,7 +216,7 @@ public class OfertaServiceImpl implements OfertaService {
 
 	@Override
 	public boolean existsByEmpresa_Id_empresa(Long id) {
-	    return ofertaRepository.existsByEmpresa_Id_empresa(id);
+		return ofertaRepository.existsByEmpresa_Id_empresa(id);
 	}
 
 }
