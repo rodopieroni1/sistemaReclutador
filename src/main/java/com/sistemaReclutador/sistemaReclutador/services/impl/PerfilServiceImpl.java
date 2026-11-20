@@ -53,7 +53,8 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String telefono, String clave,
+	public ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion,String pais,String provincia,String localidad,
+			String email, String telefono, String clave,
 			String password, MultipartFile foto, MultipartFile uploadcv) {
 		if (password == null || password.isBlank()) {
 		    throw new IllegalArgumentException(
@@ -61,13 +62,16 @@ public class PerfilServiceImpl implements PerfilService {
 		    );
 		}
 		try {
-			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, email, telefono, clave, password);
+			PerfilDTO dto = new PerfilDTO(0, nombre, dni, direccion, pais,provincia,localidad, email, telefono, clave, password);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
 			Perfil perfil = new Perfil();
 			perfil.setNombre(nombre);
 			perfil.setDni(dni);
 			perfil.setDireccion(direccion);
+			perfil.setPais(pais);
+			perfil.setProvincia(provincia);
+			perfil.setLocalidad(localidad);
 			perfil.setEmail(email);
 			perfil.setTelefono(telefono);
 			perfil.setClave(clave);
@@ -82,20 +86,23 @@ public class PerfilServiceImpl implements PerfilService {
 	}
 
 	@Override
-	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String email,
+	public ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String pais, String provincia, String localidad, String email,
 			String telefono, String clave, MultipartFile foto, MultipartFile uploadcv) {
 		Optional<Perfil> perfilOpt = perfilRepository.findById(id);
 		if (perfilOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"Perfil no encontrado\"}");
 		}
 		try {
-			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, email, telefono, clave, null);
+			PerfilDTO dto = new PerfilDTO(id, nombre, dni, direccion, pais, provincia,localidad, email, telefono, clave, null);
 			// Validaciones del backend
 			validarDatosPerfil(dto);
 			Perfil perfil = perfilOpt.get();
 			perfil.setNombre(nombre);
 			perfil.setDni(dni);
 			perfil.setDireccion(direccion);
+			perfil.setPais(pais);
+			perfil.setProvincia(provincia);
+			perfil.setLocalidad(localidad);
 			perfil.setEmail(email);
 			perfil.setTelefono(telefono);
 			perfil.setClave(clave);

@@ -58,7 +58,7 @@ public class OfertaServiceImpl implements OfertaService {
 		}
 		Oferta ofertaGuardada = ofertaRepository.save(oferta);
 		// Después enviamos el mensaje a RabbitMQ.
-		notificacionProductor.enviarNuevaOferta(ofertaGuardada);
+		//notificacionProductor.enviarNuevaOferta(ofertaGuardada);
 		return ofertaGuardada;
 	}
 

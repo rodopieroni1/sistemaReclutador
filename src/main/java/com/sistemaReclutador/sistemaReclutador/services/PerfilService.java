@@ -19,10 +19,10 @@ public interface PerfilService {
 
 	ResponseEntity<?> eliminarPerfil(int id);
 
-	ResponseEntity<String> actualizarPerfil(int id, String nombre, String dni, String direccion, String email,
-			String telefono, String clave, MultipartFile foto, MultipartFile uploadcv);
+	ResponseEntity<String> actualizarPerfil(int id,String nombre,String dni,String direccion,String pais,String provincia,String localidad,
+		    String email,String telefono,String clave,MultipartFile foto,MultipartFile uploadcv);
 
-	ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion, String email, String telefono,
+	ResponseEntity<String> guardarPerfil(String nombre, String dni, String direccion,String pais,String provincia,String localidad, String email, String telefono,
 			String clave, String password, MultipartFile foto, MultipartFile uploadcv);
 
 	ResponseEntity<Map<String, Boolean>> verificarEmailYDni(Map<String, String> datos);

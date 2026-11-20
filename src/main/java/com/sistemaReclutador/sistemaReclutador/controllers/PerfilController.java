@@ -49,11 +49,24 @@ public class PerfilController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> crearPerfil(@RequestParam("nombre") String nombre, @RequestParam("dni") String dni,
-			@RequestParam("direccion") String direccion, @RequestParam("email") String email,@RequestParam("telefono") String telefono,
-			@RequestParam("clave") String clave, @RequestParam("password") String password,
-			@RequestParam("foto") MultipartFile foto, @RequestParam("uploadcv") MultipartFile uploadcv) {
-		return perfilService.guardarPerfil(nombre, dni, direccion, email, telefono, clave, password, foto, uploadcv);
+	public ResponseEntity<String> crearPerfil(
+	        @RequestParam("nombre") String nombre,
+	        @RequestParam("dni") String dni,
+	        @RequestParam("direccion") String direccion,
+	        @RequestParam("pais") String pais,
+	        @RequestParam("provincia") String provincia,
+	        @RequestParam("localidad") String localidad,
+	        @RequestParam("email") String email,
+	        @RequestParam("telefono") String telefono,
+	        @RequestParam("clave") String clave,
+	        @RequestParam("password") String password,
+	        @RequestParam(value = "foto", required = false) MultipartFile foto,
+	        @RequestParam(value = "uploadcv", required = false) MultipartFile uploadcv) {
+
+	    return perfilService.guardarPerfil(
+	        nombre, dni, direccion, pais, provincia, localidad,
+	        email, telefono, clave, password, foto, uploadcv
+	    );
 	}
 	
 	@PostMapping("/auth/login")
@@ -92,11 +105,14 @@ public class PerfilController {
 	@PutMapping("/{id}")
 	public ResponseEntity<String> actualizarPerfil(@PathVariable Integer id, @RequestParam("nombre") String nombre,
 			@RequestParam("dni") String dni, @RequestParam("direccion") String direccion,
-			@RequestParam("email") String email, @RequestParam("telefono") String telefono,
-			@RequestParam("clave") String clave,
+			@RequestParam("pais") String pais,@RequestParam("provincia") String provincia,
+			@RequestParam("localidad") String localidad, @RequestParam("email") String email,
+			@RequestParam("telefono") String telefono, @RequestParam("clave") String clave,
 			@RequestParam(value = "foto", required = false) MultipartFile foto,
 			@RequestParam(value = "uploadcv", required = false) MultipartFile uploadcv) {
-		return perfilService.actualizarPerfil(id, nombre, dni, direccion, email, telefono, clave, foto, uploadcv);
+		return perfilService.actualizarPerfil(
+			    id, nombre, dni, direccion, pais, provincia, localidad, email, telefono, clave, foto, uploadcv
+			);
 	}
 
 	@DeleteMapping("/{id}")
