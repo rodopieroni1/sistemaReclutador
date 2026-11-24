@@ -242,44 +242,78 @@ class CompatibilidadServiceTest {
 		cv.setExperienciasLaborales(new ArrayList<>());
 		assertNull(servicio.evaluarExperiencia(oferta, cv));
 	}
-	
+
 	@Test
 	void debeCalcularPorcentajeDeFormacionesEncontradas() {
-	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
-	    oferta.setFormacionRequerida(
-	            Arrays.asList("Analista de sistemas", "Contador", "Abogado"));
-	    CvAnalisisDTO cv = new CvAnalisisDTO();
-	    cv.setFormacionAcademica(
-	            Arrays.asList("Analista de sistemas", "Contador"));
-	    assertEquals(0.6667, servicio.evaluarFormacion(oferta, cv), 0.001);
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setFormacionRequerida(Arrays.asList("Analista de sistemas", "Contador", "Abogado"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setFormacionAcademica(Arrays.asList("Analista de sistemas", "Contador"));
+		assertEquals(0.6667, servicio.evaluarFormacion(oferta, cv), 0.001);
 	}
 
 	@Test
 	void debeIgnorarMayusculasYMinusculasEnFormacion() {
-	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
-	    oferta.setFormacionRequerida(Arrays.asList("ANALISTA DE SISTEMAS"));
-	    CvAnalisisDTO cv = new CvAnalisisDTO();
-	    cv.setFormacionAcademica(Arrays.asList("Analista de sistemas"));
-	    assertEquals(1.0, servicio.evaluarFormacion(oferta, cv), 0.001);
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setFormacionRequerida(Arrays.asList("ANALISTA DE SISTEMAS"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setFormacionAcademica(Arrays.asList("Analista de sistemas"));
+		assertEquals(1.0, servicio.evaluarFormacion(oferta, cv), 0.001);
 	}
 
 	@Test
 	void noDebeConfundirFormacionesConNombresSimilares() {
-	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
-	    oferta.setFormacionRequerida(Arrays.asList("Contador"));
-	    CvAnalisisDTO cv = new CvAnalisisDTO();
-	    cv.setFormacionAcademica(Arrays.asList("Contabilidad"));
-	    assertEquals(0.0, servicio.evaluarFormacion(oferta, cv), 0.001);
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setFormacionRequerida(Arrays.asList("Contador"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setFormacionAcademica(Arrays.asList("Contabilidad"));
+		assertEquals(0.0, servicio.evaluarFormacion(oferta, cv), 0.001);
 	}
 
 	@Test
 	void debeDevolverNullCuandoNoHayFormacionParaEvaluar() {
-	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
-	    oferta.setFormacionRequerida(Arrays.asList("Abogado"));
-	    CvAnalisisDTO cv = new CvAnalisisDTO();
-	    cv.setFormacionAcademica(new ArrayList<>());
-	    assertNull(servicio.evaluarFormacion(oferta, cv));
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setFormacionRequerida(Arrays.asList("Abogado"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setFormacionAcademica(new ArrayList<>());
+		assertNull(servicio.evaluarFormacion(oferta, cv));
 	}
-	
-	
+
+	@Test
+	void evaluarCompatibilidad_debeIntegrarLosTresCriterios() {
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setExperienciaRequerida(List.of("Java"));
+		oferta.setHabilidadesRequeridas(List.of("Spring"));
+		oferta.setFormacionRequerida(List.of("Ingeniería"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setExperienciasLaborales(List.of("Java"));
+		cv.setHabilidades(List.of("Spring"));
+		cv.setFormacionAcademica(List.of("Ingeniería"));
+		CompatibilidadDTO resultado = servicio.evaluarCompatibilidad(oferta, cv);
+		assertEquals(1.0, resultado.getExperiencia());
+		assertEquals(1.0, resultado.getHabilidades());
+		assertEquals(1.0, resultado.getFormacion());
+		assertEquals(100.0, resultado.getPorcentajeCompatibilidad());
+	}
+
+	@Test
+	void evaluarCompatibilidad_debeIntegrarPuntajesYRequisitos() {
+
+		OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+		oferta.setExperienciaRequerida(List.of("Java"));
+		oferta.setHabilidadesRequeridas(List.of("Spring"));
+		oferta.setFormacionRequerida(List.of("Ingeniería"));
+		oferta.setRequisitosObligatorios(List.of("Java", "Inglés avanzado"));
+		oferta.setRequisitosDeseables(List.of("Spring"));
+		CvAnalisisDTO cv = new CvAnalisisDTO();
+		cv.setExperienciasLaborales(List.of("Java"));
+		cv.setHabilidades(List.of("Spring"));
+		cv.setFormacionAcademica(List.of("Ingeniería"));
+		CompatibilidadDTO resultado = servicio.evaluarCompatibilidad(oferta, cv);
+		assertEquals(100.0, resultado.getPorcentajeCompatibilidad());
+		assertTrue(resultado.getRequisitosObligatoriosCumplidos().contains("Java"));
+		assertTrue(resultado.getRequisitosObligatoriosNoAcreditados().contains("Inglés avanzado"));
+		assertTrue(resultado.getRequisitosDeseablesEncontrados().contains("Spring"));
+	}
+
 }

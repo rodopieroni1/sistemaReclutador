@@ -42,6 +42,25 @@ public class CompatibilidadService {
 		return resultado;
 	}
 
+	public CompatibilidadDTO evaluarCompatibilidad(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+
+		Double experiencia = evaluarExperiencia(oferta, cv);
+		Double habilidades = evaluarHabilidades(oferta, cv);
+		Double formacion = evaluarFormacion(oferta, cv);
+
+		CompatibilidadDTO resultado = construirResultado(experiencia, habilidades, formacion, null, null, null);
+
+		CompatibilidadDTO requisitos = evaluarRequisitos(oferta, cv);
+		resultado.setRequisitosCumplidos(requisitos.getRequisitosCumplidos());
+		resultado.setRequisitosNoAcreditados(requisitos.getRequisitosNoAcreditados());
+		resultado.setRequisitosObligatoriosCumplidos(requisitos.getRequisitosObligatoriosCumplidos());
+		resultado.setRequisitosObligatoriosNoAcreditados(requisitos.getRequisitosObligatoriosNoAcreditados());
+		resultado.setRequisitosDeseablesEncontrados(requisitos.getRequisitosDeseablesEncontrados());
+		resultado.setRequisitosDeseablesNoEncontrados(requisitos.getRequisitosDeseablesNoEncontrados());
+
+		return resultado;
+	}
+
 	public double calcularPorcentaje(Double experiencia, Double habilidades, Double formacion, Double ubicacion,
 			Double modalidad, Double preferencias) {
 
@@ -53,41 +72,33 @@ public class CompatibilidadService {
 		validarPuntaje(preferencias);
 		double total = 0;
 		double pesoTotal = 0;
-
 		if (experiencia != null) {
 			total += experiencia * 0.25;
 			pesoTotal += 0.25;
 		}
-
 		if (habilidades != null) {
 			total += habilidades * 0.25;
 			pesoTotal += 0.25;
 		}
-
 		if (formacion != null) {
 			total += formacion * 0.15;
 			pesoTotal += 0.15;
 		}
-
 		if (ubicacion != null) {
 			total += ubicacion * 0.15;
 			pesoTotal += 0.15;
 		}
-
 		if (modalidad != null) {
 			total += modalidad * 0.10;
 			pesoTotal += 0.10;
 		}
-
 		if (preferencias != null) {
 			total += preferencias * 0.10;
 			pesoTotal += 0.10;
 		}
-
 		if (pesoTotal == 0) {
 			return 0;
 		}
-
 		return Math.round((total / pesoTotal) * 10000.0) / 100.0;
 	}
 
@@ -226,49 +237,50 @@ public class CompatibilidadService {
 		}
 		return (double) encontradas / requeridasValidas.size();
 	}
-	
+
 	public Double evaluarFormacion(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+		if (oferta == null || cv == null) {
+			return null;
+		}
+		List<String> formacionRequerida = oferta.getFormacionRequerida();
+		List<String> formacionCv = cv.getFormacionAcademica();
+		if (formacionRequerida == null || formacionCv == null) {
+			return null;
+		}
+		List<String> requeridasValidas = formacionRequerida.stream().filter(f -> f != null && !f.isBlank()).toList();
+		List<String> formacionValida = formacionCv.stream().filter(f -> f != null && !f.isBlank()).map(this::normalizar)
+				.toList();
+		if (requeridasValidas.isEmpty() || formacionValida.isEmpty()) {
+			return null;
+		}
+		int encontradas = 0;
+		for (String formacion : requeridasValidas) {
+			String formacionNormalizada = normalizar(formacion);
+			boolean encontrada = formacionValida.stream()
+					.anyMatch(f -> (" " + f + " ").contains(" " + formacionNormalizada + " "));
+			if (encontrada) {
+				encontradas++;
+			}
+		}
+		return (double) encontradas / requeridasValidas.size();
+	}
 
-	    if (oferta == null || cv == null) {
-	        return null;
-	    }
-
-	    List<String> formacionRequerida = oferta.getFormacionRequerida();
-	    List<String> formacionCv = cv.getFormacionAcademica();
-
-	    if (formacionRequerida == null || formacionCv == null) {
-	        return null;
-	    }
-
-	    List<String> requeridasValidas = formacionRequerida.stream()
-	            .filter(f -> f != null && !f.isBlank())
-	            .toList();
-
-	    List<String> formacionValida = formacionCv.stream()
-	            .filter(f -> f != null && !f.isBlank())
-	            .map(this::normalizar)
-	            .toList();
-
-	    if (requeridasValidas.isEmpty() || formacionValida.isEmpty()) {
-	        return null;
-	    }
-
-	    int encontradas = 0;
-
-	    for (String formacion : requeridasValidas) {
-
-	        String formacionNormalizada = normalizar(formacion);
-
-	        boolean encontrada = formacionValida.stream()
-	                .anyMatch(f -> (" " + f + " ")
-	                        .contains(" " + formacionNormalizada + " "));
-
-	        if (encontrada) {
-	            encontradas++;
-	        }
-	    }
-
-	    return (double) encontradas / requeridasValidas.size();
+	public CompatibilidadDTO analizarCompatibilidad(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+		Double experiencia = evaluarExperiencia(oferta, cv);
+		Double habilidades = evaluarHabilidades(oferta, cv);
+		Double formacion = evaluarFormacion(oferta, cv);
+		// Ubicación, modalidad y preferencias quedan pendientes
+		// porque todavía no tenemos esos datos en el CV.
+		CompatibilidadDTO resultado = construirResultado(experiencia, habilidades, formacion, null, null, null);
+		// Incorporamos la evaluación de requisitos obligatorios y deseables.
+		CompatibilidadDTO requisitos = evaluarRequisitos(oferta, cv);
+		resultado.setRequisitosCumplidos(requisitos.getRequisitosCumplidos());
+		resultado.setRequisitosNoAcreditados(requisitos.getRequisitosNoAcreditados());
+		resultado.setRequisitosObligatoriosCumplidos(requisitos.getRequisitosObligatoriosCumplidos());
+		resultado.setRequisitosObligatoriosNoAcreditados(requisitos.getRequisitosObligatoriosNoAcreditados());
+		resultado.setRequisitosDeseablesEncontrados(requisitos.getRequisitosDeseablesEncontrados());
+		resultado.setRequisitosDeseablesNoEncontrados(requisitos.getRequisitosDeseablesNoEncontrados());
+		return resultado;
 	}
 
 	private String normalizar(String texto) {
