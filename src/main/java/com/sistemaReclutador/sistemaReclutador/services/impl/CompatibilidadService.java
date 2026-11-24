@@ -3,6 +3,10 @@ package com.sistemaReclutador.sistemaReclutador.services.impl;
 import java.util.List;
 import com.sistemaReclutador.sistemaReclutador.dto.CompatibilidadDTO;
 import java.util.ArrayList;
+import java.text.Normalizer;
+import java.util.Locale;
+import com.sistemaReclutador.sistemaReclutador.dto.OfertaAnalisisDTO;
+import com.sistemaReclutador.sistemaReclutador.dto.CvAnalisisDTO;
 
 public class CompatibilidadService {
 
@@ -108,4 +112,167 @@ public class CompatibilidadService {
 		}
 	}
 
+	public CompatibilidadDTO evaluarRequisitos(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+		CompatibilidadDTO resultado = new CompatibilidadDTO();
+		List<String> cumplidos = new ArrayList<>();
+		List<String> noAcreditados = new ArrayList<>();
+		List<String> obligatoriosCumplidos = new ArrayList<>();
+		List<String> obligatoriosNoAcreditados = new ArrayList<>();
+		List<String> deseablesEncontrados = new ArrayList<>();
+		List<String> deseablesNoEncontrados = new ArrayList<>();
+		List<String> informacionCv = new ArrayList<>();
+		if (cv != null) {
+			agregarInformacion(informacionCv, cv.getExperienciasLaborales());
+			agregarInformacion(informacionCv, cv.getHabilidades());
+			agregarInformacion(informacionCv, cv.getFormacionAcademica());
+			agregarInformacion(informacionCv, cv.getCertificaciones());
+			agregarInformacion(informacionCv, cv.getIdiomas());
+		}
+		if (oferta != null) {
+			evaluarLista("Obligatorio", oferta.getRequisitosObligatorios(), informacionCv, cumplidos, noAcreditados,
+					obligatoriosCumplidos, obligatoriosNoAcreditados);
+
+			evaluarLista("Deseable", oferta.getRequisitosDeseables(), informacionCv, cumplidos, noAcreditados,
+					deseablesEncontrados, deseablesNoEncontrados);
+		}
+		resultado.setRequisitosCumplidos(cumplidos);
+		resultado.setRequisitosNoAcreditados(noAcreditados);
+		resultado.setRequisitosObligatoriosCumplidos(obligatoriosCumplidos);
+		resultado.setRequisitosObligatoriosNoAcreditados(obligatoriosNoAcreditados);
+		resultado.setRequisitosDeseablesEncontrados(deseablesEncontrados);
+		resultado.setRequisitosDeseablesNoEncontrados(deseablesNoEncontrados);
+		return resultado;
+	}
+
+	private void agregarInformacion(List<String> destino, List<String> origen) {
+		if (origen != null) {
+			destino.addAll(origen);
+		}
+	}
+
+	private void evaluarLista(String tipo, List<String> requisitos, List<String> informacionCv, List<String> cumplidos,
+			List<String> noAcreditados, List<String> listaCumplidos, List<String> listaNoAcreditados) {
+		if (requisitos == null) {
+			return;
+		}
+		for (String requisito : requisitos) {
+			if (requisito == null || requisito.isBlank()) {
+				continue;
+			}
+			boolean encontrado = informacionCv.stream().filter(dato -> dato != null).map(this::normalizar)
+					.anyMatch(dato -> (" " + dato + " ").contains(" " + normalizar(requisito) + " "));
+			String descripcion = tipo + ": " + requisito;
+			if (encontrado) {
+				cumplidos.add(descripcion);
+				listaCumplidos.add(requisito);
+			} else {
+				noAcreditados.add(descripcion);
+				listaNoAcreditados.add(requisito);
+			}
+		}
+	}
+
+	public Double evaluarHabilidades(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+		if (oferta == null || cv == null) {
+			return null;
+		}
+		List<String> habilidadesRequeridas = oferta.getHabilidadesRequeridas();
+		List<String> habilidadesCv = cv.getHabilidades();
+
+		if (habilidadesRequeridas == null || habilidadesCv == null) {
+			return null;
+		}
+		List<String> requeridasValidas = habilidadesRequeridas.stream().filter(h -> h != null && !h.isBlank()).toList();
+		List<String> habilidadesValidas = habilidadesCv.stream().filter(h -> h != null && !h.isBlank())
+				.map(this::normalizar).toList();
+		if (requeridasValidas.isEmpty() || habilidadesValidas.isEmpty()) {
+			return null;
+		}
+		int encontradas = 0;
+		for (String habilidad : requeridasValidas) {
+			String habilidadNormalizada = normalizar(habilidad);
+			boolean encontrada = habilidadesValidas.stream()
+					.anyMatch(h -> (" " + h + " ").contains(" " + habilidadNormalizada + " "));
+			if (encontrada) {
+				encontradas++;
+			}
+		}
+		return (double) encontradas / requeridasValidas.size();
+	}
+
+	public Double evaluarExperiencia(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+		if (oferta == null || cv == null) {
+			return null;
+		}
+		List<String> experienciaRequerida = oferta.getExperienciaRequerida();
+		List<String> experienciasCv = cv.getExperienciasLaborales();
+		if (experienciaRequerida == null || experienciasCv == null) {
+			return null;
+		}
+		List<String> requeridasValidas = experienciaRequerida.stream().filter(e -> e != null && !e.isBlank()).toList();
+		List<String> experienciasValidas = experienciasCv.stream().filter(e -> e != null && !e.isBlank())
+				.map(this::normalizar).toList();
+		if (requeridasValidas.isEmpty() || experienciasValidas.isEmpty()) {
+			return null;
+		}
+		int encontradas = 0;
+		for (String experiencia : requeridasValidas) {
+			String experienciaNormalizada = normalizar(experiencia);
+			boolean encontrada = experienciasValidas.stream()
+					.anyMatch(e -> (" " + e + " ").contains(" " + experienciaNormalizada + " "));
+			if (encontrada) {
+				encontradas++;
+			}
+		}
+		return (double) encontradas / requeridasValidas.size();
+	}
+	
+	public Double evaluarFormacion(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+
+	    if (oferta == null || cv == null) {
+	        return null;
+	    }
+
+	    List<String> formacionRequerida = oferta.getFormacionRequerida();
+	    List<String> formacionCv = cv.getFormacionAcademica();
+
+	    if (formacionRequerida == null || formacionCv == null) {
+	        return null;
+	    }
+
+	    List<String> requeridasValidas = formacionRequerida.stream()
+	            .filter(f -> f != null && !f.isBlank())
+	            .toList();
+
+	    List<String> formacionValida = formacionCv.stream()
+	            .filter(f -> f != null && !f.isBlank())
+	            .map(this::normalizar)
+	            .toList();
+
+	    if (requeridasValidas.isEmpty() || formacionValida.isEmpty()) {
+	        return null;
+	    }
+
+	    int encontradas = 0;
+
+	    for (String formacion : requeridasValidas) {
+
+	        String formacionNormalizada = normalizar(formacion);
+
+	        boolean encontrada = formacionValida.stream()
+	                .anyMatch(f -> (" " + f + " ")
+	                        .contains(" " + formacionNormalizada + " "));
+
+	        if (encontrada) {
+	            encontradas++;
+	        }
+	    }
+
+	    return (double) encontradas / requeridasValidas.size();
+	}
+
+	private String normalizar(String texto) {
+		return Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT)
+				.replaceAll("[^\\p{L}\\p{N}\\s]", " ").replaceAll("\\s+", " ").trim();
+	}
 }
