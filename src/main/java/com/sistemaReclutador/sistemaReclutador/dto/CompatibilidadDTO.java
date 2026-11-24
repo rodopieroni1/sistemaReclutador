@@ -1,4 +1,3 @@
-
 package com.sistemaReclutador.sistemaReclutador.dto;
 
 import java.util.List;

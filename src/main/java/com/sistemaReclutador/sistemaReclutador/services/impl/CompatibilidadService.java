@@ -5,9 +5,14 @@ import com.sistemaReclutador.sistemaReclutador.dto.CompatibilidadDTO;
 import java.util.ArrayList;
 import java.text.Normalizer;
 import java.util.Locale;
+
+import org.springframework.stereotype.Service;
+
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaAnalisisDTO;
+import com.sistemaReclutador.sistemaReclutador.dto.RequisitoAnalisisDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.CvAnalisisDTO;
 
+@Service
 public class CompatibilidadService {
 
 	public CompatibilidadDTO construirResultado(Double experiencia, Double habilidades, Double formacion,
@@ -124,6 +129,7 @@ public class CompatibilidadService {
 	}
 
 	public CompatibilidadDTO evaluarRequisitos(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+
 		CompatibilidadDTO resultado = new CompatibilidadDTO();
 		List<String> cumplidos = new ArrayList<>();
 		List<String> noAcreditados = new ArrayList<>();
@@ -131,20 +137,11 @@ public class CompatibilidadService {
 		List<String> obligatoriosNoAcreditados = new ArrayList<>();
 		List<String> deseablesEncontrados = new ArrayList<>();
 		List<String> deseablesNoEncontrados = new ArrayList<>();
-		List<String> informacionCv = new ArrayList<>();
-		if (cv != null) {
-			agregarInformacion(informacionCv, cv.getExperienciasLaborales());
-			agregarInformacion(informacionCv, cv.getHabilidades());
-			agregarInformacion(informacionCv, cv.getFormacionAcademica());
-			agregarInformacion(informacionCv, cv.getCertificaciones());
-			agregarInformacion(informacionCv, cv.getIdiomas());
-		}
 		if (oferta != null) {
-			evaluarLista("Obligatorio", oferta.getRequisitosObligatorios(), informacionCv, cumplidos, noAcreditados,
-					obligatoriosCumplidos, obligatoriosNoAcreditados);
-
-			evaluarLista("Deseable", oferta.getRequisitosDeseables(), informacionCv, cumplidos, noAcreditados,
-					deseablesEncontrados, deseablesNoEncontrados);
+			evaluarListaCategorizada("Obligatorio", oferta.getRequisitosObligatoriosCategorizados(), cv, cumplidos,
+					noAcreditados, obligatoriosCumplidos, obligatoriosNoAcreditados);
+			evaluarListaCategorizada("Deseable", oferta.getRequisitosDeseablesCategorizados(), cv, cumplidos,
+					noAcreditados, deseablesEncontrados, deseablesNoEncontrados);
 		}
 		resultado.setRequisitosCumplidos(cumplidos);
 		resultado.setRequisitosNoAcreditados(noAcreditados);
@@ -153,6 +150,51 @@ public class CompatibilidadService {
 		resultado.setRequisitosDeseablesEncontrados(deseablesEncontrados);
 		resultado.setRequisitosDeseablesNoEncontrados(deseablesNoEncontrados);
 		return resultado;
+	}
+
+	private void evaluarListaCategorizada(String tipo, List<RequisitoAnalisisDTO> requisitos, CvAnalisisDTO cv,
+			List<String> cumplidos, List<String> noAcreditados, List<String> listaCumplidos,
+			List<String> listaNoAcreditados) {
+		if (requisitos == null) {
+			return;
+		}
+		for (RequisitoAnalisisDTO requisito : requisitos) {
+			if (requisito == null || requisito.getDescripcion() == null || requisito.getDescripcion().isBlank()) {
+				continue;
+			}
+			List<String> informacionCv = obtenerInformacionPorCategoria(requisito.getCategoria(), cv);
+			String descripcion = requisito.getDescripcion();
+			boolean encontrado = informacionCv.stream().filter(dato -> dato != null).map(this::normalizar)
+					.anyMatch(dato -> (" " + dato + " ").contains(" " + normalizar(descripcion) + " "));
+			if (encontrado) {
+				cumplidos.add(tipo + ": " + descripcion);
+				listaCumplidos.add(descripcion);
+			} else {
+				noAcreditados.add(tipo + ": " + descripcion);
+				listaNoAcreditados.add(descripcion);
+			}
+		}
+	}
+
+	private List<String> obtenerInformacionPorCategoria(String categoria, CvAnalisisDTO cv) {
+
+		if (cv == null || categoria == null) {
+			return new ArrayList<>();
+		}
+		switch (normalizar(categoria)) {
+		case "experiencia":
+			return cv.getExperienciasLaborales() != null ? cv.getExperienciasLaborales() : new ArrayList<>();
+		case "habilidades":
+			return cv.getHabilidades() != null ? cv.getHabilidades() : new ArrayList<>();
+		case "formacion":
+			return cv.getFormacionAcademica() != null ? cv.getFormacionAcademica() : new ArrayList<>();
+		case "certificaciones":
+			return cv.getCertificaciones() != null ? cv.getCertificaciones() : new ArrayList<>();
+		case "idiomas":
+			return cv.getIdiomas() != null ? cv.getIdiomas() : new ArrayList<>();
+		default:
+			throw new IllegalArgumentException("Categoría de requisito no válida: " + categoria);
+		}
 	}
 
 	private void agregarInformacion(List<String> destino, List<String> origen) {
