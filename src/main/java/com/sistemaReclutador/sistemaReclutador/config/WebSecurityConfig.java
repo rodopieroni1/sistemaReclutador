@@ -44,7 +44,10 @@ public class WebSecurityConfig {
 						.hasAnyAuthority("SUPER_ADMIN", "RECLUTADOR").requestMatchers("/usuarios/**")
 						.hasAuthority("SUPER_ADMIN")
 						.requestMatchers("/aplicaciones/**", "/empresas/**", "/ofertas/**", "/rubro/**", "/perfiles/**")
-						.permitAll().requestMatchers("/carina-ai/**").hasAnyAuthority("SUPER_ADMIN", "RECLUTADOR")
+						.permitAll().requestMatchers("/carina-ai/ofertas/*/mi-compatibilidad")
+						.authenticated()
+						.requestMatchers("/carina-ai/**")
+						.hasAnyAuthority("SUPER_ADMIN", "RECLUTADOR")
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
 	}

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import com.sistemaReclutador.sistemaReclutador.dto.CompatibilidadDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.CvAnalisisDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaAnalisisDTO;
+import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.services.impl.CompatibilidadService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -314,6 +315,76 @@ class CompatibilidadServiceTest {
 		assertTrue(resultado.getRequisitosObligatoriosCumplidos().contains("Java"));
 		assertTrue(resultado.getRequisitosObligatoriosNoAcreditados().contains("Inglés avanzado"));
 		assertTrue(resultado.getRequisitosDeseablesEncontrados().contains("Spring"));
+	}
+	
+	@Test
+	void debeDarCompatibilidadTotalCuandoCoincideLocalidad() {
+	    Perfil perfil = new Perfil();
+	    perfil.setPais("Argentina");
+	    perfil.setProvincia("Santiago del Estero");
+	    perfil.setLocalidad("Santiago del Estero");
+
+	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+	    oferta.setPais("Argentina");
+	    oferta.setProvincia("Santiago del Estero");
+	    oferta.setLocalidad("Santiago del Estero");
+	    oferta.setModalidad("PRESENCIAL");
+
+	    assertEquals(1.0, servicio.evaluarUbicacion(perfil, oferta));
+	}
+
+	@Test
+	void debeDarCompatibilidadParcialCuandoCoincideProvincia() {
+	    Perfil perfil = new Perfil();
+	    perfil.setPais("Argentina");
+	    perfil.setProvincia("Santiago del Estero");
+	    perfil.setLocalidad("Santiago del Estero");
+
+	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+	    oferta.setPais("Argentina");
+	    oferta.setProvincia("Santiago del Estero");
+	    oferta.setLocalidad("La Banda");
+	    oferta.setModalidad("PRESENCIAL");
+
+	    assertEquals(0.70, servicio.evaluarUbicacion(perfil, oferta));
+	}
+
+	@Test
+	void debeDarCompatibilidadMenorCuandoCoincidePaisPeroNoProvincia() {
+	    Perfil perfil = new Perfil();
+	    perfil.setPais("Argentina");
+	    perfil.setProvincia("Santiago del Estero");
+
+	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+	    oferta.setPais("Argentina");
+	    oferta.setProvincia("Córdoba");
+	    oferta.setModalidad("PRESENCIAL");
+
+	    assertEquals(0.40, servicio.evaluarUbicacion(perfil, oferta));
+	}
+
+	@Test
+	void debeDarCeroCuandoElPaisEsDiferente() {
+	    Perfil perfil = new Perfil();
+	    perfil.setPais("Argentina");
+
+	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+	    oferta.setPais("Chile");
+	    oferta.setModalidad("PRESENCIAL");
+
+	    assertEquals(0.0, servicio.evaluarUbicacion(perfil, oferta));
+	}
+
+	@Test
+	void ubicacionNoDebeAfectarCuandoLaOfertaEsRemota() {
+	    Perfil perfil = new Perfil();
+	    perfil.setPais("Argentina");
+
+	    OfertaAnalisisDTO oferta = new OfertaAnalisisDTO();
+	    oferta.setPais("Chile");
+	    oferta.setModalidad("REMOTA");
+
+	    assertNull(servicio.evaluarUbicacion(perfil, oferta));
 	}
 
 }

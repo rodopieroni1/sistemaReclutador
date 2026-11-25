@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sistemaReclutador.sistemaReclutador.dto.OfertaAnalisisDTO;
 import com.sistemaReclutador.sistemaReclutador.dto.RequisitoAnalisisDTO;
+import com.sistemaReclutador.sistemaReclutador.entities.Perfil;
 import com.sistemaReclutador.sistemaReclutador.dto.CvAnalisisDTO;
 
 @Service
@@ -21,24 +22,20 @@ public class CompatibilidadService {
 		CompatibilidadDTO resultado = new CompatibilidadDTO();
 		List<String> fortalezas = new ArrayList<>();
 		List<String> aspectosAMejorar = new ArrayList<>();
-
 		resultado.setExperiencia(experiencia);
 		resultado.setHabilidades(habilidades);
 		resultado.setFormacion(formacion);
 		resultado.setUbicacion(ubicacion);
 		resultado.setModalidad(modalidad);
 		resultado.setPreferencias(preferencias);
-
 		clasificarCriterio("Experiencia", experiencia, fortalezas, aspectosAMejorar);
 		clasificarCriterio("Habilidades", habilidades, fortalezas, aspectosAMejorar);
 		clasificarCriterio("Formación", formacion, fortalezas, aspectosAMejorar);
 		clasificarCriterio("Ubicación", ubicacion, fortalezas, aspectosAMejorar);
 		clasificarCriterio("Modalidad", modalidad, fortalezas, aspectosAMejorar);
-
 		clasificarCriterio("Preferencias", preferencias, fortalezas, aspectosAMejorar);
 		resultado.setPorcentajeCompatibilidad(
 				calcularPorcentaje(experiencia, habilidades, formacion, ubicacion, modalidad, preferencias));
-
 		resultado.setFortalezas(fortalezas);
 		resultado.setAspectosAMejorar(aspectosAMejorar);
 		resultado.setRequisitosCumplidos(new ArrayList<>());
@@ -130,26 +127,101 @@ public class CompatibilidadService {
 
 	public CompatibilidadDTO evaluarRequisitos(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
 
-		CompatibilidadDTO resultado = new CompatibilidadDTO();
-		List<String> cumplidos = new ArrayList<>();
-		List<String> noAcreditados = new ArrayList<>();
-		List<String> obligatoriosCumplidos = new ArrayList<>();
-		List<String> obligatoriosNoAcreditados = new ArrayList<>();
-		List<String> deseablesEncontrados = new ArrayList<>();
-		List<String> deseablesNoEncontrados = new ArrayList<>();
-		if (oferta != null) {
-			evaluarListaCategorizada("Obligatorio", oferta.getRequisitosObligatoriosCategorizados(), cv, cumplidos,
-					noAcreditados, obligatoriosCumplidos, obligatoriosNoAcreditados);
-			evaluarListaCategorizada("Deseable", oferta.getRequisitosDeseablesCategorizados(), cv, cumplidos,
-					noAcreditados, deseablesEncontrados, deseablesNoEncontrados);
-		}
-		resultado.setRequisitosCumplidos(cumplidos);
-		resultado.setRequisitosNoAcreditados(noAcreditados);
-		resultado.setRequisitosObligatoriosCumplidos(obligatoriosCumplidos);
-		resultado.setRequisitosObligatoriosNoAcreditados(obligatoriosNoAcreditados);
-		resultado.setRequisitosDeseablesEncontrados(deseablesEncontrados);
-		resultado.setRequisitosDeseablesNoEncontrados(deseablesNoEncontrados);
-		return resultado;
+	    CompatibilidadDTO resultado = new CompatibilidadDTO();
+
+	    List<String> cumplidos = new ArrayList<>();
+	    List<String> noAcreditados = new ArrayList<>();
+	    List<String> obligatoriosCumplidos = new ArrayList<>();
+	    List<String> obligatoriosNoAcreditados = new ArrayList<>();
+	    List<String> deseablesEncontrados = new ArrayList<>();
+	    List<String> deseablesNoEncontrados = new ArrayList<>();
+
+	    if (oferta != null) {
+
+	        List<RequisitoAnalisisDTO> obligatoriosCategorizados =
+	                oferta.getRequisitosObligatoriosCategorizados();
+
+	        List<RequisitoAnalisisDTO> deseablesCategorizados =
+	                oferta.getRequisitosDeseablesCategorizados();
+
+	        // Obligatorios
+	        if (obligatoriosCategorizados != null && !obligatoriosCategorizados.isEmpty()) {
+
+	            evaluarListaCategorizada(
+	                    "Obligatorio",
+	                    obligatoriosCategorizados,
+	                    cv,
+	                    cumplidos,
+	                    noAcreditados,
+	                    obligatoriosCumplidos,
+	                    obligatoriosNoAcreditados
+	            );
+
+	        } else {
+
+	            evaluarLista(
+	                    "Obligatorio",
+	                    oferta.getRequisitosObligatorios(),
+	                    obtenerTodaInformacionCv(cv),
+	                    cumplidos,
+	                    noAcreditados,
+	                    obligatoriosCumplidos,
+	                    obligatoriosNoAcreditados
+	            );
+	        }
+
+	        // Deseables
+	        if (deseablesCategorizados != null && !deseablesCategorizados.isEmpty()) {
+
+	            evaluarListaCategorizada(
+	                    "Deseable",
+	                    deseablesCategorizados,
+	                    cv,
+	                    cumplidos,
+	                    noAcreditados,
+	                    deseablesEncontrados,
+	                    deseablesNoEncontrados
+	            );
+
+	        } else {
+
+	            evaluarLista(
+	                    "Deseable",
+	                    oferta.getRequisitosDeseables(),
+	                    obtenerTodaInformacionCv(cv),
+	                    cumplidos,
+	                    noAcreditados,
+	                    deseablesEncontrados,
+	                    deseablesNoEncontrados
+	            );
+	        }
+	    }
+
+	    resultado.setRequisitosCumplidos(cumplidos);
+	    resultado.setRequisitosNoAcreditados(noAcreditados);
+	    resultado.setRequisitosObligatoriosCumplidos(obligatoriosCumplidos);
+	    resultado.setRequisitosObligatoriosNoAcreditados(obligatoriosNoAcreditados);
+	    resultado.setRequisitosDeseablesEncontrados(deseablesEncontrados);
+	    resultado.setRequisitosDeseablesNoEncontrados(deseablesNoEncontrados);
+
+	    return resultado;
+	}
+	
+	private List<String> obtenerTodaInformacionCv(CvAnalisisDTO cv) {
+
+	    List<String> informacion = new ArrayList<>();
+
+	    if (cv == null) {
+	        return informacion;
+	    }
+
+	    agregarInformacion(informacion, cv.getExperienciasLaborales());
+	    agregarInformacion(informacion, cv.getHabilidades());
+	    agregarInformacion(informacion, cv.getFormacionAcademica());
+	    agregarInformacion(informacion, cv.getCertificaciones());
+	    agregarInformacion(informacion, cv.getIdiomas());
+
+	    return informacion;
 	}
 
 	private void evaluarListaCategorizada(String tipo, List<RequisitoAnalisisDTO> requisitos, CvAnalisisDTO cv,
@@ -307,22 +379,81 @@ public class CompatibilidadService {
 		return (double) encontradas / requeridasValidas.size();
 	}
 
-	public CompatibilidadDTO analizarCompatibilidad(OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
-		Double experiencia = evaluarExperiencia(oferta, cv);
-		Double habilidades = evaluarHabilidades(oferta, cv);
-		Double formacion = evaluarFormacion(oferta, cv);
-		// Ubicación, modalidad y preferencias quedan pendientes
-		// porque todavía no tenemos esos datos en el CV.
-		CompatibilidadDTO resultado = construirResultado(experiencia, habilidades, formacion, null, null, null);
-		// Incorporamos la evaluación de requisitos obligatorios y deseables.
-		CompatibilidadDTO requisitos = evaluarRequisitos(oferta, cv);
-		resultado.setRequisitosCumplidos(requisitos.getRequisitosCumplidos());
-		resultado.setRequisitosNoAcreditados(requisitos.getRequisitosNoAcreditados());
-		resultado.setRequisitosObligatoriosCumplidos(requisitos.getRequisitosObligatoriosCumplidos());
-		resultado.setRequisitosObligatoriosNoAcreditados(requisitos.getRequisitosObligatoriosNoAcreditados());
-		resultado.setRequisitosDeseablesEncontrados(requisitos.getRequisitosDeseablesEncontrados());
-		resultado.setRequisitosDeseablesNoEncontrados(requisitos.getRequisitosDeseablesNoEncontrados());
-		return resultado;
+	public CompatibilidadDTO analizarCompatibilidad(
+	        OfertaAnalisisDTO oferta, CvAnalisisDTO cv) {
+
+	    return analizarCompatibilidad(oferta, cv, null);
+	}
+	
+	public Double evaluarUbicacion(Perfil perfil, OfertaAnalisisDTO oferta) {
+
+	    if (perfil == null || oferta == null) {
+	        return null;
+	    }
+
+	    // Una oferta remota no depende de la ubicación del postulante.
+	    if ("REMOTA".equalsIgnoreCase(oferta.getModalidad())) {
+	        return null;
+	    }
+
+	    String localidadPerfil = perfil.getLocalidad();
+	    String provinciaPerfil = perfil.getProvincia();
+	    String paisPerfil = perfil.getPais();
+
+	    String localidadOferta = oferta.getLocalidad();
+	    String provinciaOferta = oferta.getProvincia();
+	    String paisOferta = oferta.getPais();
+
+	    if (paisPerfil == null || paisPerfil.isBlank()
+	            || paisOferta == null || paisOferta.isBlank()) {
+	        return null;
+	    }
+
+	    if (!normalizar(paisPerfil).equals(normalizar(paisOferta))) {
+	        return 0.0;
+	    }
+
+	    if (provinciaPerfil != null && !provinciaPerfil.isBlank()
+	            && provinciaOferta != null && !provinciaOferta.isBlank()) {
+
+	        if (!normalizar(provinciaPerfil).equals(normalizar(provinciaOferta))) {
+	            return 0.40;
+	        }
+
+	        if (localidadPerfil != null && !localidadPerfil.isBlank()
+	                && localidadOferta != null && !localidadOferta.isBlank()
+	                && normalizar(localidadPerfil).equals(normalizar(localidadOferta))) {
+	            return 1.0;
+	        }
+
+	        return 0.70;
+	    }
+
+	    return 0.40;
+	}
+
+	public CompatibilidadDTO analizarCompatibilidad(
+	        OfertaAnalisisDTO oferta, CvAnalisisDTO cv, Perfil perfil) {
+
+	    Double experiencia = evaluarExperiencia(oferta, cv);
+	    Double habilidades = evaluarHabilidades(oferta, cv);
+	    Double formacion = evaluarFormacion(oferta, cv);
+	    Double ubicacion = evaluarUbicacion(perfil, oferta);
+
+	    CompatibilidadDTO resultado = construirResultado(
+	            experiencia, habilidades, formacion,
+	            ubicacion, null, null);
+
+	    CompatibilidadDTO requisitos = evaluarRequisitos(oferta, cv);
+
+	    resultado.setRequisitosCumplidos(requisitos.getRequisitosCumplidos());
+	    resultado.setRequisitosNoAcreditados(requisitos.getRequisitosNoAcreditados());
+	    resultado.setRequisitosObligatoriosCumplidos(requisitos.getRequisitosObligatoriosCumplidos());
+	    resultado.setRequisitosObligatoriosNoAcreditados(requisitos.getRequisitosObligatoriosNoAcreditados());
+	    resultado.setRequisitosDeseablesEncontrados(requisitos.getRequisitosDeseablesEncontrados());
+	    resultado.setRequisitosDeseablesNoEncontrados(requisitos.getRequisitosDeseablesNoEncontrados());
+
+	    return resultado;
 	}
 
 	private String normalizar(String texto) {

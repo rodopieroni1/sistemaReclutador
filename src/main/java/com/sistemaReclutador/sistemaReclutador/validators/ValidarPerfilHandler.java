@@ -1,10 +1,8 @@
 package com.sistemaReclutador.sistemaReclutador.validators;
 
 import java.util.Optional;
-
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
 import com.sistemaReclutador.sistemaReclutador.Enum.ResultadosAplicacion;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionRequest;
 import com.sistemaReclutador.sistemaReclutador.dto.AplicacionResponseDTO;

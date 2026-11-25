@@ -9,95 +9,102 @@ import com.sistemaReclutador.sistemaReclutador.dto.CvAnalisisDTO;
 
 @Service
 public class CvAnalizadorService {
-	
-    public CvAnalisisDTO analizar(String texto) {
-        if (texto == null || texto.isBlank()) {
-            throw new IllegalArgumentException(
-                    "No hay texto disponible para analizar.");
-        }
-    
-        CvAnalisisDTO resultado = new CvAnalisisDTO();
-        resultado.setExperienciasLaborales(new ArrayList<>());
-        resultado.setHabilidades(new ArrayList<>());
-        resultado.setFormacionAcademica(new ArrayList<>());
-        resultado.setCertificaciones(new ArrayList<>());
-        resultado.setIdiomas(new ArrayList<>());
 
-        List<String> lineas = texto.lines()
-                .map(String::trim)
-                .filter(linea -> !linea.isBlank())
-                .toList();
+	public CvAnalisisDTO analizar(String texto) {
+		if (texto == null || texto.isBlank()) {
+			throw new IllegalArgumentException("No hay texto disponible para analizar.");
+		}
 
-        String seccionActual = "";
-        
-        for (String linea : lineas) {
-            String encabezado = identificarSeccion(linea);
-            if (!encabezado.isEmpty()) {
-                seccionActual = encabezado;
-                continue;
-            }
+		CvAnalisisDTO resultado = new CvAnalisisDTO();
+		resultado.setExperienciasLaborales(new ArrayList<>());
+		resultado.setHabilidades(new ArrayList<>());
+		resultado.setFormacionAcademica(new ArrayList<>());
+		resultado.setCertificaciones(new ArrayList<>());
+		resultado.setIdiomas(new ArrayList<>());
 
-            switch (seccionActual) {
+		String textoNormalizado = texto.replace("\t", "\n")
+				.replaceAll("(?i)(?=EXPERIENCIA LABORAL|FORMACION ACADEMICA|CURSOS:?|PERFIL:?)", "\n");
 
-                case "experiencia":
-                    resultado.getExperienciasLaborales().add(linea);
-                    break;
+		List<String> lineas = textoNormalizado.lines().map(String::trim).filter(linea -> !linea.isBlank()).toList();
 
-                case "habilidades":
-                    resultado.getHabilidades().add(linea);
-                    break;
+		String seccionActual = "";
 
-                case "formacion":
-                    resultado.getFormacionAcademica().add(linea);
-                    break;
+		for (String linea : lineas) {
+			String encabezado = identificarSeccion(linea);
+			if (!encabezado.isEmpty()) {
+				seccionActual = encabezado;
+				continue;
+			}
 
-                case "certificaciones":
-                    resultado.getCertificaciones().add(linea);
-                    break;
+			switch (seccionActual) {
 
-                case "idiomas":
-                    resultado.getIdiomas().add(linea);
-                    break;
-            }
-        }
+			case "experiencia":
+				resultado.getExperienciasLaborales().add(linea);
+				break;
 
-        return resultado;
-    }
+			case "habilidades":
+				resultado.getHabilidades().add(linea);
+				break;
 
-    private String identificarSeccion(String linea) {
+			case "formacion":
+				resultado.getFormacionAcademica().add(linea);
+				break;
 
-        String normalizada = Normalizer
-                .normalize(linea, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "")
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9 ]", "")
-                .trim();
+			case "certificaciones":
+				resultado.getCertificaciones().add(linea);
+				break;
 
-        if (normalizada.matches(
-                ".*(experiencia laboral|experiencia profesional|experiencia).*")) {
+			case "idiomas":
+				resultado.getIdiomas().add(linea);
+				break;
+			}
+		}
+
+		return resultado;
+	}
+
+
+private String identificarSeccion(String linea) {
+
+    String normalizada = Normalizer
+            .normalize(linea, Normalizer.Form.NFD)
+            .replaceAll("\\p{M}", "")
+            .toLowerCase(Locale.ROOT)
+            .replaceAll("[^a-z0-9 ]", "")
+            .replaceAll("\\s+", " ")
+            .trim();
+
+    switch (normalizada) {
+
+        case "experiencia laboral":
+        case "experiencia profesional":
+        case "experiencia":
             return "experiencia";
-        }
 
-        if (normalizada.matches(
-                ".*(habilidades|competencias|conocimientos).*")) {
-            return "habilidades";
-        }
-
-        if (normalizada.matches(
-                ".*(formacion academica|formacion|educacion|estudios|titulo academico|titulos|nivel educativo|antecedentes academicos).*")) {
+        case "formacion academica":
+        case "formacion":
+        case "educacion":
+        case "estudios":
             return "formacion";
-        }
 
-        if (normalizada.matches(
-                ".*(certificaciones|cursos|capacitaciones).*")) {
+        case "cursos":
+        case "certificaciones":
+        case "capacitaciones":
             return "certificaciones";
-        }
 
-        if (normalizada.matches(
-                ".*(idiomas|lenguas).*")) {
+        case "perfil":
+        case "habilidades":
+        case "competencias":
+        case "conocimientos":
+            return "habilidades";
+
+        case "idiomas":
+        case "lenguas":
             return "idiomas";
-        }
 
-        return "";
+        default:
+            return "";
     }
+}
+
 }
