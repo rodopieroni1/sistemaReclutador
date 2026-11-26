@@ -22,8 +22,23 @@ public class CvAnalizadorService {
 		resultado.setCertificaciones(new ArrayList<>());
 		resultado.setIdiomas(new ArrayList<>());
 
-		String textoNormalizado = texto.replace("\t", "\n")
-				.replaceAll("(?i)(?=EXPERIENCIA LABORAL|FORMACION ACADEMICA|CURSOS:?|PERFIL:?)", "\n");
+		String textoNormalizado = texto
+		        // Saltos de línea y tabuladores
+		        .replace("\r\n", "\n")
+		        .replace("\r", "\n")
+		        .replace("\t", "\n")
+
+		        // Viñetas habituales
+		        .replaceAll("[•●▪▫◦‣⁃∙·]", "\n")
+
+		        // Numeraciones: 1°, 2º, 1., 2), etc.
+		        .replaceAll("(?<!\\S)(?=\\d{1,2}\\s*[°º.)])", "\n")
+
+		        // Encabezados principales
+		        .replaceAll("(?i)(?=EXPERIENCIA LABORAL|EXPERIENCIA PROFESIONAL|FORMACION ACADEMICA|CURSOS:?|CERTIFICACIONES|CAPACITACIONES|PERFIL:?|HABILIDADES|COMPETENCIAS|CONOCIMIENTOS|IDIOMAS)", "\n")
+
+		        // Subencabezados de formación
+		        .replaceAll("(?i)(?=ESTUDIOS PRIMARIOS:|ESTUDIOS SECUNDARIOS:|ESTUDIOS UNIVERSITARIOS:)", "\n");;
 
 		List<String> lineas = textoNormalizado.lines().map(String::trim).filter(linea -> !linea.isBlank()).toList();
 
